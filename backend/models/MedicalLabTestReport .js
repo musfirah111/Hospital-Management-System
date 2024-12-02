@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const MedicalLabTestReportSchema = new mongoose.Schema({
+const medicalLabTestReportSchema = new mongoose.Schema({
     patient_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Patient',
@@ -27,4 +28,5 @@ const MedicalLabTestReportSchema = new mongoose.Schema({
 
 // Export the model
 const MedicalLabTestReport = mongoose.model('MedicalLabTestReport', MedicalLabTestReportSchema);
+const MedicalLabTestReport = mongoose.model('MedicalLabTestReport', medicalLabTestReportSchema);
 module.exports = MedicalLabTestReport;

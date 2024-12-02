@@ -4,34 +4,34 @@ const doctorSchema = new mongoose.Schema({
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: [true, 'Please add a user id.']
+        required: [true, 'Please enter a user id.']
     },
     specialization: {
         type: String,
-        required: [true, 'Please add a specialization.']
+        required: [true, 'Please enter a specialization.']
     },
     qualification: {
         type: String,
-        required: [true, 'Please add a qualification.']
+        required: [true, 'Please enter a qualification.']
     },
     department_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Department',
-        required: [true, 'Please add a department id.']
+        required: [true, 'Please enter a department id.']
     },
     shift: {
         type: String,
-        required: [true, 'Please add a shift.'],
+        required: [true, 'Please enter a shift.'],
         enum: ['Morning', 'Evening', 'Night']
     },
     working_hours: {
         type: String,
-        required: [true, 'Please add a working hours.']
+        required: [true, 'Please enter a working hours.']
     },
     availability_status: {
         type: Boolean,
         default: true,
-        required: [true, 'Please add a availability status.']
+        required: [true, 'Please enter a availability status.']
     },
     rating: {
         type: Number,
@@ -40,10 +40,10 @@ const doctorSchema = new mongoose.Schema({
     date_of_joining: {
         type: Date,
         default: Date.now,
-        required: [true, 'Please add a date of joining.']
+        required: [true, 'Please enter a date of joining.']
     }
-}, {
-    timestamps: true
 });
 
-module.exports = mongoose.model('Doctor', doctorSchema);
+const Doctor = mongoose.model('Doctor', doctorSchema);
+
+module.exports = Doctor;

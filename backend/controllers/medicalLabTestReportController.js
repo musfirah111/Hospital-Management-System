@@ -1,8 +1,8 @@
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose');
-const MedicalLabTestReport = require('../models/MedicalLabTestReport');
 const PDFDocument = require('pdfkit');
 const nodemailer = require('nodemailer');
+const MedicalLabTestReport = require('../models/MedicalLabTestReport');
 
 // Create a new medical lab test report (Doctor)
 const createReport = asyncHandler(async (req, res) => {

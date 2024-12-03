@@ -22,7 +22,7 @@ const appointmentSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Scheduled', 'Completed', 'Cancelled', 'Rescheduled'],
+        enum: ['Scheduled', 'Completed', 'Cancelled', 'Rescheduled', 'Requested'],
         default: 'Scheduled'
     },
     reminder_sent: {

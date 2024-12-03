@@ -11,22 +11,11 @@ const {
 const { protect } = require('../middlewares/authMiddleware');
 const { doctorOnly } = require('../middlewares/roleMiddleware');
 
-// Route to create a new medical lab test report (Doctor)
-router.post('/reports', protect, doctorOnly, createReport);
-
-// Route to view a medical lab test report by ID (Patient/Doctor)
-router.get('/reports/:id', protect, getReportById);
-
-// Route to search reports based on patient ID
-router.get('/reports/patient/:patientId', protect, searchReportsByPatientId);
-
-// Route to search reports by name and sort by date
-router.get('/reports/search', protect, searchReportsByName);
-
-// Route to download report results
-router.get('/reports/download/:id', protect, downloadReport);
-
-// Route to share report results
-router.post('/reports/share/:id', protect, shareReport);
+router.post('/', protect, doctorOnly, createReport);
+router.get('/:id', protect, getReportById);
+router.get('/patient/:patientId', protect, searchReportsByPatientId);
+router.get('/search', protect, searchReportsByName);
+router.get('/download/:id', protect, downloadReport);
+router.post('/share/:id', protect, shareReport);
 
 module.exports = router; 

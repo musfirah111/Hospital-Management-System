@@ -1,4 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+
 const Invoice = require('../models/Billing');
 const Patient = require('../models/Patient');
 const User = require('../models/User');

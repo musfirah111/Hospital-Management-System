@@ -6,16 +6,10 @@ const {
     getAllReviews,
 } = require('../controllers/rateAndReviewController');
 const { protect } = require('../middlewares/authMiddleware');
-const { adminOnly } = require('../middlewares/roleMiddleware');
-const { patientOnly } = require('../middlewares/roleMiddleware');
+const { adminOnly, patientOnly } = require('../middlewares/roleMiddleware');
 
-// Route to add a review (Patient)
-router.post('/reviews', protect, patientOnly, addReview);
-
-// Route to delete a review (Admin)
-router.delete('/reviews/:id', protect, adminOnly, deleteReview);
-
-// Route to view all reviews
-router.get('/reviews', protect, getAllReviews);
+router.post('/', protect, patientOnly, addReview);
+router.delete('/:id', protect, adminOnly, deleteReview);
+router.get('/', protect, getAllReviews);
 
 module.exports = router;

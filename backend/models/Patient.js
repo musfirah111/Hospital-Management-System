@@ -28,26 +28,6 @@ const patientSchema = new Schema({
             required: [true, 'Please enter the relationship to the patient.']
         }
     }],
-    medical_history: [{
-        doctor_id: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Doctor',  // Reference to the Doctor model.
-            required: [true, 'Please enter the doctor ID.']
-        },
-        diagnosis: {
-            type: String,
-            required: [true, 'Please enter the diagnosis.']
-        },
-        treatment: {
-            type: String,
-            required: [true, 'Please enter the treatment.']
-        },
-        date: {
-            type: Date,
-            required: [true, 'Please enter the date of diagnosis.'],
-            default: Date.now
-        }
-    }]
 });
 
 const Patient = mongoose.model('Patient', patientSchema);

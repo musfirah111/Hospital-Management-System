@@ -1,6 +1,6 @@
 const express = require('express');
 const { addPatient, getPatientDetails, updatePatient, deletePatient } = require('../controllers/patientController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly } = require('../middlewares/roleMiddleware');
 const { patientOnly } = require('../middlewares/roleMiddleware');
 
@@ -18,7 +18,7 @@ router.put('/:id', protect, updatePatient);
 // Route for deleting a patient.
 router.delete('/:id', protect, adminOnly, deletePatient);
 
-// Route to request an appointment
-router.post('/appointments/request', protect, patientOnly, requestAppointment);
+// Route for requesting appointment cancellation.
+router.post('/cancel-request', protect, patientOnly, requestCancellation);
 
 module.exports = router;

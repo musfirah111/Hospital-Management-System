@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose');
-const Patient = require('../models/Patient'); 
+const Patient = require('../models/Patient');
 const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
 
@@ -70,34 +70,38 @@ const deletePatient = asyncHandler(async (req, res) => {
     res.json({ message: "Patient deleted successfully." });
 });
 
-// Request an appointment
-const requestAppointment = asyncHandler(async (req, res) => {
-    const { patient_id, doctor_id, appointment_date, appointment_time } = req.body;
+// Request appointment cancellation.
+const requestCancellation = asyncHandler(async (req, res) => {
+    const { appointment_id, cancellation_reason } = req.body;
 
-    // Check if patient exists
-    const patientExists = await Patient.findById(patient_id);
-    if (!patientExists) {
+    // Check if appointment exists.
+    const appointment = await Appointment.findById(appointment_id)
+        .populate('doctor_id')
+        .populate('patient_id');
+
+    if (!appointment) {
         res.status(404);
-        throw new Error("Patient not found.");
+        throw new Error("Appointment not found.");
     }
 
-    // Check if doctor exists
-    const doctorExists = await Doctor.findById(doctor_id);
-    if (!doctorExists) {
-        res.status(404);
-        throw new Error("Doctor not found.");
+    // Check if appointment can be cancelled
+    if (['Cancelled', 'Completed', 'Requested'].includes(appointment.status)) {
+        res.status(400);
+        throw new Error("Cannot request cancellation for an appointment that is already cancelled, completed, or has a pending request.");
     }
 
-    // Create the appointment request
-    const appointmentRequest = await Appointment.create({
-        patient_id,
-        doctor_id,
-        appointment_date,
-        appointment_time,
-        status: 'Requested', // Set status to 'Requested'
-    });
+    // Update appointment status to cancellation requested.
+    const updatedAppointment = await Appointment.findByIdAndUpdate(
+        appointment_id,
+        {
+            status: 'Requested',
+            cancellation_reason,
+            cancellation_requested_at: Date.now()
+        },
+        { new: true }
+    ).populate('doctor_id patient_id');
 
-    res.status(201).json(appointmentRequest);
+    res.status(200).json(updatedAppointment);
 });
 
-module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient, requestAppointment };
+module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient, requestCancellation };

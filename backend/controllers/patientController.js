@@ -1,6 +1,8 @@
 const asyncHandler = require('express-async-handler');
 const Patient = require('../models/Patient'); 
 const mongoose = require('mongoose');
+const Appointment = require('../models/Appointment');
+const Doctor = require('../models/Doctor');
 
 // Add a new patient
 const addPatient = asyncHandler(async (req, res) => {
@@ -68,4 +70,34 @@ const deletePatient = asyncHandler(async (req, res) => {
     res.json({ message: "Patient deleted successfully." });
 });
 
-module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient };
+// Request an appointment
+const requestAppointment = asyncHandler(async (req, res) => {
+    const { patient_id, doctor_id, appointment_date, appointment_time } = req.body;
+
+    // Check if patient exists
+    const patientExists = await Patient.findById(patient_id);
+    if (!patientExists) {
+        res.status(404);
+        throw new Error("Patient not found.");
+    }
+
+    // Check if doctor exists
+    const doctorExists = await Doctor.findById(doctor_id);
+    if (!doctorExists) {
+        res.status(404);
+        throw new Error("Doctor not found.");
+    }
+
+    // Create the appointment request
+    const appointmentRequest = await Appointment.create({
+        patient_id,
+        doctor_id,
+        appointment_date,
+        appointment_time,
+        status: 'Requested', // Set status to 'Requested'
+    });
+
+    res.status(201).json(appointmentRequest);
+});
+
+module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient, requestAppointment };

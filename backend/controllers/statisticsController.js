@@ -50,9 +50,13 @@ const getTopRatedDoctorsByDepartment = asyncHandler(async (req, res) => {
         // Compute ratings for each doctor.
         for (const doctor of data.doctors) {
             const reviews = await RatingAndReview.find({ doctor_id: doctor._id });
-            const avgRating = reviews.length
-                ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
-                : 0;
+
+            let avgRating;
+            if (reviews.length > 0) {
+                avgRating = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+            } else {
+                avgRating = 0;
+            }
 
             ratings.push({
                 doctor_name: doctor.user_id.name,

@@ -104,4 +104,24 @@ const requestCancellation = asyncHandler(async (req, res) => {
     res.status(200).json(updatedAppointment);
 });
 
-module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient, requestCancellation };
+// Search for doctors based on name, department, or disease
+const searchDoctors = asyncHandler(async (req, res) => {
+    const { name, department, disease } = req.query;
+
+    const searchCriteria = {};
+    if (name) {
+        searchCriteria.name = { $regex: name, $options: 'i' }; 
+    }
+    if (department) {
+        searchCriteria.department = { $regex: department, $options: 'i' };
+    }
+    if (disease) {
+        searchCriteria.disease = { $regex: disease, $options: 'i' };
+    }
+
+    const doctors = await Doctor.find(searchCriteria);
+
+    res.json(doctors);
+});
+
+module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient, requestCancellation, searchDoctors };

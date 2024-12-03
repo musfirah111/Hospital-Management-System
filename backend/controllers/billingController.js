@@ -89,11 +89,12 @@ const payBill = async (req, res) => {
 
         // Process payment through Stripe
         const payment = await stripe.paymentIntents.create({
-            amount: invoice.total_amount * 100, // Stripe expects amounts in cents
-            currency: 'usd',
+            amount: invoice.total_amount * 100,
+            currency: 'pkr',
             payment_method: paymentMethodId,
             confirm: true,
-            description: `Invoice payment for ${invoice._id}`
+            payment_method_types: ['card'],
+            description: `Test payment for invoice ${invoice._id}`
         });
 
         // Update invoice status
@@ -103,8 +104,11 @@ const payBill = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: 'Payment processed successfully',
-            data: invoice
+            message: 'Test payment processed successfully',
+            data: {
+                invoice,
+                clientSecret: payment.client_secret
+            }
         });
     } catch (error) {
         res.status(500).json({

@@ -1,28 +1,8 @@
-// Load env variables first, before any other imports
-const dotenv = require('dotenv');
-dotenv.config();
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const { errorHandler } = require('./middlewares/errorHandler');
-
-// Import routes
-const userRoutes = require('./routes/userRoute');
-const doctorRoutes = require('./routes/doctorRoute');
-const patientRoutes = require('./routes/patientRoute');
-const departmentRoutes = require('./routes/departmentRoutes');
-const medicalRecordRoutes = require('./routes/medicalRecordRoute');
-const appointmentRoutes = require('./routes/appointmentRoute');
-const statisticsRoutes = require('./routes/statisticsRoutes');
-const prescriptionRoutes = require('./routes/prescriptionRoute');
-const labReportRoutes = require('./routes/medicalLabTestReportRoute');
-const reviewRoutes = require('./routes/rateAndReviewRoute');
-const billingRoutes = require('./routes/billingRoute');
-const recommendationRoutes = require('./routes/recommendationRoute');
-const communicationRoutes = require('./routes/communicationRoute');
-
-// Loads env variables
-dotenv.config();
 
 // Connection to the database
 connectDB();
@@ -35,19 +15,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api/users', userRoutes);
-app.use('/api/doctors', doctorRoutes);
-app.use('/api/patients', patientRoutes);
-app.use('/api/departments', departmentRoutes);
-app.use('/api/medical-records', medicalRecordRoutes);
-app.use('/api/appointments', appointmentRoutes);
-app.use('/api/statistics', statisticsRoutes);
-app.use('/api/prescriptions', prescriptionRoutes);
-app.use('/api/lab-reports', labReportRoutes);
-app.use('/api/reviews', reviewRoutes);
-app.use('/api/billing', billingRoutes);
-app.use('/api/recommendations', recommendationRoutes);
-app.use('/api/communication', communicationRoutes);
+app.use('/api/users', require('./routes/userRoute'));
+app.use('/api/doctors', require('./routes/doctorRoute'));
+app.use('/api/patients', require('./routes/patientRoute'));
+app.use('/api/departments', require('./routes/departmentRoutes'));
+app.use('/api/medical-records', require('./routes/medicalRecordRoute'));
+app.use('/api/appointments', require('./routes/appointmentRoute'));
+app.use('/api/statistics', require('./routes/statisticsRoutes'));
+app.use('/api/prescriptions', require('./routes/prescriptionRoute'));
+app.use('/api/lab-reports', require('./routes/medicalLabTestReportRoute'));
+app.use('/api/reviews', require('./routes/rateAndReviewRoute'));
+app.use('/api/billing', require('./routes/billingRoute'));
+app.use('/api/recommendations', require('./routes/recommendationRoute'));
+app.use('/api/communication', require('./routes/communicationRoute'));
 
 // Error Handler Middleware  
 app.use(errorHandler);
@@ -66,6 +46,5 @@ app.listen(PORT, () => {
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
     console.log(`Error: ${err.message}`);
-    // Close server & exit process
-    server.close(() => process.exit(1));
+    process.exit(1);
 });

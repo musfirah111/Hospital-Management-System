@@ -6,8 +6,8 @@ const {
     getPrescriptionById,
     getAllPrescriptions,
 } = require('../controllers/prescriptionController');
-const { protect } = require('../middleware/authMiddleware'); 
-const { doctorOnly } = require('../middleware/roleMiddleware');
+const { protect } = require('../middlewares/authMiddleware');
+const { doctorOnly } = require('../middlewares/roleMiddleware');
 
 // Route to create a new prescription
 router.post('/prescriptions', protect, doctorOnly, createPrescription);

@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
-const Patient = require('../models/Patient'); 
 const mongoose = require('mongoose');
+const Patient = require('../models/Patient'); 
 const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
 

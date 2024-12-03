@@ -4,7 +4,9 @@ const {
     getDoctorById,
     createDoctor,
     updateDoctor,
-    deleteDoctor
+    deleteDoctor,
+    getDailySchedule,
+    getWeeklySchedule
 } = require('../controllers/doctorController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly, doctorOnly } = require('../middlewares/roleMiddleware');
@@ -25,5 +27,9 @@ router.put('/:id', protect, doctorOnly, updateDoctor);
 
 // Route to delete a doctor by ID - admin only.
 router.delete('/:id', protect, adminOnly, deleteDoctor);
+
+// Schedule routes
+router.get('/schedule/daily', protect, doctorOnly, getDailySchedule);
+router.get('/schedule/weekly', protect, doctorOnly, getWeeklySchedule);
 
 module.exports = router;

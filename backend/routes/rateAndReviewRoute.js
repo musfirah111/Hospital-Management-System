@@ -10,7 +10,7 @@ const { adminOnly } = require('../middlewares/roleMiddleware');
 const { patientOnly } = require('../middlewares/roleMiddleware');
 
 // Route to add a review (Patient)
-router.post('/reviews', protect, patientOnlyOnly, addReview);
+router.post('/reviews', protect, patientOnly, addReview);
 
 // Route to delete a review (Admin)
 router.delete('/reviews/:id', protect, adminOnly, deleteReview);

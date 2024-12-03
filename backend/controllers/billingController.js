@@ -1,5 +1,5 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const Invoice = require('../models/Invoice');
+const Invoice = require('../models/Billing');
 const Patient = require('../models/Patient');
 const User = require('../models/User');
 
@@ -59,7 +59,7 @@ const approvePayment = async (req, res) => {
         await invoice.save();
 
         // TODO: Send notification to patient about payment approval
-        
+
         res.status(200).json({
             success: true,
             message: 'Payment approved successfully',

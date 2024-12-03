@@ -4,6 +4,20 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const { errorHandler } = require('./middlewares/errorHandler');
 
+// Import routes.
+const userRoutes = require('./routes/userRoute');
+const doctorRoutes = require('./routes/doctorRoute');
+const patientRoutes = require('./routes/patientRoute');
+const departmentRoutes = require('./routes/departmentRoutes');
+const medicalRecordRoutes = require('./routes/medicalRecordRoute');
+const appointmentRoutes = require('./routes/appointmentRoute');
+const statisticsRoutes = require('./routes/statisticsRoutes');
+const prescriptionRoutes = require('./routes/prescriptionRoute');
+const labReportRoutes = require('./routes/medicalLabTestReportRoute');
+const reviewRoutes = require('./routes/rateAndReviewRoute');
+const billingRoutes = require('./routes/billingRoute');
+const recommendationRoutes = require('./routes/recommendationRoute');
+
 // Loads env variables
 dotenv.config();
 

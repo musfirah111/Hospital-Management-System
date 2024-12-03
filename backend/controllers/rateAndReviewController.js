@@ -1,5 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const Review = require('../models/Review'); // Assuming you have a Review model
+const Review = require('../models/RatingAndReview'); // Assuming you have a Review model
 
 // Add a review (Patient)
 const addReview = asyncHandler(async (req, res) => {
@@ -50,7 +50,7 @@ const getAllReviews = asyncHandler(async (req, res) => {
                 path: 'doctor_id',
                 select: 'name department',
                 model: 'Doctor'
-            }); 
+            });
         res.status(200).json(reviews);
     } catch (error) {
         res.status(500).json({ message: error.message });

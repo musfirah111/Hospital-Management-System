@@ -32,6 +32,23 @@ const billingSchema = new Schema({
     date_of_payment: {
         type: Date,
         required: false
+    },
+    stripe_invoice_id: {
+        type: String,
+        required: false
+    },
+    payment_intent_id: {
+        type: String,
+        required: false
+    },
+    items: [{
+        description: String,
+        amount: Number,
+        quantity: Number
+    }],
+    due_date: {
+        type: Date,
+        required: false
     }
 });
 

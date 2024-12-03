@@ -41,7 +41,7 @@ const generateInvoice = async (req, res) => {
 // Payment Accept - Admin
 const approvePayment = async (req, res) => {
     try {
-        const { invoiceId } = req.params;
+        const { invoiceId } = req.body;
 
         const invoice = await Invoice.findById(invoiceId);
         if (!invoice) {

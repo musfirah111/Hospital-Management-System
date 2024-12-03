@@ -12,7 +12,7 @@ const router = express.Router();
 
 // Admin routes
 router.post('/invoice/generate', protect, adminOnly, generateInvoice);
-router.put('/invoice/approve/:invoiceId', protect, adminOnly, approvePayment);
+router.put('/invoice/approve', protect, adminOnly, approvePayment);
 
 // Patient routes
 router.post('/invoice/pay', protect, patientOnly, payBill);

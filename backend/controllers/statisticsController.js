@@ -22,15 +22,15 @@ const getDoctorRating = asyncHandler(async (req, res) => {
 
 // Get top rated doctors by department.
 const getTopRatedDoctorsByDepartment = asyncHandler(async (req, res) => {
-    const limit = parseInt(req.query.limit || 5);
+    const limit = parseInt(req.query.limit || 5); // Default to 5 doctors.
 
-    // Get all doctors grouped by department.
+    // Get all doctors with their user and department details.
     const doctors = await Doctor.find({})
         .populate('user_id', 'name')
         .populate('department_id', 'name');
 
-    // Group doctors by department.
-    const departmentDoctors = {};
+    const departmentDoctors = {}; // Group doctors by department.
+
     doctors.forEach(doctor => {
         const deptId = doctor.department_id._id.toString();
         if (!departmentDoctors[deptId]) {
@@ -42,35 +42,31 @@ const getTopRatedDoctorsByDepartment = asyncHandler(async (req, res) => {
         departmentDoctors[deptId].doctors.push(doctor);
     });
 
-    // Calculate ratings for each department.
-    const departmentRatings = {};
+    const departmentRatings = {}; // Store department ratings.
+
     for (const [deptId, data] of Object.entries(departmentDoctors)) {
-        let ratings = [];
+        const ratings = [];
 
-        // Calculate rating for each doctor in department.
-        for (let doctor of data.doctors) {
-            const doctorReviews = await RatingAndReview.find({ doctor_id: doctor._id });
-
-            const average = doctorReviews.length
-                ? doctorReviews.reduce((sum, review) => sum + review.rating, 0) / doctorReviews.length
+        // Compute ratings for each doctor.
+        for (const doctor of data.doctors) {
+            const reviews = await RatingAndReview.find({ doctor_id: doctor._id });
+            const avgRating = reviews.length
+                ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
                 : 0;
 
             ratings.push({
-                doctor_id: doctor._id,
                 doctor_name: doctor.user_id.name,
                 department: data.department_name,
-                averageRating: Number(average.toFixed(1)),
-                totalReviews: doctorReviews.length
+                averageRating: Number(avgRating.toFixed(1)),
+                totalReviews: reviews.length
             });
         }
 
-        // Sort ratings from highest to lowest.
+        // Sort by average rating and limit to top 5.
         ratings.sort((a, b) => b.averageRating - a.averageRating);
         departmentRatings[deptId] = {
             department_name: data.department_name,
-            highest_rated: ratings[0] || null,
-            lowest_rated: ratings[ratings.length - 1] || null,
-            top_rated: ratings.slice(0, limit)
+            top_rated: ratings.slice(0, limit) // Top 5 doctors.
         };
     }
 

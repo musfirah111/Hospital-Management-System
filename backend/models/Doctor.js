@@ -11,8 +11,8 @@ const doctorSchema = new mongoose.Schema({
         required: [true, 'Please enter a specialization.']
     },
     qualification: {
-        type: String,
-        required: [true, 'Please enter a qualification.']
+        type: [String],
+        required: [true, 'Please enter at least one qualification.']
     },
     department_id: {
         type: mongoose.Schema.Types.ObjectId,

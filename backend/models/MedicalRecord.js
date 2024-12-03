@@ -17,11 +17,14 @@ const medicalRecordSchema = new Schema({
         required: [true, 'Please enter the diagnosis.'],
         maxlength: [1000, 'Diagnosis cannot be longer than 1000 characters.']
     },
-    treatment: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Prescription',
-        required: [true, 'Please enter prescription IDs.']
-    }],
+    treatment: {
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Prescription',
+            required: [true, 'Please enter prescription IDs.']
+        }],
+        required: [true, 'At least one treatment must be specified.']
+    },
     date: {
         type: Date,
         default: Date.now,

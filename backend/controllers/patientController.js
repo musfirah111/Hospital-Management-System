@@ -42,8 +42,6 @@ const getPatientDetails = asyncHandler(async (req, res) => {
 
 // Update patient information
 const updatePatient = asyncHandler(async (req, res) => {
-    const { address, emergency_contact } = req.body;
-
     const updatedPatient = await Patient.findByIdAndUpdate(req.params.id, req.body, { new: true });
 
     if (!updatedPatient) {

@@ -6,8 +6,8 @@ const {
     getAllReviews,
 } = require('../controllers/rateAndReviewController');
 const { protect } = require('../middlewares/authMiddleware');
-const { adminOnlyOnly } = require('../middlewares/roleMiddleware');
-const { patientOnlyOnly } = require('../middlewares/roleMiddleware');
+const { adminOnly } = require('../middlewares/roleMiddleware');
+const { patientOnly } = require('../middlewares/roleMiddleware');
 
 // Route to add a review (Patient)
 router.post('/reviews', protect, patientOnlyOnly, addReview);

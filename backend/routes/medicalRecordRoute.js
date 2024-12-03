@@ -5,7 +5,7 @@ const {
     getRecordById,
     searchRecordsByPatientId,
     searchRecordsByName,
-} = require('../controllers/medicalRecord');
+} = require('../controllers/medicalRecordController');
 const { protect } = require('../middlewares/authMiddleware');
 const { doctorOnly } = require('../middlewares/roleMiddleware');
 

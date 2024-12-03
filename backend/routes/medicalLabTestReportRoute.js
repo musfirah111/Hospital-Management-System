@@ -7,7 +7,7 @@ const {
     searchReportsByName,
     downloadReport,
     shareReport,
-} = require('../controllers/medicalRecord');
+} = require('../controllers/medicalLabTestReportController');
 const { protect } = require('../middlewares/authMiddleware');
 const { doctorOnly } = require('../middlewares/roleMiddleware');
 

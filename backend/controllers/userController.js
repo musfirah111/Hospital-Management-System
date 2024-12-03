@@ -1,3 +1,4 @@
+// backend/controllers/userController.js
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose');

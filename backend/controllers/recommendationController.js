@@ -1,4 +1,3 @@
-const MedicalRecord = require('../models/MedicalRecord');
 const Doctor = require('../models/Doctor');
 const Appointment = require('../models/Appointment');
 

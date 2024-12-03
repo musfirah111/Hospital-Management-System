@@ -7,12 +7,6 @@ const patientSchema = new Schema({
         ref: 'User',  // Reference to the User model.
         required: [true, 'Please enter a user ID.']
     },
-    gender: {
-        type: String,
-        required: [true, 'Please enter the gender.'],
-        enum: ['Male', 'Female', 'Other'],
-        message: 'Gender should be one of the following: Male, Female, or Other.'
-    },
     address: {
         type: String,
         required: false,

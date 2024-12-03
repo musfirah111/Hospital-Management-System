@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: [true,`Please enter your email.`],
+        required: [true, `Please enter your email.`],
         unique: true,
         match: [
             /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
@@ -18,7 +18,13 @@ const userSchema = new mongoose.Schema({
     },
     age: {
         type: Number,
-        required: [true,`Please enter your age.`],
+        required: [true, `Please enter your age.`],
+    },
+    gender: {
+        type: String,
+        required: [true, 'Please enter the gender.'],
+        enum: ['Male', 'Female', 'Other'],
+        message: 'Gender should be one of the following: Male, Female, or Other.'
     },
     password: {
         type: String,
@@ -27,7 +33,7 @@ const userSchema = new mongoose.Schema({
     },
     phone_number: {
         type: String,
-        required: [true,`Please enter your phone number.`],
+        required: [true, `Please enter your phone number.`],
         match: [
             /^(03[0-9]{2})[0-9]{7}$/,
             'Please enter a valid phone number.'
@@ -52,7 +58,7 @@ const User = mongoose.model('User', userSchema);
 
 //Middleware used to hash the password of the user before saving.
 userSchema.pre('save', async function (next) {
-    if(!this.isModified('password')){
+    if (!this.isModified('password')) {
         next();
     }
     const salt = await bcrypt.genSalt(10);
@@ -60,7 +66,7 @@ userSchema.pre('save', async function (next) {
 })
 
 //This function is used to compare the entered password with the hashed one.
-userSchema.methods.matchPassword = async function(enteredPassword){
+userSchema.methods.matchPassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 }
 

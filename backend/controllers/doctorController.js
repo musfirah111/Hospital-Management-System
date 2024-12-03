@@ -1,6 +1,8 @@
 const asyncHandler = require('express-async-handler');
+const moment = require('moment');
 const Doctor = require('../models/Doctor');
 const User = require('../models/User');
+const Appointment = require('../models/Appointment');
 
 // Get all doctors.
 const getDoctors = asyncHandler(async (req, res) => {
@@ -61,10 +63,128 @@ const deleteDoctor = asyncHandler(async (req, res) => {
     res.json({ message: "Doctor deleted successfully." });
 });
 
+// Get doctor's schedule for a specific day.
+const getDailySchedule = asyncHandler(async (req, res) => {
+    const { doctor_id, date } = req.query;
+
+    let targetDate;
+    if (date) {
+        targetDate = moment(date).startOf('day');
+    } else {
+        targetDate = moment().startOf('day');
+    }
+
+    // Verify doctor exists.
+    const doctor = await Doctor.findById(doctor_id);
+    if (!doctor) {
+        return res.status(404).json({
+            success: false,
+            message: "Doctor not found"
+        });
+    }
+
+    // Get all appointments for the specified day.
+    const appointments = await Appointment.find({
+        doctor_id,
+        appointment_date: {
+            $gte: targetDate.toDate(),
+            $lte: moment(targetDate).endOf('day').toDate()
+        }
+    }).populate('patient_id', 'name');
+
+    // Define time slots based on doctor's shift.
+    const timeSlots = {
+        'Morning': ['09:00', '10:00', '11:00', '12:00'],
+        'Evening': ['14:00', '15:00', '16:00', '17:00'],
+        'Night': ['18:00', '19:00', '20:00', '21:00']
+    };
+
+    // Create schedule with availability.
+    const schedule = timeSlots[doctor.shift].map(time => {
+        const appointment = appointments.find(apt => apt.appointment_time === time);
+        return {
+            time,
+            isBooked: !!appointment,
+            appointment: appointment || null
+        };
+    });
+
+    res.status(200).json({
+        success: true,
+        data: {
+            date: targetDate.format('YYYY-MM-DD'),
+            shift: doctor.shift,
+            schedule
+        }
+    });
+});
+
+// Get doctor's schedule for a week.
+const getWeeklySchedule = asyncHandler(async (req, res) => {
+    const { doctor_id, start_date } = req.query;
+
+    let weekStart;
+    if (start_date) {
+        weekStart = moment(start_date).startOf('week');
+    } else {
+        weekStart = moment().startOf('week');
+    }
+    const weekEnd = moment(weekStart).endOf('week');
+
+    // Verify doctor exists.
+    const doctor = await Doctor.findById(doctor_id);
+    if (!doctor) {
+        return res.status(404).json({
+            success: false,
+            message: "Doctor not found"
+        });
+    }
+
+    // Get all appointments for the week.
+    const appointments = await Appointment.find({
+        doctor_id,
+        appointment_date: {
+            $gte: weekStart.toDate(),
+            $lte: weekEnd.toDate()
+        }
+    }).populate('patient_id', 'name');
+
+    // Create weekly schedule.
+    const weeklySchedule = [];
+    for (let i = 0; i < 7; i++) {
+        const currentDate = moment(weekStart).add(i, 'days');
+        const dayAppointments = appointments.filter(apt =>
+            moment(apt.appointment_date).isSame(currentDate, 'day')
+        );
+
+        weeklySchedule.push({
+            date: currentDate.format('YYYY-MM-DD'),
+            dayOfWeek: currentDate.format('dddd'),
+            appointments: dayAppointments.map(apt => ({
+                time: apt.appointment_time,
+                patient: apt.patient_id,
+                status: apt.status
+            }))
+        });
+    }
+
+    res.status(200).json({
+        success: true,
+        data: {
+            weekStart: weekStart.format('YYYY-MM-DD'),
+            weekEnd: weekEnd.format('YYYY-MM-DD'),
+            shift: doctor.shift,
+            weeklySchedule
+        }
+    });
+});
+
 module.exports = {
     getDoctors,
     getDoctorById,
     createDoctor,
     updateDoctor,
-    deleteDoctor
+    deleteDoctor,
+    getDailySchedule,
+    getWeeklySchedule
 };

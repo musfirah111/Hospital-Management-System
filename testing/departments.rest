@@ -10,7 +10,7 @@ Content-Type: application/json
 }
 
 ### Update Department
-PUT http://localhost:5000/api/departments/DEPARTMENT_ID_HERE
+PUT http://localhost:5000/api/departments/6750380cbb481a21276f357e
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
 Content-Type: application/json
 
@@ -19,5 +19,5 @@ Content-Type: application/json
 }
 
 ### Delete Department
-DELETE http://localhost:5000/api/departments/DEPARTMENT_ID_HERE
+DELETE http://localhost:5000/api/departments/6750380cbb481a21276f357e
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0

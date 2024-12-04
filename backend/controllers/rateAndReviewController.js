@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler');
-const Review = require('../models/RatingAndReview'); // Assuming you have a Review model
+const Review = require('../models/RatingAndReview');
+const Doctor = require('../models/Doctor');
+const Patient = require('../models/Patient');
 
 // Add a review (Patient)
 const addReview = asyncHandler(async (req, res) => {

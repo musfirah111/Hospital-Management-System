@@ -3,13 +3,13 @@ POST http://localhost:5000/api/users/register
 Content-Type: application/json
 
 {
-    "name": "Test User",
-    "email": "test@example.com",
-    "password": "password123",
-    "role": "Admin",
-    "age": 25,
+    "name": "Jaffar Dar",
+    "email": "Jaffar@gmail.com",
+    "password": "Jaffar@321",
+    "role": "Doctor",
+    "age": 38,
     "gender": "Male",
-    "phone_number": "03001234567"
+    "phone_number": "03211274567"
 }
 
 ### Login User

@@ -12,12 +12,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhN
 Content-Type: application/json
 
 {
-    "user_id": "675037496a15796526968257",
+    "user_id": "6750783291dcace6a5837f1f",
     "specialization": "Cardiology",
     "qualification": ["MBBS", "MD"],
     "department_id": "6750385bbb481a21276f3586",
-    "shift": "Morning",
-    "working_hours": "9AM-5PM",
+    "shift": "Evening",
+    "working_hours": "3PM-11PM",
     "availability_status": true
 }
 

@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
+const Patient = require('../models/Patient');
 const moment = require('moment');
 
 // Function to get available time slots.
@@ -39,7 +40,9 @@ const getAvailableTimeSlots = async (doctorId, date) => {
 const createAppointment = asyncHandler(async (req, res) => {
     const { patient_id, doctor_id, appointment_date, appointment_time } = req.body;
 
-    if (!doctor.availability_status) {
+    // Fetch the doctor to check availability
+    const doctor = await Doctor.findById(doctor_id);
+    if (!doctor || !doctor.availability_status) {
         res.status(400);
         throw new Error('Doctor is not available for appointments.');
     }

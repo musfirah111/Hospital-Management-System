@@ -19,4 +19,34 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNzQ5N
 
 ### Search Doctors
 GET http://localhost:5000/api/patients/search?name=Doctor&department=Cardiology
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8
+
+
+### Update Patient
+PUT http://localhost:5000/api/patients/675036f46a15796526968251
+Authorization: Bearer token
+Content-Type: application/json
+
+{
+    "address": "456 Updated Street, New City",
+    "emergency_contact": {
+        "name": "New Emergency Contact",
+        "phone": "03009876543",
+        "relationship": "Sibling"
+    }
+}
+
+### Delete Patient
+DELETE http://localhost:5000/api/patients/675036f46a15796526968251
+Authorization: Bearer token
+
+
+### Request Appointment Cancellation
+POST http://localhost:5000/api/patients/cancel-request
+Authorization: Bearer token
+Content-Type: application/json
+
+{
+    "appointment_id": "YOUR_APPOINTMENT_ID",
+    "cancellation_reason": "Unable to attend due to emergency"
+}

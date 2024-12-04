@@ -11,7 +11,7 @@ const { adminOnly } = require('../middlewares/roleMiddleware');
 const router = express.Router();
 
 // Route for registering a new user
-router.post('/register', adminOnly, registerUser);
+router.post('/register', registerUser);
 
 // Route for logging in a user.
 router.post('/login', loginUser);

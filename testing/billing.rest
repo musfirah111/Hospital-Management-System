@@ -1,0 +1,21 @@
+### Generate Invoice
+POST http://localhost:5000/api/billing/invoice/generate
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "patientId": "PATIENT_ID_HERE",
+    "items": [
+        {
+            "description": "Consultation Fee",
+            "amount": 100,
+            "quantity": 1
+        }
+    ],
+    "totalAmount": 100,
+    "dueDate": "2024-03-30"
+}
+
+### Download Invoice
+GET http://localhost:5000/api/billing/download/INVOICE_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE 

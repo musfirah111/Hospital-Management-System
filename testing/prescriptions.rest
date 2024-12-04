@@ -1,0 +1,22 @@
+### Create Prescription
+POST http://localhost:5000/api/prescriptions
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "patient_id": "PATIENT_ID_HERE",
+    "doctor_id": "DOCTOR_ID_HERE",
+    "medications": [
+        {
+            "name": "Medicine Name",
+            "dosage": "10mg",
+            "frequency": "Twice daily",
+            "duration": "7 days"
+        }
+    ],
+    "instructions": "Take after meals"
+}
+
+### Get Prescription by ID
+GET http://localhost:5000/api/prescriptions/PRESCRIPTION_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE 

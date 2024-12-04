@@ -166,21 +166,29 @@ const payBill = async (req, res) => {
             });
         }
 
-        // Process payment through Stripe
-        const payment = await stripe.paymentIntents.create({
-            amount: invoice.total_amount * 100, // Convert to paisa
+        // Create payment intent with the provided payment method
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: invoice.total_amount * 100,
             currency: 'pkr',
             payment_method: paymentMethodId,
             confirm: true,
             payment_method_types: ['card'],
-            description: `Payment for invoice ${invoice._id}`
+            description: `Payment for invoice ${invoice._id}`,
+            metadata: {
+                invoice_id: invoice._id.toString()
+            }
         });
 
-        // Update invoice status and payment details
-        invoice.status = 'paid'; // Update status to paid
-        invoice.payment_status = 'Paid'; // Update payment status to Paid
-        invoice.amount_paid = invoice.total_amount; // Update amount paid
-        invoice.payment_intent_id = payment.id;
+        // Pay the invoice in Stripe
+        await stripe.invoices.pay(invoice.stripe_invoice_id, {
+            paid_out_of_band: true // Mark as paid externally
+        });
+
+        // Update local database
+        invoice.payment_status = 'Paid';
+        invoice.amount_paid = invoice.total_amount;
+        invoice.payment_intent_id = paymentIntent.id;
+        invoice.date_of_payment = new Date();
         await invoice.save();
 
         res.status(200).json({
@@ -188,7 +196,7 @@ const payBill = async (req, res) => {
             message: 'Payment processed successfully',
             data: {
                 invoice,
-                clientSecret: payment.client_secret
+                clientSecret: paymentIntent.client_secret
             }
         });
     } catch (error) {
@@ -215,13 +223,8 @@ const downloadInvoice = async (req, res) => {
             });
         }
 
-        // Retrieve the invoice from Stripe
-        let stripeInvoice = await stripe.invoices.retrieve(invoice.stripe_invoice_id);
-
-        // Finalize the invoice if it's in draft status
-        if (stripeInvoice.status === 'draft') {
-            stripeInvoice = await stripe.invoices.finalizeInvoice(invoice.stripe_invoice_id);
-        }
+        // Get the invoice from Stripe
+        const stripeInvoice = await stripe.invoices.retrieve(invoice.stripe_invoice_id);
 
         // Check if the hosted invoice URL is available
         if (!stripeInvoice.hosted_invoice_url) {

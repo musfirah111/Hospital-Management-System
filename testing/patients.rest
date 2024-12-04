@@ -23,8 +23,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0N
 
 
 ### Update Patient
-PUT http://localhost:5000/api/patients/675036f46a15796526968251
-Authorization: Bearer token
+PUT http://localhost:5000/api/patients/67503b48bb481a21276f35a4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8
 Content-Type: application/json
 
 {
@@ -37,7 +37,7 @@ Content-Type: application/json
 }
 
 ### Delete Patient
-DELETE http://localhost:5000/api/patients/675036f46a15796526968251
+DELETE http://localhost:5000/api/patients/67503b48bb481a21276f35a4
 Authorization: Bearer token
 
 

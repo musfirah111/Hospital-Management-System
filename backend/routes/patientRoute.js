@@ -9,11 +9,11 @@ const {
     searchDoctors 
 } = require('../controllers/patientController');
 const { protect } = require('../middlewares/authMiddleware');
-const { adminOnly, patientOnly } = require('../middlewares/roleMiddleware');
+const { adminOnly, patientOnly, adminOrPatient } = require('../middlewares/roleMiddleware');
 
 router.post('/', protect, adminOnly, addPatient);
 router.get('/:id', protect, getPatientDetails);
-router.put('/:id', protect, updatePatient);
+router.put('/:id', protect, adminOrPatient, updatePatient);
 router.delete('/:id', protect, adminOnly, deletePatient);
 router.post('/cancel-request', protect, patientOnly, requestCancellation);
 router.get('/search', protect, searchDoctors);

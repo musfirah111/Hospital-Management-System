@@ -1,30 +1,30 @@
 ### Get All Doctors
 GET http://localhost:5000/api/doctors
-Authorization: Bearer YOUR_TOKEN_HERE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8
 
 ### Get Doctor by ID
-GET http://localhost:5000/api/doctors/DOCTOR_ID_HERE
-Authorization: Bearer YOUR_TOKEN_HERE
+GET http://localhost:5000/api/doctors/675039e1bb481a21276f3590
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8
 
 ### Create Doctor
 POST http://localhost:5000/api/doctors
-Authorization: Bearer YOUR_TOKEN_HERE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
 Content-Type: application/json
 
 {
-    "user_id": "USER_ID_HERE",
+    "user_id": "675037496a15796526968257",
     "specialization": "Cardiology",
     "qualification": ["MBBS", "MD"],
-    "department_id": "DEPARTMENT_ID_HERE",
+    "department_id": "6750385bbb481a21276f3586",
     "shift": "Morning",
     "working_hours": "9AM-5PM",
     "availability_status": true
 }
 
 ### Get Daily Schedule
-GET http://localhost:5000/api/doctors/schedule/daily?doctor_id=DOCTOR_ID_HERE&date=2024-03-20
-Authorization: Bearer YOUR_TOKEN_HERE
+GET http://localhost:5000/api/doctors/schedule/daily?doctor_id=675039e1bb481a21276f3590&date=2024-03-20
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNzQ5NmExNTc5NjUyNjk2ODI1NyIsImlhdCI6MTczMzMxMDI4MSwiZXhwIjoxNzM1OTAyMjgxfQ.HdCrILiR1rieALWfs5C6fod3S11CFZ1D8D_H4ac6n3k
 
 ### Get Weekly Schedule
-GET http://localhost:5000/api/doctors/schedule/weekly?doctor_id=DOCTOR_ID_HERE
-Authorization: Bearer YOUR_TOKEN_HERE 
+GET http://localhost:5000/api/doctors/schedule/weekly?doctor_id=675039e1bb481a21276f3590
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNzQ5NmExNTc5NjUyNjk2ODI1NyIsImlhdCI6MTczMzMxMDI4MSwiZXhwIjoxNzM1OTAyMjgxfQ.HdCrILiR1rieALWfs5C6fod3S11CFZ1D8D_H4ac6n3k

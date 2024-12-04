@@ -18,8 +18,8 @@ const checkRole = (roles) => {
 };
 
 // Specific role middleware functions
-const adminOnly = checkRole(['admin']);
-const doctorOnly = checkRole(['doctor']);
-const patientOnly = checkRole(['patient']);
+const adminOnly = checkRole(['Admin']);
+const doctorOnly = checkRole(['Doctor']);
+const patientOnly = checkRole(['Patient']);
 
 module.exports = { checkRole, adminOnly, doctorOnly, patientOnly };

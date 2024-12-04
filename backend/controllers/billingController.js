@@ -8,30 +8,95 @@ const User = require('../models/User');
 // Generate Invoice - Admin Only
 const generateInvoice = async (req, res) => {
     try {
-        const { patientId, items, totalAmount, dueDate } = req.body;
+        const { patientId, items, totalAmount, dueDate, appointmentId } = req.body;
 
-        // Create invoice in Stripe
+        // Check if the patient exists and populate user data
+        const patient = await Patient.findById(patientId).populate('user_id');
+        if (!patient) {
+            return res.status(404).json({
+                success: false,
+                message: 'Patient not found'
+            });
+        }
+
+        // Create or get customer in Stripe
+        let customer;
+        if (patient.stripe_customer_id) {
+            customer = await stripe.customers.retrieve(patient.stripe_customer_id);
+        } else {
+            customer = await stripe.customers.create({
+                email: patient.user_id.email,
+                name: patient.user_id.name,
+                metadata: {
+                    patientId: patient._id.toString()
+                }
+            });
+            patient.stripe_customer_id = customer.id;
+            await patient.save();
+        }
+
+        // First create invoice in Stripe
         const stripeInvoice = await stripe.invoices.create({
-            customer: patientId,
+            customer: customer.id,
+            currency: 'pkr',
             collection_method: 'send_invoice',
-            days_until_due: 30,
+            days_until_due: 30
         });
+
+        // Add items to the invoice
+        for (const item of items) {
+            await stripe.invoiceItems.create({
+                customer: customer.id,
+                invoice: stripeInvoice.id,
+                currency: 'pkr',
+                unit_amount: item.amount * 100, // Convert to paisa
+                quantity: item.quantity,
+                description: item.description
+            });
+        }
+
+        // Add total amount as a separate line item if needed
+        if (totalAmount > items.reduce((sum, item) => sum + (item.amount * item.quantity), 0)) {
+            const additionalFees = totalAmount - items.reduce((sum, item) => sum + (item.amount * item.quantity), 0);
+            await stripe.invoiceItems.create({
+                customer: customer.id,
+                invoice: stripeInvoice.id,
+                currency: 'pkr',
+                unit_amount: additionalFees * 100,
+                quantity: 1,
+                description: 'Additional Fees'
+            });
+        }
+
+        // Finalize the invoice
+        const finalizedInvoice = await stripe.invoices.finalizeInvoice(stripeInvoice.id);
 
         // Create invoice in our database
         const invoice = await Invoice.create({
             patient_id: patientId,
+            appointment_id: appointmentId,
             items,
             total_amount: totalAmount,
             due_date: dueDate,
-            stripe_invoice_id: stripeInvoice.id,
-            status: 'pending'
+            stripe_invoice_id: finalizedInvoice.id,
+            payment_status: 'Unpaid'
         });
+
+        // Send the invoice
+        await stripe.invoices.sendInvoice(finalizedInvoice.id);
 
         res.status(201).json({
             success: true,
-            data: invoice
+            message: 'Invoice generated successfully',
+            data: {
+                invoice,
+                stripeInvoiceId: finalizedInvoice.id,
+                hostedInvoiceUrl: finalizedInvoice.hosted_invoice_url
+            }
         });
+
     } catch (error) {
+        console.error('Generate Invoice Error:', error);
         res.status(500).json({
             success: false,
             message: 'Error generating invoice',
@@ -53,8 +118,19 @@ const approvePayment = async (req, res) => {
             });
         }
 
-        // Update invoice status in Stripe
-        await stripe.invoices.markUncollectible(invoice.stripe_invoice_id);
+        // Retrieve the invoice from Stripe
+        const stripeInvoice = await stripe.invoices.retrieve(invoice.stripe_invoice_id);
+
+        // Check if the invoice is open
+        if (stripeInvoice.status !== 'open') {
+            return res.status(400).json({
+                success: false,
+                message: 'Invoice is not open and cannot be approved'
+            });
+        }
+
+        // Mark the invoice as paid in Stripe
+        await stripe.invoices.pay(invoice.stripe_invoice_id);
 
         // Update invoice status in our database
         invoice.status = 'paid';
@@ -68,6 +144,7 @@ const approvePayment = async (req, res) => {
             data: invoice
         });
     } catch (error) {
+        console.error('Approve Payment Error:', error);
         res.status(500).json({
             success: false,
             message: 'Error approving payment',
@@ -91,28 +168,31 @@ const payBill = async (req, res) => {
 
         // Process payment through Stripe
         const payment = await stripe.paymentIntents.create({
-            amount: invoice.total_amount * 100,
+            amount: invoice.total_amount * 100, // Convert to paisa
             currency: 'pkr',
             payment_method: paymentMethodId,
             confirm: true,
             payment_method_types: ['card'],
-            description: `Test payment for invoice ${invoice._id}`
+            description: `Payment for invoice ${invoice._id}`
         });
 
-        // Update invoice status
-        invoice.status = 'pending_approval';
+        // Update invoice status and payment details
+        invoice.status = 'paid'; // Update status to paid
+        invoice.payment_status = 'Paid'; // Update payment status to Paid
+        invoice.amount_paid = invoice.total_amount; // Update amount paid
         invoice.payment_intent_id = payment.id;
         await invoice.save();
 
         res.status(200).json({
             success: true,
-            message: 'Test payment processed successfully',
+            message: 'Payment processed successfully',
             data: {
                 invoice,
                 clientSecret: payment.client_secret
             }
         });
     } catch (error) {
+        console.error('Pay Bill Error:', error);
         res.status(500).json({
             success: false,
             message: 'Error processing payment',
@@ -126,9 +206,8 @@ const downloadInvoice = async (req, res) => {
     try {
         const { invoiceId } = req.params;
 
-        const invoice = await Invoice.findById(invoiceId)
-            .populate('patient_id');
-
+        // Find the invoice in our database
+        const invoice = await Invoice.findById(invoiceId);
         if (!invoice) {
             return res.status(404).json({
                 success: false,
@@ -136,18 +215,33 @@ const downloadInvoice = async (req, res) => {
             });
         }
 
-        // Get invoice PDF from Stripe
-        const invoicePdf = await stripe.invoices.retrieve(invoice.stripe_invoice_id, {
-            expand: ['invoice.pdf']
-        });
+        // Retrieve the invoice from Stripe
+        let stripeInvoice = await stripe.invoices.retrieve(invoice.stripe_invoice_id);
+
+        // Finalize the invoice if it's in draft status
+        if (stripeInvoice.status === 'draft') {
+            stripeInvoice = await stripe.invoices.finalizeInvoice(invoice.stripe_invoice_id);
+        }
+
+        // Check if the hosted invoice URL is available
+        if (!stripeInvoice.hosted_invoice_url) {
+            return res.status(404).json({
+                success: false,
+                message: 'Invoice URL not available yet. Please try again in a few moments.'
+            });
+        }
 
         res.status(200).json({
             success: true,
             data: {
-                pdfUrl: invoicePdf.invoice_pdf
+                invoiceUrl: stripeInvoice.hosted_invoice_url,
+                invoiceNumber: stripeInvoice.number,
+                amount: stripeInvoice.amount_due,
+                status: stripeInvoice.status
             }
         });
     } catch (error) {
+        console.error('Download Invoice Error:', error);
         res.status(500).json({
             success: false,
             message: 'Error downloading invoice',

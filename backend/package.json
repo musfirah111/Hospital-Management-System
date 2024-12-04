@@ -29,5 +29,11 @@
   "description": "",
   "devDependencies": {
     "nodemon": "^3.1.7"
+  },
+  "nodemon": {
+    "watch": ["backend/", "server.js"],
+    "ext": "js,json",
+    "ignore": ["node_modules/", "frontend/"],
+    "exec": "node server.js"
   }
 }

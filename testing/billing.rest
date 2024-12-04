@@ -1,21 +1,33 @@
 ### Generate Invoice
 POST http://localhost:5000/api/billing/invoice/generate
-Authorization: Bearer YOUR_TOKEN_HERE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
 Content-Type: application/json
 
 {
-    "patientId": "PATIENT_ID_HERE",
+    "patientId": "67503b48bb481a21276f35a4",
+    "appointmentId": "67508b84226370e7a2fd482f",
     "items": [
         {
             "description": "Consultation Fee",
-            "amount": 100,
+            "amount": 1000,
             "quantity": 1
         }
     ],
-    "totalAmount": 100,
+    "totalAmount": 1500,
     "dueDate": "2024-03-30"
 }
 
 ### Download Invoice
-GET http://localhost:5000/api/billing/download/INVOICE_ID_HERE
-Authorization: Bearer YOUR_TOKEN_HERE 
+GET http://localhost:5000/api/billing/download/67508b84226370e7a2fd482f
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8 
+
+
+### Pay Bill
+POST http://localhost:5000/api/billing/pay
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8
+Content-Type: application/json
+
+{
+    "invoiceId": "67508b84226370e7a2fd482f",
+    "paymentMethodId": "pm_card_visa" 
+}

@@ -25,4 +25,27 @@ Content-Type: application/json
 
 {
     "status": "Completed"
+}
+
+### Update/Reschedule Appointment
+PUT http://localhost:5000/api/appointments/APPOINTMENT_ID_HERE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
+Content-Type: application/json
+
+{
+    "appointment_date": "2024-03-25",
+    "appointment_time": "14:00",
+    "status": "Rescheduled"
+}
+
+### Request Appointment or Reschedule
+POST http://localhost:5000/api/appointments/request-reschedule
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
+Content-Type: application/json
+
+{
+    "patient_id": "67503b48bb481a21276f35a4",
+    "doctor_id": "675039e1bb481a21276f3590",
+    "appointment_date": "2024-03-22",
+    "appointment_time": "15:00"
 } 

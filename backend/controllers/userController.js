@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose');
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
 //Generate JWT.
 const generateToken = (id) => {
@@ -15,24 +16,24 @@ const generateToken = (id) => {
 const registerUser = asyncHandler(async(req, res) => {
     const {name, email, password, role, createdAt, age, gender, phone_number, profile_picture} = req.body;
 
-    if(!name|| !email || !password || !role || !age || !gender || !phone_number)
-    {
+    if(!name || !email || !password || !role || !age || !gender || !phone_number) {
         res.status(400);
         throw new Error("Please add all fields.");
     }
 
     const userExists = await User.findOne({email});
 
-    if(userExists)
-    {
+    if(userExists) {
         res.status(400);
         throw new Error("User already exists.");
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await User.create({
         name,
         email,
-        password,
+        password: hashedPassword,
         role,
         createdAt,
         age,
@@ -41,8 +42,9 @@ const registerUser = asyncHandler(async(req, res) => {
         profile_picture
     });
 
-    if(user)
-    {
+    await user.save(); 
+
+    if(user) {
         res.status(201).json({
             id: user.id,
             name: user.name,
@@ -55,9 +57,7 @@ const registerUser = asyncHandler(async(req, res) => {
             profile_picture: user.profile_picture,
             token: generateToken(user.id)
         });
-    }
-    else
-    {
+    } else {
         res.status(400);
         throw new Error("Invalid user data.");
     }
@@ -69,8 +69,7 @@ const loginUser = asyncHandler(async(req, res) => {
 
     const user = await User.findOne({email});
 
-    if(user && (await user.matchPassword(password)))
-    {
+    if(user && (await user.matchPassword(password))) {
         user.lastlogin = Date.now();
         await user.save();
         res.json({
@@ -82,9 +81,7 @@ const loginUser = asyncHandler(async(req, res) => {
             lastlogin: user.lastlogin,
             token: generateToken(user.id)
         });
-    }
-    else
-    {
+    } else {
         res.status(401);
         throw new Error("Invalid credentials.");
     }
@@ -98,7 +95,6 @@ const getUserProfile = asyncHandler(async (req, res) => {
         return res.status(401).json({ message: 'User not authenticated' }); 
     }
 
-   
     const user = await User.findById(req.user.id).select('-password');
     
     if (user) {

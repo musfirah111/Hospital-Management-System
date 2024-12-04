@@ -1,0 +1,28 @@
+### Create Appointment
+POST http://localhost:5000/api/appointments
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "patient_id": "PATIENT_ID_HERE",
+    "doctor_id": "DOCTOR_ID_HERE",
+    "appointment_date": "2024-03-20",
+    "appointment_time": "10:00"
+}
+
+### Get All Appointments
+GET http://localhost:5000/api/appointments
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get Appointment by ID
+GET http://localhost:5000/api/appointments/APPOINTMENT_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Update Appointment Status
+PUT http://localhost:5000/api/appointments/APPOINTMENT_ID_HERE/status
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "status": "Completed"
+} 

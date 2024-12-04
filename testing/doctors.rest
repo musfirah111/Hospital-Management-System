@@ -1,0 +1,30 @@
+### Get All Doctors
+GET http://localhost:5000/api/doctors
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get Doctor by ID
+GET http://localhost:5000/api/doctors/DOCTOR_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Create Doctor
+POST http://localhost:5000/api/doctors
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "user_id": "USER_ID_HERE",
+    "specialization": "Cardiology",
+    "qualification": ["MBBS", "MD"],
+    "department_id": "DEPARTMENT_ID_HERE",
+    "shift": "Morning",
+    "working_hours": "9AM-5PM",
+    "availability_status": true
+}
+
+### Get Daily Schedule
+GET http://localhost:5000/api/doctors/schedule/daily?doctor_id=DOCTOR_ID_HERE&date=2024-03-20
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get Weekly Schedule
+GET http://localhost:5000/api/doctors/schedule/weekly?doctor_id=DOCTOR_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE 

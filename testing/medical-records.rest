@@ -1,0 +1,19 @@
+### Create Medical Record
+POST http://localhost:5000/api/medical-records
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "patient_id": "PATIENT_ID_HERE",
+    "doctor_id": "DOCTOR_ID_HERE",
+    "diagnosis": "Patient diagnosis here",
+    "treatment": ["PRESCRIPTION_ID_HERE"]
+}
+
+### Get Medical Record by ID
+GET http://localhost:5000/api/medical-records/RECORD_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Search Records by Patient
+GET http://localhost:5000/api/medical-records/patient/PATIENT_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE 

@@ -1,0 +1,19 @@
+### Add Review
+POST http://localhost:5000/api/reviews
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "doctor_id": "DOCTOR_ID_HERE",
+    "patient_id": "PATIENT_ID_HERE",
+    "rating": 5,
+    "review": "Excellent service!"
+}
+
+### Get All Reviews
+GET http://localhost:5000/api/reviews
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Delete Review
+DELETE http://localhost:5000/api/reviews/REVIEW_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE 

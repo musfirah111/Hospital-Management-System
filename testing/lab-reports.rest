@@ -1,0 +1,20 @@
+### Create Lab Test Report
+POST http://localhost:5000/api/lab-reports
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "patient_id": "PATIENT_ID_HERE",
+    "doctor_id": "DOCTOR_ID_HERE",
+    "test_name": "Blood Test",
+    "test_date": "2024-03-20",
+    "result": "Normal"
+}
+
+### Get Lab Test Report by ID
+GET http://localhost:5000/api/lab-reports/REPORT_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Search Reports by Patient ID
+GET http://localhost:5000/api/lab-reports/patient/PATIENT_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE 

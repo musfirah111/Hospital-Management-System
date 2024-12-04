@@ -1,0 +1,22 @@
+### Add Patient
+POST http://localhost:5000/api/patients
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "user_id": "USER_ID_HERE",
+    "address": "123 Test Street, City",
+    "emergency_contact": {
+        "name": "Emergency Contact",
+        "phone": "03001234567",
+        "relationship": "Parent"
+    }
+}
+
+### Get Patient Details
+GET http://localhost:5000/api/patients/PATIENT_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Search Doctors
+GET http://localhost:5000/api/patients/search?name=Doctor&department=Cardiology
+Authorization: Bearer YOUR_TOKEN_HERE 

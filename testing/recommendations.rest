@@ -1,0 +1,8 @@
+### Get Doctor Recommendations
+POST http://localhost:5000/api/recommendations
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "patientId": "PATIENT_ID_HERE"
+} 

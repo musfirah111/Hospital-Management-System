@@ -6,7 +6,7 @@ Content-Type: application/json
     "name": "Test User",
     "email": "test@example.com",
     "password": "password123",
-    "role": "Patient",
+    "role": "Admin",
     "age": 25,
     "gender": "Male",
     "phone_number": "03001234567"

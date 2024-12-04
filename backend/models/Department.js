@@ -22,7 +22,7 @@ const departmentSchema = new mongoose.Schema({
     head_of_department: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Doctor', 
-        required: [true, `Please enter the head of department.`] 
+        required: false 
     },
     date_created: {
         type: Date,

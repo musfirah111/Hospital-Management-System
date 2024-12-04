@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose');
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
 
 //Generate JWT.
 const generateToken = (id) => {
@@ -28,12 +27,12 @@ const registerUser = asyncHandler(async(req, res) => {
         throw new Error("User already exists.");
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    //const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
         name,
         email,
-        password: hashedPassword,
+        password,
         role,
         createdAt,
         age,

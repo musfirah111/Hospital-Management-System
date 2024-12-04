@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose');
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 //Generate JWT.
 const generateToken = (id) => {

@@ -22,4 +22,4 @@ transporter.verify(function (error, success) {
     }
 });
 
-module.exports = transporter;
+module.exports = transporter;

@@ -9,7 +9,8 @@ const {
     searchDoctors,
     getDailyRegistrations,
     getWeeklyRegistrations,
-    getMonthlyRegistrations
+    getMonthlyRegistrations,
+    getAllPatients
 } = require('../controllers/patientController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly, patientOnly, adminOrPatient } = require('../middlewares/roleMiddleware');
@@ -19,6 +20,7 @@ router.get('/weekly-registrations', protect, getWeeklyRegistrations);
 router.get('/monthly-registrations', protect, getMonthlyRegistrations);
 router.post('/', protect, adminOnly, addPatient);
 router.get('/:id', protect, getPatientDetails);
+router.get('/', protect, getAllPatients);
 router.put('/:id', protect, adminOrPatient, updatePatient);
 router.delete('/:id', protect, adminOnly, deletePatient);
 router.post('/cancel-request', protect, patientOnly, requestCancellation);

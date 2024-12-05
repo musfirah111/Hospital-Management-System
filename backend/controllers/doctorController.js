@@ -179,6 +179,27 @@ const getWeeklySchedule = asyncHandler(async (req, res) => {
     });
 });
 
+// Get all doctors with pagination
+const getAllDoctors = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 7; // Default to 7 doctors per page
+    const skip = (page - 1) * limit; // Calculate the number of documents to skip
+
+    const doctors = await Doctor.find()
+        .skip(skip)
+        .limit(limit)
+        .populate('user_id department_id'); // Populate if needed
+
+    const totalDoctors = await Doctor.countDocuments(); // Get total number of doctors
+
+    res.json({
+        totalDoctors,
+        totalPages: Math.ceil(totalDoctors / limit),
+        currentPage: page,
+        doctors,
+    });
+});
+
 module.exports = {
     getDoctors,
     getDoctorById,
@@ -186,5 +207,6 @@ module.exports = {
     updateDoctor,
     deleteDoctor,
     getDailySchedule,
-    getWeeklySchedule
+    getWeeklySchedule,
+    getAllDoctors
 };

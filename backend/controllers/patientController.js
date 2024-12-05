@@ -161,4 +161,26 @@ const getMonthlyRegistrations = asyncHandler(async (req, res) => {
     res.json({ monthlyCount });
 });
 
-module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient, requestCancellation, searchDoctors, getDailyRegistrations, getWeeklyRegistrations, getMonthlyRegistrations };
+
+// Get all patients with pagination
+const getAllPatients = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 7; // Default to 7 patients per page
+    const skip = (page - 1) * limit; // Calculate the number of documents to skip
+
+    const patients = await Patient.find()
+        .skip(skip)
+        .limit(limit);
+
+    const totalPatients = await Patient.countDocuments(); // Get total number of patients
+
+    res.json({
+        totalPatients,
+        totalPages: Math.ceil(totalPatients / limit),
+        currentPage: page,
+        patients,
+    });
+});
+
+
+module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient, requestCancellation, searchDoctors, getDailyRegistrations, getWeeklyRegistrations, getMonthlyRegistrations, getAllPatients};

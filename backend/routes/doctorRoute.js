@@ -1,12 +1,13 @@
 const express = require('express');
 const {
-    getDoctors,
+    //getDoctors,
     getDoctorById,
     createDoctor,
     updateDoctor,
     deleteDoctor,
     getDailySchedule,
-    getWeeklySchedule
+    getWeeklySchedule,
+    getAllDoctors
 } = require('../controllers/doctorController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly, doctorOnly } = require('../middlewares/roleMiddleware');
@@ -14,7 +15,9 @@ const { adminOnly, doctorOnly } = require('../middlewares/roleMiddleware');
 const router = express.Router();
 
 // Route to get all doctors - accessible to all authenticated users.
-router.get('/', protect, getDoctors);
+//router.get('/', protect, getDoctors);
+
+router.get('/', protect, getAllDoctors);
 
 // Route to get a doctor by ID - accessible to all authenticated users.
 router.get('/:id', protect, getDoctorById);

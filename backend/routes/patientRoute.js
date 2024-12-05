@@ -18,13 +18,14 @@ const { adminOnly, patientOnly, adminOrPatient } = require('../middlewares/roleM
 router.get('/daily-registrations', protect, getDailyRegistrations);
 router.get('/weekly-registrations', protect, getWeeklyRegistrations);
 router.get('/monthly-registrations', protect, getMonthlyRegistrations);
+router.get('/search', protect, searchDoctors);
 router.post('/', protect, adminOnly, addPatient);
 router.get('/:id', protect, getPatientDetails);
 router.get('/', protect, getAllPatients);
 router.put('/:id', protect, adminOrPatient, updatePatient);
 router.delete('/:id', protect, adminOnly, deletePatient);
 router.post('/cancel-request', protect, patientOnly, requestCancellation);
-router.get('/search', protect, searchDoctors);
+
 
 
 module.exports = router;

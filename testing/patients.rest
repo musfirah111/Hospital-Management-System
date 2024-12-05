@@ -1,6 +1,6 @@
 ### Add Patient
 POST http://localhost:5000/api/patients
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4
 Content-Type: application/json
 
 {
@@ -14,17 +14,17 @@ Content-Type: application/json
 }
 
 ### Get Patient Details
-GET http://localhost:5000/api/patients/675036f46a15796526968251
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNzQ5NmExNTc5NjUyNjk2ODI1NyIsImlhdCI6MTczMzMxMDI4MSwiZXhwIjoxNzM1OTAyMjgxfQ.HdCrILiR1rieALWfs5C6fod3S11CFZ1D8D_H4ac6n3k
+GET http://localhost:5000/api/patients/67503a99079109bd4cef37be
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4
 
 ### Search Doctors
 GET http://localhost:5000/api/patients/search?name=Doctor&department=Cardiology
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4
 
 
 ### Update Patient
 PUT http://localhost:5000/api/patients/67503b48bb481a21276f35a4
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4
 Content-Type: application/json
 
 {
@@ -63,5 +63,10 @@ Content-Type: application/json
 
 ### Monthly Registrations
 GET http://localhost:5000/api/patients/monthly-registrations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4
+Content-Type: application/json
+
+### Get all patients
+GET http://localhost:5000/api/patients
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4
 Content-Type: application/json

@@ -1,6 +1,6 @@
-### Get All Doctors
 GET http://localhost:5000/api/doctors
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4
+Content-Type: application/json
 
 ### Get Doctor by ID
 GET http://localhost:5000/api/doctors/675039e1bb481a21276f3590

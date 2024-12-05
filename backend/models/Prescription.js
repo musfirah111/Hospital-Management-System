@@ -12,6 +12,11 @@ const prescriptionSchema = new Schema({
         ref: 'Doctor',
         required: [true, 'Please enter the doctor ID.']
     },
+    appointment_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Appointment',
+        required: [true, 'Please enter the appointment ID.']
+    },
     medications: {
         type: [{
             name: {

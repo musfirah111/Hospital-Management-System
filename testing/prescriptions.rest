@@ -1,11 +1,12 @@
 ### Create Prescription
 POST http://localhost:5000/api/prescriptions
-Authorization: Bearer YOUR_TOKEN_HERE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlMTJlMzE1YmVhMzZkMmQ0YSIsImlhdCI6MTczMzQxNzk2OCwiZXhwIjoxNzM2MDA5OTY4fQ.R7iRf71IuqpKNDkOTzq4BvJbTx8HotyL4tNUjDhN6XE
 Content-Type: application/json
 
 {
-    "patient_id": "PATIENT_ID_HERE",
-    "doctor_id": "DOCTOR_ID_HERE",
+    "patient_id": "67503a99079109bd4cef37be",
+    "doctor_id": "6750ae1ebb5819c52ef40704",
+    "appointment_id": "6751de8cad579fe75b07de5c",
     "medications": [
         {
             "name": "Medicine Name",
@@ -16,6 +17,7 @@ Content-Type: application/json
     ],
     "instructions": "Take after meals"
 }
+
 
 ### Get Prescription by ID
 GET http://localhost:5000/api/prescriptions/PRESCRIPTION_ID_HERE

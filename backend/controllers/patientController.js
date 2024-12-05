@@ -127,10 +127,10 @@ const searchDoctors = asyncHandler(async (req, res) => {
 
 const getDailyRegistrations = asyncHandler(async (req, res) => {
     const now = new Date();
-    const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000); // Subtract 24 hours
+    const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000); // Subtract 24 hours.
 
     const dailyCount = await User.countDocuments({
-        role: "Patient", // Ensure only patients are counted
+        role: "Patient", // Ensure only patients are counted.
         date_created: { $gte: last24Hours },
     });
 
@@ -139,10 +139,10 @@ const getDailyRegistrations = asyncHandler(async (req, res) => {
 
 const getWeeklyRegistrations = asyncHandler(async (req, res) => {
     const now = new Date();
-    const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // Subtract 7 days
+    const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // Subtract 7 days.
 
     const weeklyCount = await User.countDocuments({
-        role: "Patient", // Ensure only patients are counted
+        role: "Patient", // Ensure only patients are counted.
         date_created: { $gte: last7Days },
     });
 
@@ -151,17 +151,14 @@ const getWeeklyRegistrations = asyncHandler(async (req, res) => {
 
 const getMonthlyRegistrations = asyncHandler(async (req, res) => {
     const now = new Date();
-    const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // Subtract 30 days
+    const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // Subtract 30. days
 
     const monthlyCount = await User.countDocuments({
-        role: "Patient", // Ensure only patients are counted
+        role: "Patient", // Ensure only patients are counted.
         date_created: { $gte: last30Days },
     });
 
     res.json({ monthlyCount });
 });
-
-
-
 
 module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient, requestCancellation, searchDoctors, getDailyRegistrations, getWeeklyRegistrations, getMonthlyRegistrations };

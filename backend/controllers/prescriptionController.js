@@ -1,11 +1,11 @@
 const asyncHandler = require('express-async-handler');
-const Prescription = require('../models/Prescription'); 
+const Prescription = require('../models/Prescription');
 const Patient = require('../models/Patient')
-const Doctor = require('../models/Doctor'); 
+const Doctor = require('../models/Doctor');
 
 // Create a new prescription
 const createPrescription = asyncHandler(async (req, res) => {
-    const { patient_id, doctor_id, medications, instructions, tests } = req.body;
+    const { patient_id, doctor_id, appointment_id, medications, instructions, tests } = req.body;
 
     // Check if patient and doctor exist
     const patientExists = await Patient.findById(patient_id);
@@ -19,6 +19,7 @@ const createPrescription = asyncHandler(async (req, res) => {
     const prescription = await Prescription.create({
         patient_id,
         doctor_id,
+        appointment_id,
         medications,
         instructions,
         tests,

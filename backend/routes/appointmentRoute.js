@@ -7,7 +7,12 @@ const {
     getAppointmentById,
     updateAppointmentStatus,
     updateAppointment,
-    requestAppointmentOrReschedule
+    requestAppointmentOrReschedule,
+    getDailyAppointments,
+    getWeeklyAppointments,
+    getMonthlyAppointments,
+    getCompletedAppointments,
+    getRequestedAppointments, 
 } = require('../controllers/appointmentController');
 
 const { protect } = require('../middlewares/authMiddleware');
@@ -18,9 +23,14 @@ const {
 } = require('../middlewares/roleMiddleware');
 
 
-router.get('/daily-registrations', protect, getDailyRegistrations);
-router.get('/weekly-registrations', protect, getWeeklyRegistrations);
-router.get('/monthly-registrations', protect, getMonthlyRegistrations);
+router.get('/daily-registrations', protect,  getDailyAppointments);
+router.get('/weekly-registrations', protect,  getWeeklyAppointments);
+router.get('/monthly-registrations', protect, getMonthlyAppointments);
+// Route for getting completed appointments with pagination
+router.get('/appointments/completed', getCompletedAppointments);
+
+// Route for getting requested or rescheduled appointments with pagination
+router.get('/appointments/requested', getRequestedAppointments);
 
 // Route to create a new appointment (admin only).
 router.post('/', protect, adminOnly, createAppointment);

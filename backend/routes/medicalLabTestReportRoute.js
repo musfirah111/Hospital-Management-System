@@ -7,13 +7,16 @@ const {
     searchReportsByName,
     downloadReport,
     shareReport,
+    getDailyLabReports,
+    getWeeklyLabReports,
+    getMonthlyLabReports
 } = require('../controllers/medicalLabTestReportController');
 const { protect } = require('../middlewares/authMiddleware');
 const { doctorOnly } = require('../middlewares/roleMiddleware');
 
-router.get('/daily-registrations', protect, getDailyRegistrations);
-router.get('/weekly-registrations', protect, getWeeklyRegistrations);
-router.get('/monthly-registrations', protect, getMonthlyRegistrations);
+router.get('/daily-registrations', protect, getDailyLabReports);
+router.get('/weekly-registrations', protect,  getWeeklyLabReports);
+router.get('/monthly-registrations', protect,  getMonthlyLabReports);
 router.post('/', protect, doctorOnly, createReport);
 router.get('/:id', protect, getReportById);
 router.get('/patient/:patientId', protect, searchReportsByPatientId);

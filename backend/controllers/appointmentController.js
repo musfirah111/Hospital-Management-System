@@ -262,6 +262,50 @@ const getMonthlyAppointments = asyncHandler(async (req, res) => {
     res.json({ monthlyCount });
 });
 
+// Get completed appointments with pagination.
+const getCompletedAppointments = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 7; // Default to 7 results per page
+    const skip = (page - 1) * limit; // Calculate the number of documents to skip
+
+    const completedAppointments = await Appointment.find({ status: "Completed" })
+        .skip(skip)
+        .limit(limit)
+        .populate('patient_id')
+        .populate('doctor_id');
+
+    const totalCount = await Appointment.countDocuments({ status: "Completed" });
+
+    res.json({
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
+        appointments: completedAppointments,
+    });
+});
+
+// Get requested or rescheduled appointments with pagination.
+const getRequestedAppointments = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 7; // Default to 7 results per page
+    const skip = (page - 1) * limit; // Calculate the number of documents to skip
+
+    const requestedOrRescheduledAppointments = await Appointment.find({ status: { $in: ["Requested", "Rescheduled"] } })
+        .skip(skip)
+        .limit(limit)
+        .populate('patient_id')
+        .populate('doctor_id');
+
+    const totalCount = await Appointment.countDocuments({ status: { $in: ["Requested", "Rescheduled"] } });
+
+    res.json({
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
+        appointments: requestedOrRescheduledAppointments,
+    });
+});
+
 
 module.exports = {
     createAppointment,
@@ -273,5 +317,7 @@ module.exports = {
     requestCancellation,
     getDailyAppointments,
     getWeeklyAppointments,
-    getMonthlyAppointments
+    getMonthlyAppointments,
+    getCompletedAppointments,
+    getRequestedAppointments, 
 };

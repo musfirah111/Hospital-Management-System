@@ -17,6 +17,11 @@ const {
     doctorOnly
 } = require('../middlewares/roleMiddleware');
 
+
+router.get('/daily-registrations', protect, getDailyRegistrations);
+router.get('/weekly-registrations', protect, getWeeklyRegistrations);
+router.get('/monthly-registrations', protect, getMonthlyRegistrations);
+
 // Route to create a new appointment (admin only).
 router.post('/', protect, adminOnly, createAppointment);
 

@@ -11,6 +11,9 @@ const {
 const { protect } = require('../middlewares/authMiddleware');
 const { doctorOnly } = require('../middlewares/roleMiddleware');
 
+router.get('/daily-registrations', protect, getDailyRegistrations);
+router.get('/weekly-registrations', protect, getWeeklyRegistrations);
+router.get('/monthly-registrations', protect, getMonthlyRegistrations);
 router.post('/', protect, doctorOnly, createReport);
 router.get('/:id', protect, getReportById);
 router.get('/patient/:patientId', protect, searchReportsByPatientId);

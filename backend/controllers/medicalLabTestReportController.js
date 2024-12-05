@@ -131,11 +131,48 @@ const shareReport = async (req, res) => {
     }
 };
 
+const getDailyLabReports = asyncHandler(async (req, res) => {
+    const now = new Date();
+    const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000); // Subtract 24 hours
+
+    const dailyCount = await MedicalLabTestReport.countDocuments({
+        date_created: { $gte: last24Hours },
+    });
+
+    res.json({ dailyCount });
+});
+
+const getWeeklyLabReports = asyncHandler(async (req, res) => {
+    const now = new Date();
+    const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // Subtract 7 days
+
+    const weeklyCount = await MedicalLabTestReport.countDocuments({
+        date_created: { $gte: last7Days },
+    });
+
+    res.json({ weeklyCount });
+});
+
+const getMonthlyLabReports = asyncHandler(async (req, res) => {
+    const now = new Date();
+    const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // Subtract 30 days
+
+    const monthlyCount = await MedicalLabTestReport.countDocuments({
+        date_created: { $gte: last30Days },
+    });
+
+    res.json({ monthlyCount });
+});
+
+
 module.exports = {
     createReport,
     getReportById,
     searchReportsByPatientId,
     searchReportsByName,
     downloadReport,
-    shareReport,
+    shareReport,
+    getDailyLabReports,
+    getWeeklyLabReports,
+    getMonthlyLabReports
 };

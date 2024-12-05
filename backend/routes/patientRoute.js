@@ -14,9 +14,9 @@ const {
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly, patientOnly, adminOrPatient } = require('../middlewares/roleMiddleware');
 
-router.get('/daily-registrations', getDailyRegistrations);
-router.get('/weekly-registrations', getWeeklyRegistrations);
-router.get('/monthly-registrations', getMonthlyRegistrations);
+router.get('/daily-registrations', protect, getDailyRegistrations);
+router.get('/weekly-registrations', protect, getWeeklyRegistrations);
+router.get('/monthly-registrations', protect, getMonthlyRegistrations);
 router.post('/', protect, adminOnly, addPatient);
 router.get('/:id', protect, getPatientDetails);
 router.put('/:id', protect, adminOrPatient, updatePatient);

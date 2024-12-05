@@ -1,20 +1,40 @@
 ### Create Lab Test Report
 POST http://localhost:5000/api/lab-reports
-Authorization: Bearer YOUR_TOKEN_HERE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlMTJlMzE1YmVhMzZkMmQ0YSIsImlhdCI6MTczMzM0MDc0MSwiZXhwIjoxNzM1OTMyNzQxfQ.qLPKMl3HBgiuwQnR9_l1mdTobqzk_WtwqEa65w7DS9o
 Content-Type: application/json
 
 {
-    "patient_id": "PATIENT_ID_HERE",
-    "doctor_id": "DOCTOR_ID_HERE",
+    "patient_id": "67503a99079109bd4cef37be",
+    "doctor_id": "6750ae1ebb5819c52ef40704",
     "test_name": "Blood Test",
     "test_date": "2024-03-20",
     "result": "Normal"
 }
 
 ### Get Lab Test Report by ID
-GET http://localhost:5000/api/lab-reports/REPORT_ID_HERE
-Authorization: Bearer YOUR_TOKEN_HERE
+GET http://localhost:5000/api/lab-reports/6750ae82bb5819c52ef40709
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlMTJlMzE1YmVhMzZkMmQ0YSIsImlhdCI6MTczMzM0MDc0MSwiZXhwIjoxNzM1OTMyNzQxfQ.qLPKMl3HBgiuwQnR9_l1mdTobqzk_WtwqEa65w7DS9o
 
 ### Search Reports by Patient ID
-GET http://localhost:5000/api/lab-reports/patient/PATIENT_ID_HERE
-Authorization: Bearer YOUR_TOKEN_HERE 
+GET http://localhost:5000/api/lab-reports/patient/67503a99079109bd4cef37be
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlMTJlMzE1YmVhMzZkMmQ0YSIsImlhdCI6MTczMzM0MDc0MSwiZXhwIjoxNzM1OTMyNzQxfQ.qLPKMl3HBgiuwQnR9_l1mdTobqzk_WtwqEa65w7DS9o
+
+### Test searchReportsByName
+GET http://localhost:5000/api/lab-reports/search?name=Blood%20Test
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlMTJlMzE1YmVhMzZkMmQ0YSIsImlhdCI6MTczMzM0MDc0MSwiZXhwIjoxNzM1OTMyNzQxfQ.qLPKMl3HBgiuwQnR9_l1mdTobqzk_WtwqEa65w7DS9o
+Content-Type: application/json
+
+### Test downloadReport
+GET http://localhost:5000/api/lab-reports/download/6750ae82bb5819c52ef40709
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlMTJlMzE1YmVhMzZkMmQ0YSIsImlhdCI6MTczMzM0MDc0MSwiZXhwIjoxNzM1OTMyNzQxfQ.qLPKMl3HBgiuwQnR9_l1mdTobqzk_WtwqEa65w7DS9o
+Content-Type: application/json
+Content-Disposition: attachment; filename="report_6750ae82bb5819c52ef40709.pdf"
+
+### Test shareReport
+POST http://localhost:5000/api/lab-reports/share/6750ae82bb5819c52ef40709
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlMTJlMzE1YmVhMzZkMmQ0YSIsImlhdCI6MTczMzM0MDc0MSwiZXhwIjoxNzM1OTMyNzQxfQ.qLPKMl3HBgiuwQnR9_l1mdTobqzk_WtwqEa65w7DS9o
+Content-Type: application/json
+
+{
+    "email": "fatimarathore2018@gmail.com"
+}

@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose');
 const PDFDocument = require('pdfkit');
 const nodemailer = require('nodemailer');
+const transporter = require('../config/emailConfig');
 const MedicalLabTestReport = require('../models/MedicalLabTestReport');
 
 // Create a new medical lab test report (Doctor)
@@ -49,89 +50,86 @@ const searchReportsByName = asyncHandler(async (req, res) => {
 
 // Download report results as PDF
 const downloadReport = asyncHandler(async (req, res) => {
-    const report = await MedicalLabTestReport.findById(req.params.id);
-    if (!report) return res.status(404).json({ message: 'Report not found' });
+    try {
+        const report = await MedicalLabTestReport.findById(req.params.id);
+        if (!report) {
+            return res.status(404).json({ message: 'Report not found' });
+        }
 
-    // Create a PDF document
-    const doc = new PDFDocument();
-    let filename = `report_${report._id}.pdf`;
-    res.setHeader('Content-disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Content-type', 'application/pdf');
+        // Create a PDF document
+        const doc = new PDFDocument();
+        const filename = `report_${report._id}.pdf`;
 
-    // Add content to the PDF
-    doc.fontSize(25).text('Medical Lab Test Report', { align: 'center' });
-    doc.text(`Patient ID: ${report.patient_id}`);
-    doc.text(`Doctor ID: ${report.doctor_id}`);
-    doc.text(`Test Name: ${report.test_name}`);
-    doc.text(`Results: ${report.results}`);
-    doc.text(`Date: ${report.date}`);
-    doc.text(`Comments: ${report.comments || 'N/A'}`);
+        // Force download headers
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="' + filename + '"');
+        res.setHeader('Content-Transfer-Encoding', 'binary');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', 0);
 
-    // Finalize the PDF and end the response
-    doc.pipe(res);
-    doc.end();
+        // Pipe the PDF into the response
+        doc.pipe(res);
+
+        // Add content to the PDF with proper spacing
+        doc.fontSize(25)
+            .text('Medical Lab Test Report', { align: 'center' })
+            .moveDown();
+
+        doc.fontSize(12)
+            .text(`Patient ID: ${report.patient_id}`        )
+            .moveDown()
+            .text(`Doctor ID: ${report.doctor_id}`)
+            .moveDown()
+            .text(`Test Name: ${report.test_name}`)
+            .moveDown()
+            .text(`Results: ${report.result}`)
+            .moveDown()
+            .text(`Date: ${report.test_date}`)
+            .moveDown()
+            .text(`Comments: ${report.comments || 'N/A'}`);
+
+        // End the document
+        doc.end();
+
+    } catch (error) {
+        console.error('PDF Generation Error:', error);
+        res.status(500).json({ message: 'Error generating PDF', error: error.message });
+    }
 });
 
-// Share report results via email
-const shareReport = asyncHandler(async (req, res) => {
-    const report = await MedicalLabTestReport.findById(req.params.id);
-    if (!report) return res.status(404).json({ message: 'Report not found' });
+const shareReport = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { email } = req.body;
 
-    const { email } = req.body; // Expecting the email address in the request body
+        // Fetch the report details
+        const report = await MedicalLabTestReport.findById(id);
+        if (!report) {
+            return res.status(404).json({ message: 'Report not found' });
+        }
 
-    // Create a PDF document for the email attachment
-    const doc = new PDFDocument();
-    let filename = `report_${report._id}.pdf`;
-    let buffers = [];
-
-    doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', async () => {
-        const pdfData = Buffer.concat(buffers);
-
-        // Set up nodemailer transporter
-        const transporter = nodemailer.createTransport({
-            service: 'gmail', // Use your email service
-            auth: {
-                user: req.user.email, //Email of the user
-                pass: req.user.password, //Password of the user
-            },
-        });
-
-        // Email options
+        // Send email
         const mailOptions = {
-            from: req.user.email,
+            from: process.env.SMTP_USER,
             to: email,
-            subject: 'Your Medical Lab Test Report',
-            text: 'Please find attached your medical lab test report.',
-            attachments: [
-                {
-                    filename: filename,
-                    content: pdfData,
-                },
-            ],
+            subject: 'Medical Lab Test Report Shared',
+            html: `
+                <h1>Medical Lab Test Report Details</h1>
+                <p>Test Name: ${report.test_name}</p>
+                <p>Test Date: ${report.test_date}</p>
+                <p>Result: ${report.result}</p>
+            `
         };
 
-        // Send the email
-        try {
-            await transporter.sendMail(mailOptions);
-            res.status(200).json({ message: 'Report shared successfully via email.' });
-        } catch (error) {
-            res.status(500).json({ message: 'Error sending email: ' + error.message });
-        }
-    });
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ message: 'Report shared successfully' });
 
-    // Add content to the PDF
-    doc.fontSize(25).text('Medical Lab Test Report', { align: 'center' });
-    doc.text(`Patient ID: ${report.patient_id}`);
-    doc.text(`Doctor ID: ${report.doctor_id}`);
-    doc.text(`Test Name: ${report.test_name}`);
-    doc.text(`Results: ${report.results}`);
-    doc.text(`Date: ${report.date}`);
-    doc.text(`Comments: ${report.comments || 'N/A'}`);
-
-    // Finalize the PDF
-    doc.end();
-});
+    } catch (error) {
+        console.error('Share report error:', error);
+        res.status(500).json({ message: `Error sharing report: ${error.message}`});
+    }
+};
 
 module.exports = {
     createReport,
@@ -139,5 +137,5 @@ module.exports = {
     searchReportsByPatientId,
     searchReportsByName,
     downloadReport,
-    shareReport,
+    shareReport,
 };

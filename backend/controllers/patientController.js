@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose');
+const User = require('../models/User');
 const Patient = require('../models/Patient');
 const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
@@ -110,7 +111,7 @@ const searchDoctors = asyncHandler(async (req, res) => {
 
     const searchCriteria = {};
     if (name) {
-        searchCriteria.name = { $regex: name, $options: 'i' }; 
+        searchCriteria.name = { $regex: name, $options: 'i' };
     }
     if (department) {
         searchCriteria.department = { $regex: department, $options: 'i' };
@@ -124,4 +125,43 @@ const searchDoctors = asyncHandler(async (req, res) => {
     res.json(doctors);
 });
 
-module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient, requestCancellation, searchDoctors };
+const getDailyRegistrations = asyncHandler(async (req, res) => {
+    const now = new Date();
+    const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000); // Subtract 24 hours
+
+    const dailyCount = await User.countDocuments({
+        role: "Patient", // Ensure only patients are counted
+        date_created: { $gte: last24Hours },
+    });
+
+    res.json({ dailyCount });
+});
+
+const getWeeklyRegistrations = asyncHandler(async (req, res) => {
+    const now = new Date();
+    const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // Subtract 7 days
+
+    const weeklyCount = await User.countDocuments({
+        role: "Patient", // Ensure only patients are counted
+        date_created: { $gte: last7Days },
+    });
+
+    res.json({ weeklyCount });
+});
+
+const getMonthlyRegistrations = asyncHandler(async (req, res) => {
+    const now = new Date();
+    const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // Subtract 30 days
+
+    const monthlyCount = await User.countDocuments({
+        role: "Patient", // Ensure only patients are counted
+        date_created: { $gte: last30Days },
+    });
+
+    res.json({ monthlyCount });
+});
+
+
+
+
+module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient, requestCancellation, searchDoctors, getDailyRegistrations, getWeeklyRegistrations, getMonthlyRegistrations };

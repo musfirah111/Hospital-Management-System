@@ -50,3 +50,18 @@ Content-Type: application/json
     "appointment_id": "YOUR_APPOINTMENT_ID",
     "cancellation_reason": "Unable to attend due to emergency"
 }
+
+### Daily Registrations
+GET http://localhost:5000/api/patients/daily-registrations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4
+Content-Type: application/json
+
+### Weekly Registrations
+GET http://localhost:5000/api/patients/weekly-registrations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4
+Content-Type: application/json
+
+### Monthly Registrations
+GET http://localhost:5000/api/patients/monthly-registrations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4
+Content-Type: application/json

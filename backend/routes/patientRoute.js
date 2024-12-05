@@ -1,21 +1,28 @@
 const express = require('express');
 const router = express.Router();
-const { 
-    addPatient, 
-    getPatientDetails, 
-    updatePatient, 
-    deletePatient, 
-    requestCancellation, 
-    searchDoctors 
+const {
+    addPatient,
+    getPatientDetails,
+    updatePatient,
+    deletePatient,
+    requestCancellation,
+    searchDoctors,
+    getDailyRegistrations,
+    getWeeklyRegistrations,
+    getMonthlyRegistrations
 } = require('../controllers/patientController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly, patientOnly, adminOrPatient } = require('../middlewares/roleMiddleware');
 
+router.get('/daily-registrations', getDailyRegistrations);
+router.get('/weekly-registrations', getWeeklyRegistrations);
+router.get('/monthly-registrations', getMonthlyRegistrations);
 router.post('/', protect, adminOnly, addPatient);
 router.get('/:id', protect, getPatientDetails);
 router.put('/:id', protect, adminOrPatient, updatePatient);
 router.delete('/:id', protect, adminOnly, deletePatient);
 router.post('/cancel-request', protect, patientOnly, requestCancellation);
 router.get('/search', protect, searchDoctors);
+
 
 module.exports = router;

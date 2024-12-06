@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: [true, 'Please enter a title.']
+    },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -9,10 +13,6 @@ const notificationSchema = new mongoose.Schema({
     message: {
         type: String,
         required: [true, 'Please enter a message.']
-    },
-    is_read: {
-        type: Boolean,
-        default: false // Default to false
     },
     sent_date: {
         type: Date,

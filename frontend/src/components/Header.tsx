@@ -1,6 +1,5 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Avatar } from './Avatar';
-import { Link } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 
 export function Header() {

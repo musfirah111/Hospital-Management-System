@@ -3,6 +3,7 @@ const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
 const Patient = require('../models/Patient');
 const moment = require('moment');
+const Invoice = require('../models/Billing');
 
 // Function to get available time slots.
 const getAvailableTimeSlots = async (doctorId, date) => {
@@ -198,7 +199,7 @@ const requestAppointmentOrReschedule = asyncHandler(async (req, res) => {
 const requestCancellation = asyncHandler(async (req, res) => {
     const { appointment_id } = req.body;
 
-    // Check if appointment exists.
+    // Check if appointment exists
     const appointment = await Appointment.findById(appointment_id)
         .populate('doctor_id')
         .populate('patient_id');
@@ -208,22 +209,49 @@ const requestCancellation = asyncHandler(async (req, res) => {
         throw new Error("Appointment not found.");
     }
 
-    // Check if appointment can be cancelled.
+    // Check if appointment can be cancelled
     if (['Cancelled', 'Completed', 'Requested'].includes(appointment.status)) {
         res.status(400);
         throw new Error("Cannot request cancellation for an appointment that is already cancelled or completed or already requested.");
     }
 
-    // Update appointment status to requested.
+    // Find associated invoice
+    const invoice = await Invoice.findOne({ appointment_id: appointment_id });
+    
+    // If there's a paid invoice, process refund
+    if (invoice && invoice.payment_status === 'Paid' && !invoice.refunded) {
+        try {
+            // Create refund through Stripe
+            const refund = await stripe.refunds.create({
+                payment_intent: invoice.payment_intent_id,
+            });
+
+            // Update invoice status
+            invoice.payment_status = 'Refunded';
+            invoice.refunded = true;
+            invoice.refund_id = refund.id;
+            invoice.refund_date = new Date();
+            await invoice.save();
+        } catch (error) {
+            console.error('Refund processing error:', error);
+            // Continue with cancellation even if refund fails
+            // But log the error for admin attention
+        }
+    }
+
+    // Update appointment status
     const updatedAppointment = await Appointment.findByIdAndUpdate(
         appointment_id,
         {
-            status: 'Requested'
+            status: 'Cancelled'
         },
         { new: true }
     ).populate('doctor_id patient_id');
 
-    res.status(200).json(updatedAppointment);
+    res.status(200).json({
+        appointment: updatedAppointment,
+        refundProcessed: invoice?.refunded || false
+    });
 });
 
 const getDailyAppointments = asyncHandler(async (req, res) => {

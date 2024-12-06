@@ -5,10 +5,32 @@ const Invoice = require('../models/Billing');
 const Patient = require('../models/Patient');
 const User = require('../models/User');
 
+// Test card details for development
+const TEST_CARDS = {
+    visa: {
+        number: '4242424242424242',
+        exp_month: 12,
+        exp_year: 2024,
+        cvc: '123'
+    },
+    mastercard: {
+        number: '5555555555554444',
+        exp_month: 12,
+        exp_year: 2024,
+        cvc: '123'
+    },
+    declined: {
+        number: '4000000000000002',
+        exp_month: 12,
+        exp_year: 2024,
+        cvc: '123'
+    }
+};
+
 // Generate Invoice - Admin Only
 const generateInvoice = async (req, res) => {
     try {
-        const { patientId, items, totalAmount, dueDate, appointmentId } = req.body;
+        const { patientId, totalAmount, dueDate, appointmentId } = req.body;
 
         // Check if the patient exists and populate user data
         const patient = await Patient.findById(patientId).populate('user_id');
@@ -35,7 +57,7 @@ const generateInvoice = async (req, res) => {
             await patient.save();
         }
 
-        // First create invoice in Stripe
+        // Create invoice in Stripe
         const stripeInvoice = await stripe.invoices.create({
             customer: customer.id,
             currency: 'pkr',
@@ -43,30 +65,15 @@ const generateInvoice = async (req, res) => {
             days_until_due: 30
         });
 
-        // Add items to the invoice
-        for (const item of items) {
-            await stripe.invoiceItems.create({
-                customer: customer.id,
-                invoice: stripeInvoice.id,
-                currency: 'pkr',
-                unit_amount: item.amount * 100, // Convert to paisa
-                quantity: item.quantity,
-                description: item.description
-            });
-        }
-
-        // Add total amount as a separate line item if needed
-        if (totalAmount > items.reduce((sum, item) => sum + (item.amount * item.quantity), 0)) {
-            const additionalFees = totalAmount - items.reduce((sum, item) => sum + (item.amount * item.quantity), 0);
-            await stripe.invoiceItems.create({
-                customer: customer.id,
-                invoice: stripeInvoice.id,
-                currency: 'pkr',
-                unit_amount: additionalFees * 100,
-                quantity: 1,
-                description: 'Additional Fees'
-            });
-        }
+        // Add total amount as a single line item
+        await stripe.invoiceItems.create({
+            customer: customer.id,
+            invoice: stripeInvoice.id,
+            currency: 'pkr',
+            unit_amount: totalAmount * 100, // Convert to paisa
+            quantity: 1,
+            description: 'Medical Appointment Charges'
+        });
 
         // Finalize the invoice
         const finalizedInvoice = await stripe.invoices.finalizeInvoice(stripeInvoice.id);
@@ -75,7 +82,6 @@ const generateInvoice = async (req, res) => {
         const invoice = await Invoice.create({
             patient_id: patientId,
             appointment_id: appointmentId,
-            items,
             total_amount: totalAmount,
             due_date: dueDate,
             stripe_invoice_id: finalizedInvoice.id,
@@ -153,11 +159,12 @@ const approvePayment = async (req, res) => {
     }
 };
 
-// Bill Pay - Patient
+// Pay Bill - Patient
 const payBill = async (req, res) => {
     try {
-        const { invoiceId, paymentMethodId } = req.body;
+        const { invoiceId } = req.body;
 
+        // Find and validate invoice
         const invoice = await Invoice.findById(invoiceId);
         if (!invoice) {
             return res.status(404).json({
@@ -166,39 +173,76 @@ const payBill = async (req, res) => {
             });
         }
 
-        // Create payment intent with the provided payment method
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: invoice.total_amount * 100,
-            currency: 'pkr',
-            payment_method: paymentMethodId,
-            confirm: true,
-            payment_method_types: ['card'],
-            description: `Payment for invoice ${invoice._id}`,
-            metadata: {
-                invoice_id: invoice._id.toString()
+        // Check if invoice is already paid
+        if (invoice.payment_status === 'Paid') {
+            return res.status(400).json({
+                success: false,
+                message: 'Invoice is already paid'
+            });
+        }
+
+        try {
+            // Create payment intent using test token
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: invoice.total_amount * 100,
+                currency: 'pkr',
+                payment_method_types: ['card'],
+                payment_method: 'pm_card_visa', // Using Stripe's test payment method token
+                confirm: true,
+                description: `Payment for invoice ${invoice._id}`,
+                metadata: {
+                    invoice_id: invoice._id.toString(),
+                    test_mode: 'true'
+                }
+            });
+
+            // If payment is successful, update invoice status
+            if (paymentIntent.status === 'succeeded') {
+                // Update invoice in Stripe
+                await stripe.invoices.pay(invoice.stripe_invoice_id, {
+                    paid_out_of_band: true
+                });
+
+                // Update invoice in database
+                invoice.payment_status = 'Paid';
+                invoice.amount_paid = invoice.total_amount;
+                invoice.payment_intent_id = paymentIntent.id;
+                invoice.payment_method = 'Test Card (Visa)';
+                invoice.date_of_payment = new Date();
+                await invoice.save();
+
+                // Return success response with payment details
+                return res.status(200).json({
+                    success: true,
+                    message: 'Payment processed successfully',
+                    data: {
+                        invoice,
+                        paymentIntent: {
+                            id: paymentIntent.id,
+                            status: paymentIntent.status,
+                            amount: paymentIntent.amount / 100
+                        },
+                        testMode: true
+                    }
+                });
+            } else {
+                // Payment intent created but not succeeded
+                return res.status(400).json({
+                    success: false,
+                    message: 'Payment processing failed',
+                    error: `Payment status: ${paymentIntent.status}`
+                });
             }
-        });
+        } catch (stripeError) {
+            // Handle Stripe-specific errors
+            console.error('Stripe Error:', stripeError);
+            return res.status(400).json({
+                success: false,
+                message: 'Payment processing failed',
+                error: stripeError.message
+            });
+        }
 
-        // Pay the invoice in Stripe
-        await stripe.invoices.pay(invoice.stripe_invoice_id, {
-            paid_out_of_band: true // Mark as paid externally
-        });
-
-        // Update local database
-        invoice.payment_status = 'Paid';
-        invoice.amount_paid = invoice.total_amount;
-        invoice.payment_intent_id = paymentIntent.id;
-        invoice.date_of_payment = new Date();
-        await invoice.save();
-
-        res.status(200).json({
-            success: true,
-            message: 'Payment processed successfully',
-            data: {
-                invoice,
-                clientSecret: paymentIntent.client_secret
-            }
-        });
     } catch (error) {
         console.error('Pay Bill Error:', error);
         res.status(500).json({
@@ -253,9 +297,90 @@ const downloadInvoice = async (req, res) => {
     }
 };
 
+// Add this new function for refunds
+const refundPayment = async (req, res) => {
+    try {
+        const { invoiceId } = req.body;
+
+        const invoice = await Invoice.findById(invoiceId);
+        if (!invoice) {
+            return res.status(404).json({
+                success: false,
+                message: 'Invoice not found'
+            });
+        }
+
+        if (invoice.payment_status !== 'Paid') {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot refund unpaid invoice'
+            });
+        }
+
+        if (invoice.refunded) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invoice has already been refunded'
+            });
+        }
+
+        try {
+            // First retrieve the Stripe invoice to get the latest payment intent
+            const stripeInvoice = await stripe.invoices.retrieve(invoice.stripe_invoice_id);
+            
+            if (!stripeInvoice.payment_intent) {
+                throw new Error('No payment intent found for this invoice');
+            }
+
+            // Create refund through Stripe using the latest payment intent
+            const refund = await stripe.refunds.create({
+                payment_intent: stripeInvoice.payment_intent,
+            });
+
+            // Update invoice in our database
+            const updatedInvoice = await Invoice.findByIdAndUpdate(
+                invoiceId,
+                {
+                    payment_status: 'Refunded',
+                    refunded: true,
+                    refund_id: refund.id,
+                    refund_date: new Date(),
+                    amount_paid: 0 // Reset amount paid since it's refunded
+                },
+                { new: true }
+            );
+
+            // Also void the Stripe invoice
+            await stripe.invoices.voidInvoice(invoice.stripe_invoice_id);
+
+            res.status(200).json({
+                success: true,
+                message: 'Payment refunded successfully',
+                data: {
+                    invoice: updatedInvoice,
+                    refund,
+                    refundDate: new Date(),
+                    refundAmount: invoice.total_amount
+                }
+            });
+        } catch (stripeError) {
+            console.error('Stripe Refund Error:', stripeError);
+            throw new Error(`Stripe refund failed: ${stripeError.message}`);
+        }
+    } catch (error) {
+        console.error('Refund Payment Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error processing refund',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     generateInvoice,
     approvePayment,
     payBill,
-    downloadInvoice
+    downloadInvoice,
+    refundPayment
 };

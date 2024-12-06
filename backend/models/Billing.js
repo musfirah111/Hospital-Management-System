@@ -22,7 +22,7 @@ const billingSchema = new Schema({
     },
     payment_status: {
         type: String,
-        enum: ['Paid', 'Unpaid', 'Partial'],
+        enum: ['Paid', 'Unpaid', 'Refunded'],
         default: 'Unpaid'
     },
     payment_method: {
@@ -41,11 +41,6 @@ const billingSchema = new Schema({
         type: String,
         required: false
     },
-    items: [{
-        description: String,
-        amount: Number,
-        quantity: Number
-    }],
     due_date: {
         type: Date,
         required: false

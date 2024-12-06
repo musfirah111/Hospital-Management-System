@@ -19,6 +19,32 @@ const addPatient = asyncHandler(async (req, res) => {
 
     res.status(201).json(patient);
 });
+// Get patient details by user id
+const getPatientDetailsByUserId = asyncHandler(async (req, res) => {
+    // First, find the patient by user ID
+    const patient = await Patient.findOne({ user_id: req.params.userId });
+
+    if (!patient) {
+        res.status(404);
+        throw new Error("Patient not found.");
+    }
+
+    // Then, find the user associated with the patient
+    const user = await User.findById(patient.user_id); // Retrieve the entire user object
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found.");
+    }
+
+    // Include user details in the response
+    res.json({
+        id: patient._id,
+        user: user, // Return the entire user object
+        address: patient.address,
+        emergency_contact: patient.emergency_contact,
+    });
+});
 
 // Get patient details
 const getPatientDetails = asyncHandler(async (req, res) => {
@@ -183,4 +209,4 @@ const getAllPatients = asyncHandler(async (req, res) => {
 });
 
 
-module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient, requestCancellation, searchDoctors, getDailyRegistrations, getWeeklyRegistrations, getMonthlyRegistrations, getAllPatients};
+module.exports = { addPatient, getPatientDetails, updatePatient, deletePatient, requestCancellation, searchDoctors, getDailyRegistrations, getWeeklyRegistrations, getMonthlyRegistrations, getAllPatients };

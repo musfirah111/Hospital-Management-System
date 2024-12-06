@@ -6,23 +6,23 @@ const User = require('../models/User');
 
 //Generate JWT.
 const generateToken = (id) => {
-    return jwt.sign({id}, process.env.JWT_SECRET, {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '30d',
     });
 };
 
 //Register a new user.
-const registerUser = asyncHandler(async(req, res) => {
-    const {name, email, password, role, createdAt, age, gender, phone_number, profile_picture} = req.body;
+const registerUser = asyncHandler(async (req, res) => {
+    const { name, email, password, role, createdAt, age, gender, phone_number, profile_picture } = req.body;
 
-    if(!name || !email || !password || !role || !age || !gender || !phone_number) {
+    if (!name || !email || !password || !role || !age || !gender || !phone_number) {
         res.status(400);
         throw new Error("Please add all fields.");
     }
 
-    const userExists = await User.findOne({email});
+    const userExists = await User.findOne({ email });
 
-    if(userExists) {
+    if (userExists) {
         res.status(400);
         throw new Error("User already exists.");
     }
@@ -41,9 +41,9 @@ const registerUser = asyncHandler(async(req, res) => {
         profile_picture
     });
 
-    await user.save(); 
+    await user.save();
 
-    if(user) {
+    if (user) {
         res.status(201).json({
             id: user.id,
             name: user.name,
@@ -63,12 +63,13 @@ const registerUser = asyncHandler(async(req, res) => {
 });
 
 //Login a user.
-const loginUser = asyncHandler(async(req, res) => {
-    const {email, password} = req.body;
+const loginUser = asyncHandler(async (req, res) => {
+    console.log("----LOGIN---------------------------------------------");
+    const { email, password } = req.body;
 
-    const user = await User.findOne({email});
+    const user = await User.findOne({ email });
 
-    if(user && (await user.matchPassword(password))) {
+    if (user && (await user.matchPassword(password))) {
         user.lastlogin = Date.now();
         await user.save();
         res.json({
@@ -88,19 +89,19 @@ const loginUser = asyncHandler(async(req, res) => {
 
 //Get user profile.
 const getUserProfile = asyncHandler(async (req, res) => {
-    console.log('Request User:', req.user); 
-   
+    console.log('Request User:', req.user);
+
     if (!req.user || !req.user.id) {
-        return res.status(401).json({ message: 'User not authenticated' }); 
+        return res.status(401).json({ message: 'User not authenticated' });
     }
 
     const user = await User.findById(req.user.id).select('-password');
-    
+
     if (user) {
-        res.json(user); 
+        res.json(user);
     } else {
-        res.status(404).json({ message: 'User not found' }); 
+        res.status(404).json({ message: 'User not found' });
     }
 });
 
-module.exports = {registerUser, loginUser, getUserProfile};
+module.exports = { registerUser, loginUser, getUserProfile };

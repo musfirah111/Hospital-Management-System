@@ -12,6 +12,20 @@ Content-Type: application/json
     "phone_number": "03211274567"
 }
 
+### Register User
+POST http://localhost:5000/api/users/register
+Content-Type: application/json
+
+{
+    "name": "Patient",
+    "email": "patient@gmail.com",
+    "password": "password123",
+    "role": "Patient",
+    "age": 38,
+    "gender": "Male",
+    "phone_number": "03211274567"
+}
+
 ###
 POST http://localhost:5000/api/users/login
 Content-Type: application/json

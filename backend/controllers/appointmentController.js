@@ -4,6 +4,9 @@ const Doctor = require('../models/Doctor');
 const Patient = require('../models/Patient');
 const moment = require('moment');
 const Invoice = require('../models/Billing');
+const Notification = require('../models/Notification');
+const User = require('../models/User');
+const cron = require('node-cron');
 
 // Function to get available time slots.
 const getAvailableTimeSlots = async (doctorId, date) => {
@@ -36,6 +39,50 @@ const getAvailableTimeSlots = async (doctorId, date) => {
 
     return availableSlots;
 };
+
+// Function to send reminders for upcoming appointments
+const sendAppointmentReminders = async () => {
+    console.log('Starting appointment reminders...');
+    const now = new Date();
+    const reminderTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+
+    // Find all appointments scheduled for the next 24 hours
+    const upcomingAppointments = await Appointment.find({
+        appointment_date: {
+            $gte: now,
+            $lt: reminderTime
+        },
+        status: 'Scheduled'
+    }).populate('patient_id'); // Populate patient details
+
+    console.log(`Found ${upcomingAppointments.length} upcoming appointments.`); // Debugging log
+
+    for (const appointment of upcomingAppointments) {
+        // Check if the appointment is less than or equal to 24 hours away
+        const appointmentDate = new Date(appointment.appointment_date);
+        if (appointmentDate <= reminderTime) {
+            console.log(`Creating notification for appointment ID: ${appointment._id}`); // Debugging log
+            try {
+                if (appointment.patient_id) { // Check if patient_id is populated
+                    console.log('Appointment details:', appointment); // Log the appointment details
+                    const notification = await Notification.create({
+                        title: 'Appointment Reminder',
+                        user_id: appointment.patient_id._id, // Use patient_id's _id
+                        message: `You have an appointment scheduled on ${moment(appointment.appointment_date).format('YYYY-MM-DD HH:mm')}.`,
+                    });
+                    console.log(`Notification sent to user ${appointment.patient_id._id}: ${notification.message}`);
+                } else {
+                    console.error('Patient ID is not populated for appointment ID:', appointment._id);
+                }
+            } catch (error) {
+                console.error('Error creating notification:', error);
+            }
+        }
+    }
+};
+
+// Schedule the reminder function to run every hour
+cron.schedule('* * * * *', sendAppointmentReminders); // Runs at the start of every hour
 
 // Create appointment.
 const createAppointment = asyncHandler(async (req, res) => {
@@ -217,7 +264,7 @@ const requestCancellation = asyncHandler(async (req, res) => {
 
     // Find associated invoice
     const invoice = await Invoice.findOne({ appointment_id: appointment_id });
-    
+
     // If there's a paid invoice, process refund
     if (invoice && invoice.payment_status === 'Paid' && !invoice.refunded) {
         try {
@@ -347,5 +394,5 @@ module.exports = {
     getWeeklyAppointments,
     getMonthlyAppointments,
     getCompletedAppointments,
-    getRequestedAppointments, 
+    getRequestedAppointments,
 };

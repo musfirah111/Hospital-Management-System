@@ -1,13 +1,13 @@
 ### Create Appointment
 POST http://localhost:5000/api/appointments
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzUxNzA0NywiZXhwIjoxNzM2MTA5MDQ3fQ.pqpeui8yGEzK8zKjIi6dn1zWH8S1kDGKIvC9J71RBEY
 Content-Type: application/json
 
 {
-    "patient_id": "67503b48bb481a21276f35a4",
-    "doctor_id": "675039e1bb481a21276f3590",
-    "appointment_date": "2024-03-22",
-    "appointment_time": "10:00"
+    "patient_id": "6753637cf0fb6ac17272fb7d",
+    "doctor_id": "6750ae1ebb5819c52ef40704",
+    "appointment_date": "2024-12-07",
+    "appointment_time": "12:00"
 }
 
 ### Get All Appointments

@@ -13,6 +13,7 @@ const {
     getMonthlyAppointments,
     getCompletedAppointments,
     getRequestedAppointments,
+    requestCancellation,
 } = require('../controllers/appointmentController');
 
 const { protect } = require('../middlewares/authMiddleware');
@@ -49,6 +50,9 @@ router.put('/:id', protect, adminOnly, updateAppointment);
 
 // Route to request an appointment
 router.post('/request-reschedule', protect, requestAppointmentOrReschedule);
+
+// Route to request appointment cancellation
+router.post('/cancel', protect, requestCancellation);
 
 
 

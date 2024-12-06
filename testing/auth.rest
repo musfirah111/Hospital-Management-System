@@ -12,13 +12,22 @@ Content-Type: application/json
     "phone_number": "03211274567"
 }
 
-### Login User
+###
 POST http://localhost:5000/api/users/login
 Content-Type: application/json
 
 {
     "email": "test@example.com",
     "password": "password123"
+}
+
+### Login User
+POST http://localhost:5000/api/users/login
+Content-Type: application/json
+
+{
+    "email": "Jaffar@gmail.com",
+    "password": "Jaffar@321"
 }
 
 ###

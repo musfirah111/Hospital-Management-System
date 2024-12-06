@@ -8,13 +8,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0N
 
 ### Create Doctor
 POST http://localhost:5000/api/doctors
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzUwMjM4OSwiZXhwIjoxNzM2MDk0Mzg5fQ.DMdTk1Ll4ermFB9Hons0QRM1w5kJ-xmvMhuqGJq5NcQ
 Content-Type: application/json
 
 {
-    "user_id": "6750783291dcace6a5837f1f",
+    "user_id": "675324cea335f7e600d77028",
     "specialization": "Cardiology",
     "qualification": ["MBBS", "MD"],
+    "description": "nice",
     "department_id": "6750385bbb481a21276f3586",
     "shift": "Evening",
     "working_hours": "3PM-11PM",

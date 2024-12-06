@@ -7,7 +7,8 @@ const {
     deleteDoctor,
     getDailySchedule,
     getWeeklySchedule,
-    getAllDoctors
+    getAllDoctors,
+    getDoctorCountByDepartment
 } = require('../controllers/doctorController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly, doctorOnly } = require('../middlewares/roleMiddleware');
@@ -16,6 +17,9 @@ const router = express.Router();
 
 // Route to get all doctors - accessible to all authenticated users.
 //router.get('/', protect, getDoctors);
+
+// Route to get the count of doctors in each department
+router.get('/count', protect, getDoctorCountByDepartment);
 
 router.get('/', protect, getAllDoctors);
 

@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const Prescription = require('../models/Prescription');
 const Patient = require('../models/Patient')
 const Doctor = require('../models/Doctor');
+const cron = require('node-cron');
 
 // Create a new prescription
 const createPrescription = asyncHandler(async (req, res) => {
@@ -53,6 +54,49 @@ const getPrescriptionById = asyncHandler(async (req, res) => {
     res.json(prescription);
 });
 
+// Get active prescriptions of a specific patient
+const getActivePrescriptionsByPatientId = asyncHandler(async (req, res) => {
+    const prescriptions = await Prescription.find({ patient_id: req.params.id, status: 'active' });
+
+    if (!prescriptions) {
+        res.status(404);
+        throw new Error("Prescriptions not found.");
+    }
+
+    res.json(prescriptions);
+});
+
+// Schedule a job to run every day at midnight
+cron.schedule('0 0 * * *', async () => {
+    try {
+        const prescriptions = await Prescription.find({ status: 'active' });
+
+        for (const prescription of prescriptions) {
+            const medications = prescription.medications;
+
+            // Find the largest duration
+            const largestDuration = medications.reduce((max, med) => {
+                const duration = parseInt(med.duration); // Assuming duration is a string representing a number
+                return Math.max(max, duration);
+            }, 0);
+
+            // Calculate the date when the status should change
+            const changeDate = new Date();
+            changeDate.setDate(changeDate.getDate() + largestDuration);
+
+            // Check if the current date is past the change date
+            const now = new Date();
+            if (now >= changeDate) {
+                prescription.status = 'inactive';
+                await prescription.save(); // Save the updated status
+            }
+        }
+        console.log('Prescription statuses updated successfully.');
+    } catch (error) {
+        console.error('Error updating prescription statuses:', error);
+    }
+});
+
 // View all prescriptions
 const getAllPrescriptions = asyncHandler(async (req, res) => {
     const prescriptions = await Prescription.find({});
@@ -64,4 +108,5 @@ module.exports = {
     updatePrescription,
     getPrescriptionById,
     getAllPrescriptions,
+    getActivePrescriptionsByPatientId
 };

@@ -6,7 +6,10 @@ const cron = require('node-cron');
 
 // Create a new prescription
 const createPrescription = asyncHandler(async (req, res) => {
-    const { patient_id, doctor_id, appointment_id, medications, instructions, tests } = req.body;
+    const { patient_id, doctor_id, appointment_id, medications, instructions, tests, status } = req.body;
+
+    // Set default status if not provided
+    const prescriptionStatus = status || 'active'; // Default to 'active' if status is not provided
 
     // Check if patient and doctor exist
     const patientExists = await Patient.findById(patient_id);
@@ -24,8 +27,10 @@ const createPrescription = asyncHandler(async (req, res) => {
         medications,
         instructions,
         tests,
+        status: prescriptionStatus // Use the determined status
     });
 
+    console.log('Created Prescription:', prescription); // Log the created prescription
     res.status(201).json(prescription);
 });
 
@@ -77,7 +82,7 @@ cron.schedule('0 0 * * *', async () => {
             // Find the largest duration
             const largestDuration = medications.reduce((max, med) => {
                 const duration = parseInt(med.duration); // Assuming duration is a string representing a number
-                return Math.max(max, duration);
+                return Math.max(max, isNaN(duration) ? 0 : duration); // Handle NaN case
             }, 0);
 
             // Calculate the date when the status should change
@@ -89,11 +94,11 @@ cron.schedule('0 0 * * *', async () => {
             if (now >= changeDate) {
                 prescription.status = 'inactive';
                 await prescription.save(); // Save the updated status
+                console.log('Prescription status updated successfully.');
             }
         }
-        console.log('Prescription statuses updated successfully.');
     } catch (error) {
-        console.error('Error updating prescription statuses:', error);
+        console.error('Error updating prescription status:', error);
     }
 });
 

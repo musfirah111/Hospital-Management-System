@@ -9,13 +9,14 @@ Content-Type: application/json
     "appointment_id": "6751de8cad579fe75b07de5c",
     "medications": [
         {
-            "name": "Medicine Name",
+            "name": "Medicine Name-------------",
             "dosage": "10mg",
             "frequency": "Twice daily",
-            "duration": "7 days"
+            "duration": "0"
         }
     ],
-    "instructions": "Take after meals"
+    "instructions": "Take after meals",
+    "status": "active"
 }
 
 

@@ -5,6 +5,7 @@ const {
     updatePrescription,
     getPrescriptionById,
     getAllPrescriptions,
+    getActivePrescriptionsByPatientId
 } = require('../controllers/prescriptionController');
 const { protect } = require('../middlewares/authMiddleware');
 const { doctorOnly } = require('../middlewares/roleMiddleware');
@@ -17,6 +18,9 @@ router.put('/:id', protect, doctorOnly, updatePrescription);
 
 // Route to get a specific prescription by ID
 router.get('/:id', protect, getPrescriptionById);
+
+// Route to get active prescriptions of a specific patient
+router.get('/patient/:id', protect, getActivePrescriptionsByPatientId);
 
 // Route to get all prescriptions
 router.get('/', protect, getAllPrescriptions);

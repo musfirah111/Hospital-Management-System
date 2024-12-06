@@ -200,6 +200,17 @@ const getAllDoctors = asyncHandler(async (req, res) => {
     });
 });
 
+
+// Get the count of doctors in each department
+const getDoctorCountByDepartment = asyncHandler(async (req, res) => {
+    const doctorCountByDepartment = await Doctor.aggregate([
+        { $group: { _id: "$department_id", count: { $sum: 1 } } }
+    ]);
+
+    res.json(doctorCountByDepartment);
+});
+
+
 module.exports = {
     getDoctors,
     getDoctorById,
@@ -208,5 +219,6 @@ module.exports = {
     deleteDoctor,
     getDailySchedule,
     getWeeklySchedule,
-    getAllDoctors
+    getAllDoctors,
+    getDoctorCountByDepartment
 };

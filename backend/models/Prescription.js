@@ -54,7 +54,12 @@ const prescriptionSchema = new Schema({
     },
     tests: [{
         test_name: String
-    }]
+    }],
+    status: {
+        type: String,
+        enum: ['active', 'inactive'],
+        default: 'active'
+    }
 });
 
 const Prescription = mongoose.model('Prescription', prescriptionSchema);

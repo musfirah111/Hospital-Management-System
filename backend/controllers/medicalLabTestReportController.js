@@ -4,6 +4,7 @@ const PDFDocument = require('pdfkit');
 const nodemailer = require('nodemailer');
 const transporter = require('../config/emailConfig');
 const MedicalLabTestReport = require('../models/MedicalLabTestReport');
+const Patient = require('../models/Patient');
 
 // Create a new medical lab test report (Doctor)
 const createReport = asyncHandler(async (req, res) => {
@@ -164,6 +165,26 @@ const getMonthlyLabReports = asyncHandler(async (req, res) => {
     res.json({ monthlyCount });
 });
 
+const getLabReportsByPatientId = asyncHandler(async (req, res) => {
+    try {
+        console.log('Received request for patient ID:', req.params.patientId);
+        const reports = await MedicalLabTestReport.find({ patient_id: req.params.patientId })
+            .populate({
+                path: 'doctor_id',
+                populate: { 
+                    path: 'user_id',
+                    select: 'name' 
+                }
+            });
+        
+        console.log('Found reports:', reports);
+        res.status(200).json(reports);
+    } catch (error) {
+        console.error('Error in getLabReportsByPatientId:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 
 module.exports = {
     createReport,
@@ -174,5 +195,6 @@ module.exports = {
     shareReport,
     getDailyLabReports,
     getWeeklyLabReports,
-    getMonthlyLabReports
+    getMonthlyLabReports,
+    getLabReportsByPatientId
 };

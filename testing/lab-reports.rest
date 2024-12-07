@@ -1,11 +1,11 @@
 ### Create Lab Test Report
 POST http://localhost:5000/api/lab-reports
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlMTJlMzE1YmVhMzZkMmQ0YSIsImlhdCI6MTczMzM0MDc0MSwiZXhwIjoxNzM1OTMyNzQxfQ.qLPKMl3HBgiuwQnR9_l1mdTobqzk_WtwqEa65w7DS9o
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzYTY4MDhmYmM3Y2NjYzIxMjFhNyIsImlhdCI6MTczMzU1NDAyMiwiZXhwIjoxNzM2MTQ2MDIyfQ.SH2WaV-_49FXglF13AulS52fU6Vb2I8bvRBTZAHqoiA
 Content-Type: application/json
 
 {
-    "patient_id": "67503a99079109bd4cef37be",
-    "doctor_id": "6750ae1ebb5819c52ef40704",
+    "patient_id": "6750af7e6dd96e12b38b5e93",
+    "doctor_id": "6750afac6dd96e12b38b5ea1",
     "test_name": "Blood Test",
     "test_date": "2024-03-20",
     "result": "Normal"
@@ -53,3 +53,7 @@ Content-Type: application/json
 {
     "email": "fatimarathore2018@gmail.com"
 }
+
+### Get Lab Reports By Patient ID
+GET http://localhost:5000/api/lab-reports/patient/6750af7e6dd96e12b38b5e93/reports
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzYjIxMDhmYmM3Y2NjYzIxMjFjYiIsImlhdCI6MTczMzU1NTIxMCwiZXhwIjoxNzM2MTQ3MjEwfQ.cOBEzlzmgaUhAZ0k979FR-gvfHSjDrv6Hs15Z65fngQ

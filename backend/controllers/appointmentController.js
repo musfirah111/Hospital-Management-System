@@ -381,6 +381,45 @@ const getRequestedAppointments = asyncHandler(async (req, res) => {
     });
 });
 
+// Get requested or rescheduled appointments of a patient by id.
+const getPatientAppointments = asyncHandler(async (req, res) => {
+    const { patientId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 7;
+    const skip = (page - 1) * limit;
+    
+    const patientAppointments = await Appointment.find({ 
+        'patient_id._id': patientId,
+        status: { $in: ["Requested", "Scheduled"] } 
+    })
+    .skip(skip)
+    .limit(limit)
+    .populate({
+        path: 'patient_id',
+        populate: { path: 'user_id' }
+    })
+    .populate({
+        path: 'doctor_id',
+        populate: [
+            { path: 'user_id' },
+            { path: 'department_id' }
+        ]
+    });
+
+    const totalCount = await Appointment.countDocuments({ 
+        'patient_id._id': patientId,
+        status: { $in: ["Requested", "Scheduled"] } 
+    });
+
+    res.json({
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
+        appointments: patientAppointments,
+    });
+});
+
+
 
 module.exports = {
     createAppointment,
@@ -395,4 +434,5 @@ module.exports = {
     getMonthlyAppointments,
     getCompletedAppointments,
     getRequestedAppointments,
+    getPatientAppointments,
 };

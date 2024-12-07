@@ -12,7 +12,7 @@ Content-Type: application/json
 
 ### Get All Appointments
 GET http://localhost:5000/api/appointments
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzYjIxMDhmYmM3Y2NjYzIxMjFjYiIsImlhdCI6MTczMzU1MDA2NiwiZXhwIjoxNzM2MTQyMDY2fQ.Kz12082EL8It8KjxuuPqsxNU_snD9TKBhHmOs845DzA
 
 ### Get Appointment by ID
 GET http://localhost:5000/api/appointments/67507592ccba814bde07155b
@@ -40,14 +40,14 @@ Content-Type: application/json
 
 ### Request Appointment or Reschedule
 POST http://localhost:5000/api/appointments/request-reschedule
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzYjIxMDhmYmM3Y2NjYzIxMjFjYiIsImlhdCI6MTczMzUxNzU5OCwiZXhwIjoxNzM2MTA5NTk4fQ.AHkTgNpAMUuztGHFpyAix9ipm7JPyH15E87_aDcfwzQ
 Content-Type: application/json
 
 {
-    "patient_id": "67503b48bb481a21276f35a4",
-    "doctor_id": "675039e1bb481a21276f3590",
+    "patient_id": "6750af7e6dd96e12b38b5e93",
+    "doctor_id": "6750afac6dd96e12b38b5ea1",
     "appointment_date": "2024-03-22",
-    "appointment_time": "15:00"
+    "appointment_time": "10:00"
 } 
 
 ### Daily Registrations
@@ -101,3 +101,7 @@ Content-Type: application/json
 {
     "invoiceId": "67507592ccba814bde07155b"
 }
+
+### Get Patient Appointments (Default pagination)
+GET http://localhost:5000/api/appointments/patient/6750af7e6dd96e12b38b5e93
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzYjIxMDhmYmM3Y2NjYzIxMjFjYiIsImlhdCI6MTczMzU1MDA2NiwiZXhwIjoxNzM2MTQyMDY2fQ.Kz12082EL8It8KjxuuPqsxNU_snD9TKBhHmOs845DzA

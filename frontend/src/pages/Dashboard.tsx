@@ -18,16 +18,21 @@ interface DoctorResponse {
 }
 
 interface AppointmentResponse {
-  doctor_id: {
-    user_id: {
-      name: string;
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  appointments: Array<{
+    doctor_id: {
+      user_id: {
+        name: string;
+      };
+      department_id: {
+        name: string;
+      };
     };
-    department_id: {
-      name: string;
-    };
-  };
-  appointment_date: string;
-  appointment_time: string;
+    appointment_date: string;
+    appointment_time: string;
+  }>;
 }
 
 interface Doctor {
@@ -44,21 +49,57 @@ interface Appointment {
   time: string;
 }
 
+interface PatientResponse {
+  id: string;
+}
+
 function Dashboard() {
   const [topDoctors, setTopDoctors] = useState<Doctor[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    console.log('Dashboard mounted, userId:', userId); // Debug log
+   
     const fetchDashboardData = async () => {
       try {
-        // Assuming you have the patient ID stored in localStorage or context
+        const userId = localStorage.getItem('userId');
+        const token = localStorage.getItem('authToken');
+
+        const patientResponse = await axios.get<PatientResponse>(
+          `http://localhost:5000/api/patients/user/${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        console.log('Patient response:', patientResponse.data);
+        const patientId = patientResponse.data.id;
+
+        const appointmentsResponse = await axios.get<AppointmentResponse>(
+          `http://localhost:5000/api/appointments/patient/${patientId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        console.log('Appointments response:', appointmentsResponse.data);
+        
+        // Check if appointments exist and are in an array
+        const appointments = Array.isArray(appointmentsResponse.data.appointments) 
+          ? appointmentsResponse.data.appointments.map(apt => ({
+              doctorName: apt.doctor_id.user_id.name,
+              specialty: apt.doctor_id.department_id.name,
+              date: new Date(apt.appointment_date).toLocaleDateString(),
+              time: apt.appointment_time
+            }))
+          : [];
+
+        setAppointments(appointments);
 
         // Fetch top rated doctors across all departments
-        const doctorsResponse = await axios.get<DoctorResponse>('/api/statistics/top-rated-doctors');
-
-        // Fetch patient's appointments
-        const appointmentsResponse = await axios.get<AppointmentResponse[]>('/api/appointments/patient/${ patientId }');
+        const doctorsResponse = await axios.get<DoctorResponse>('http://localhost:5000/api/statistics/ratings/departments/top-doctors', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
 
         // Transform doctors data to match the component's format
         const formattedDoctors = Object.values(doctorsResponse.data)
@@ -72,16 +113,7 @@ function Dashboard() {
           }))
           .slice(0, 3); // Keep only top 3 doctors
 
-        // Transform appointments data
-        const formattedAppointments = appointmentsResponse.data.map(apt => ({
-          doctorName: apt.doctor_id.user_id.name,
-          specialty: apt.doctor_id.department_id.name,
-          date: new Date(apt.appointment_date).toLocaleDateString(),
-          time: apt.appointment_time
-        }));
-
         setTopDoctors(formattedDoctors);
-        setAppointments(formattedAppointments);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         // You might want to add error handling UI here

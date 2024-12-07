@@ -77,6 +77,7 @@ const getTopRatedDoctorsByDepartment = asyncHandler(async (req, res) => {
     res.json(departmentRatings);
 });
 
+
 module.exports = {
     getDoctorRating,
     getTopRatedDoctorsByDepartment

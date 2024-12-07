@@ -14,6 +14,7 @@ const {
     getCompletedAppointments,
     getRequestedAppointments,
     requestCancellation,
+    getPatientAppointments
 } = require('../controllers/appointmentController');
 
 const { protect } = require('../middlewares/authMiddleware');
@@ -23,6 +24,8 @@ const {
     doctorOnly
 } = require('../middlewares/roleMiddleware');
 
+// Get patient appointments
+router.get('/patient/:id', protect, getPatientAppointments);
 
 router.get('/daily-registrations', protect, getDailyAppointments);
 router.get('/weekly-registrations', protect, getWeeklyAppointments);

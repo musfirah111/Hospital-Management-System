@@ -8,7 +8,7 @@ import {
   Star,
   LogOut
 } from 'lucide-react';
-import MedinovaLogo from '../../assets/Medinova.svg';
+import MedinovaLogo from '../../../assets/Medinova.svg';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },

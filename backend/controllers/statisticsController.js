@@ -22,59 +22,77 @@ const getDoctorRating = asyncHandler(async (req, res) => {
 
 // Get top rated doctors by department.
 const getTopRatedDoctorsByDepartment = asyncHandler(async (req, res) => {
-    const limit = parseInt(req.query.limit || 5); // Default to 5 doctors.
+    try {
+        const limit = parseInt(req.query.limit || 5);
 
-    // Get all doctors with their user and department details.
-    const doctors = await Doctor.find({})
+        // Get all doctors with valid department and user references
+        const doctors = await Doctor.find({
+            department_id: { $ne: null },
+            user_id: { $ne: null }
+        })
         .populate('user_id', 'name')
-        .populate('department_id', 'name');
+        .populate('department_id', 'name')
+        .lean()
+        .exec();
 
-    const departmentDoctors = {}; // Group doctors by department.
-
-    doctors.forEach(doctor => {
-        const deptId = doctor.department_id._id.toString();
-        if (!departmentDoctors[deptId]) {
-            departmentDoctors[deptId] = {
-                department_name: doctor.department_id.name,
-                doctors: []
-            };
+        if (!doctors || doctors.length === 0) {
+            return res.json({ message: 'No doctors found' });
         }
-        departmentDoctors[deptId].doctors.push(doctor);
-    });
 
-    const departmentRatings = {}; // Store department ratings.
+        const departmentDoctors = {};
 
-    for (const [deptId, data] of Object.entries(departmentDoctors)) {
-        const ratings = [];
+        // Safe access to properties
+        doctors.forEach(doctor => {
+            if (doctor?.department_id?._id && doctor?.user_id?.name) {
+                const deptId = doctor.department_id._id.toString();
+                if (!departmentDoctors[deptId]) {
+                    departmentDoctors[deptId] = {
+                        department_name: doctor.department_id.name,
+                        doctors: []
+                    };
+                }
+                departmentDoctors[deptId].doctors.push(doctor);
+            }
+        });
 
-        // Compute ratings for each doctor.
-        for (const doctor of data.doctors) {
-            const reviews = await RatingAndReview.find({ doctor_id: doctor._id });
+        const departmentRatings = {};
 
-            let avgRating;
-            if (reviews.length > 0) {
-                avgRating = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
-            } else {
-                avgRating = 0;
+        for (const [deptId, data] of Object.entries(departmentDoctors)) {
+            const ratings = [];
+
+            for (const doctor of data.doctors) {
+                const reviews = await RatingAndReview.find({ 
+                    doctor_id: doctor._id,
+                    rating: { $exists: true }
+                });
+
+                const avgRating = reviews.length > 0
+                    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+                    : 0;
+
+                ratings.push({
+                    doctor_name: doctor.user_id.name,
+                    department: data.department_name,
+                    averageRating: Number(avgRating.toFixed(1))
+                });
             }
 
-            ratings.push({
-                doctor_name: doctor.user_id.name,
-                department: data.department_name,
-                averageRating: Number(avgRating.toFixed(1)),
-                totalReviews: reviews.length
-            });
+            ratings.sort((a, b) => b.averageRating - a.averageRating);
+            departmentRatings[deptId] = {
+                department_name: data.department_name,
+                top_rated: ratings.slice(0, limit)
+            };
         }
 
-        // Sort by average rating and limit to top 5.
-        ratings.sort((a, b) => b.averageRating - a.averageRating);
-        departmentRatings[deptId] = {
-            department_name: data.department_name,
-            top_rated: ratings.slice(0, limit) // Top 5 doctors.
-        };
-    }
+        return res.json(departmentRatings);
 
-    res.json(departmentRatings);
+    } catch (error) {
+        console.error('Error in getTopRatedDoctorsByDepartment:', error);
+        return res.status(500).json({ 
+            message: error.message,
+            stack: error.stack 
+        });
+    }
 });
 
 

@@ -37,7 +37,7 @@ export default function DoctorList() {
       try {
         setLoading(true);
         const token = localStorage.getItem('authToken');
-        const response = await axios.get('http://localhost:5000/api/doctors', {
+        const response = await axios.get<{ doctors: Doctor[] }>('http://localhost:5000/api/doctors', {
           headers: {
             Authorization: `Bearer ${token}`
           }

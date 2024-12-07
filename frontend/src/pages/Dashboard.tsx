@@ -33,6 +33,7 @@ interface AppointmentResponse {
     };
     appointment_date: string;
     appointment_time: string;
+    status: string;
   }>;
 }
 
@@ -86,12 +87,17 @@ function Dashboard() {
         
         // Check if appointments exist and are in an array
         const appointments = Array.isArray(appointmentsResponse.data.appointments) 
-          ? appointmentsResponse.data.appointments.map(apt => ({
-              doctorName: apt.doctor_id.user_id.name,
-              specialty: apt.doctor_id.department_id.name,
-              date: new Date(apt.appointment_date).toLocaleDateString(),
-              time: apt.appointment_time
-            }))
+          ? appointmentsResponse.data.appointments
+              .map(apt => {
+                // Handle cases where doctor_id is null
+                return {
+                  doctorName: apt?.doctor_id?.user_id?.name || 'Doctor Not Assigned',
+                  specialty: apt?.doctor_id?.department_id?.name || 'Department Pending',
+                  date: new Date(apt.appointment_date).toLocaleDateString(),
+                  time: apt.appointment_time,
+                  status: apt.status || 'Pending'
+                };
+              })
           : [];
 
         setAppointments(appointments);

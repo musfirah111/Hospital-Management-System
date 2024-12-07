@@ -1,24 +1,88 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { CreditCard, Calendar, Clock } from 'lucide-react';
-import { doctors } from '../data/doctors';
 import { formatDate } from '../utils/date';
 import { Layout } from '../components/Layout';
+import axios from 'axios';
+
+interface Doctor {
+  _id: string;
+  user_id: {
+    _id: string;
+    name: string;
+    email: string;
+    age: number;
+    gender: string;
+    phone_number: string;
+    role: string;
+    profile_picture: string;
+    date_created: string;
+  };
+  description: string;
+  specialization: string;
+  qualification: string[];
+  department_id: any;
+  shift: string;
+  working_hours: string;
+  availability_status: boolean;
+  rating: number;
+  experience: number;
+  consultation_fee: number;
+  date_of_joining: string;
+}
+
+interface PaymentResponse {
+  success: boolean;
+  message: string;
+  data: {
+    invoice: {
+      _id: string;
+      stripe_invoice_id: string;
+      payment_status: string;
+    };
+    paymentIntent: {
+      id: string;
+      status: string;
+      amount: number;
+    };
+    testMode: boolean;
+  };
+}
 
 export default function PaymentPage() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const doctor = doctors.find(d => d.id === id);
-  const appointmentDate = searchParams.get('date');
-  const appointmentTime = searchParams.get('slot');
-
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [paymentDetails, setPaymentDetails] = useState({
     cardNumber: '',
     expiryDate: '',
     cvv: '',
     name: ''
   });
+  
+  const appointmentDate = searchParams.get('date');
+  const appointmentTime = searchParams.get('slot');
+
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const config = {
+          headers: { Authorization: `Bearer ${token}` }
+        };
+        const response = await axios.get<Doctor>(`http://localhost:5000/api/doctors/${id}`, config);
+        setDoctor(response.data);
+      } catch (error) {
+        console.error('Error fetching doctor:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDoctor();
+  }, [id]);
 
   if (!doctor || !appointmentDate || !appointmentTime) {
     return (
@@ -34,7 +98,7 @@ export default function PaymentPage() {
     );
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Here you would typically process the payment
     alert('Payment successful! Appointment confirmed.');
@@ -52,12 +116,12 @@ export default function PaymentPage() {
             <div className="space-y-4">
               <div className="flex items-start space-x-4">
                 <img
-                  src={doctor.image}
-                  alt={doctor.name}
+                  src={doctor.user_id.profile_picture}
+                  alt={doctor.user_id.name}
                   className="w-20 h-20 rounded-lg object-cover"
                 />
                 <div>
-                  <h3 className="font-semibold">{doctor.name}</h3>
+                  <h3 className="font-semibold">{doctor.user_id.name}</h3>
                   <p className="text-[#0B8FAC]">{doctor.specialization}</p>
                 </div>
               </div>
@@ -76,7 +140,7 @@ export default function PaymentPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Consultation Fee</span>
                   <span className="text-xl font-bold text-[#0B8FAC]">
-                    ${doctor.price}
+                    ${doctor.consultation_fee}
                   </span>
                 </div>
               </div>
@@ -154,7 +218,7 @@ export default function PaymentPage() {
                 type="submit"
                 className="w-full py-3 bg-[#0B8FAC] text-white rounded-lg hover:bg-[#097a93] transition-colors"
               >
-                Pay ${doctor.price}
+                Pay ${doctor.consultation_fee}
               </button>
             </form>
           </div>

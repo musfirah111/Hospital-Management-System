@@ -1,13 +1,13 @@
 ### Create Medical Record
 POST http://localhost:5000/api/medical-records
-Authorization: Bearer YOUR_TOKEN_HERE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNzQ5NmExNTc5NjUyNjk2ODI1NyIsImlhdCI6MTczMzMxMDI4MSwiZXhwIjoxNzM1OTAyMjgxfQ.HdCrILiR1rieALWfs5C6fod3S11CFZ1D8D_H4ac6n3k
 Content-Type: application/json
 
 {
-    "patient_id": "PATIENT_ID_HERE",
-    "doctor_id": "DOCTOR_ID_HERE",
+    "patient_id": "6753668162ae38bdf7368784",
+    "doctor_id": "675039e1bb481a21276f3590",
     "diagnosis": "Patient diagnosis here",
-    "treatment": ["PRESCRIPTION_ID_HERE"]
+    "treatment": ["675401c1a0fa0fde8c18565c"]
 }
 
 ### Get Medical Record by ID

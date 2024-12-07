@@ -1,31 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Calendar, Clock, Star } from 'lucide-react';
-import { doctors } from '../data/doctors';
 import { formatDate } from '../utils/date';
 import type { Doctor } from '../types/medical';
 import SearchBar from '../components/SearchBar';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '../components/Layout';
+import { AuthContext } from '../context/AuthContext';
+import axios from 'axios';
+import { ConfirmationModal } from '../components/shared/ConfirmationModal';
 
-// Mock appointments data
-const appointments = [
-  {
-    id: '1',
-    doctor_id: '1',
-    appointment_date: '2024-03-20',
-    appointment_time: '10:00',
-    status: 'Scheduled'
-  },
-  {
-    id: '2',
-    doctor_id: '2',
-    appointment_date: '2024-03-25',
-    appointment_time: '14:00',
-    status: 'Completed'
-  }
-];
+interface PatientResponse {
+  id: string;
+}
 
-type AppointmentStatus = 'All' | 'Scheduled' | 'Completed' | 'Requested' | 'Rescheduled';
+interface Appointment {
+  id: string;
+  doctorName: string;
+  specialty: string;
+  date: string;
+  time: string;
+  status: AppointmentStatus;
+  doctor_id: {
+    id: string;
+    name: string;
+    specialization: string;
+    image: string;
+  };
+}
+
+type AppointmentStatus = 'All' | 'Scheduled' | 'Completed' | 'Requested' | 'Cancelled' | 'Rescheduled';
 
 export default function AppointmentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,22 +37,156 @@ export default function AppointmentsPage() {
   const [rating, setRating] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStatus, setActiveStatus] = useState<AppointmentStatus>('All');
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showRescheduleModal, setShowRescheduleModal] =useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] =useState<string>('');
+  
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
-  const handleAddReview = (doctor: Doctor) => {
-    setSelectedDoctor(doctor);
+  useEffect(() => {
+    fetchAppointments();
+  }, [user]);
+
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('authToken');
+      const userId = localStorage.getItem('userId');
+
+      // First get the patient ID for the logged-in user
+      const patientResponse = await axios.get(
+        `http://localhost:5000/api/patients/user/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (patientResponse.data && patientResponse.data.id) {
+        // Then fetch appointments for this patient
+        const appointmentsResponse = await axios.get(
+          `http://localhost:5000/api/appointments/patient/${patientResponse.data.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        if (appointmentsResponse.data) {
+          const formattedAppointments = appointmentsResponse.data.appointments.map((apt: any) => ({
+            id: apt._id,
+            doctorName: apt.doctor_id.user_id.name,
+            specialty: apt.doctor_id.department_id.name,
+            date: apt.appointment_date,
+            time: apt.appointment_time,
+            status: apt.status,
+            doctor_id: {
+              id: apt.doctor_id._id,
+              name: apt.doctor_id.user_id.name,
+              specialization: apt.doctor_id.department_id.name,
+              image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300"
+            }
+          }));
+          setAppointments(formattedAppointments);
+          setError(null);
+        }
+      }
+    } catch (err: any) {
+      console.error('Error fetching appointments:', err);
+      setError(err.response?.data?.message || 'Failed to fetch appointments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddReview = (doctorData: { id: string; name: string; specialization: string; image: string }) => {
+    setSelectedDoctor(doctorData as Doctor);
     setIsModalOpen(true);
   };
 
-  const handleSubmitReview = () => {
-    // Handle review submission logic here
-    setIsModalOpen(false);
+  const handleSubmitReview = async () => {
+    try {
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/reviews`,
+        {
+          doctor_id: selectedDoctor?.id,
+          rating,
+          review: reviewText
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`
+          }
+        }
+      );
+      setIsModalOpen(false);
+      fetchAppointments();
+    } catch (err) {
+      console.error('Error submitting review:', err);
+    }
+  };
+
+  const handleCancelAppointment = async (appointmentId: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await axios.post(
+        `http://localhost:5000/api/appointments/cancel`,
+        { appointment_id: appointmentId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      
+      // Refresh the appointments list after cancellation
+      await fetchAppointments();
+    } catch (err) {
+      console.error('Error cancelling appointment:', err);
+      // Optionally add error handling/user notification here
+    }
+  };
+
+  const handleCancelClick = (appointmentId: string) => {
+    setSelectedAppointmentId(appointmentId);
+    setShowCancelModal(true);
+  };
+
+  const handleRescheduleClick = (appointmentId: string) => {
+    setSelectedAppointmentId(appointmentId);
+    setShowRescheduleModal(true);
+  };
+
+  const handleRescheduleConfirm = async (newDate: Date) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await axios.put(
+        `http://localhost:5000/api/appointments/${selectedAppointmentId}/reschedule`,
+        { 
+          appointment_date: newDate.toISOString().split('T')[0],
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setShowRescheduleModal(false);
+      fetchAppointments();
+    } catch (err) {
+      console.error('Error rescheduling appointment:', err);
+    }
   };
 
   const filteredAppointments = appointments.filter(appointment => {
-    const doctor = doctors.find(d => d.id === appointment.doctor_id);
-    const matchesSearch = doctor?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doctor?.specialization.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = appointment.doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      appointment.specialty.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = activeStatus === 'All' || appointment.status === activeStatus;
     return matchesSearch && matchesStatus;
   });
@@ -58,6 +195,14 @@ export default function AppointmentsPage() {
     acc[appointment.status] = (acc[appointment.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  if (loading) {
+    return <Layout><div className="flex justify-center items-center h-screen">Loading...</div></Layout>;
+  }
+
+  if (error) {
+    return <Layout><div className="flex justify-center items-center h-screen text-red-500">{error}</div></Layout>;
+  }
 
   return (
     <Layout>
@@ -74,19 +219,21 @@ export default function AppointmentsPage() {
           </div>
 
           <div className="flex space-x-4 mb-8">
-            {['All', 'Scheduled', 'Completed', 'Requested', 'Rescheduled'].map((status) => (
+            {['All', 'Scheduled', 'Completed', 'Requested', 'Cancelled', 'Rescheduled'].map((status) => (
               <button
                 key={status}
                 onClick={() => setActiveStatus(status as AppointmentStatus)}
-                className={`px-4 py-2 font-medium ${activeStatus === status
-                  ? 'text-[#0B8FAC] border-b-2 border-[#0B8FAC]'
-                  : 'text-gray-500'
-                  }`}
+                className={`px-4 py-2 font-medium ${
+                  activeStatus === status
+                    ? 'text-[#0B8FAC] border-b-2 border-[#0B8FAC]'
+                    : 'text-gray-500'
+                }`}
               >
                 {status}
                 {status !== 'All' && (
-                  <span className={`ml-2 text-sm font-semibold ${activeStatus === status ? 'text-[#0B8FAC]' : 'text-gray-500'
-                    }`}>
+                  <span className={`ml-2 text-sm font-semibold ${
+                    activeStatus === status ? 'text-[#0B8FAC]' : 'text-gray-500'
+                  }`}>
                     {statusCounts[status] || 0}
                   </span>
                 )}
@@ -95,81 +242,86 @@ export default function AppointmentsPage() {
           </div>
 
           <div className="space-y-4">
-            {filteredAppointments.map((appointment) => {
-              const doctor = doctors.find(d => d.id === appointment.doctor_id);
-
-              return (
-                <div key={appointment.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6">
-                  <div className="flex items-start space-x-6">
-                    <img
-                      src={doctor?.image}
-                      alt={doctor?.name}
-                      className="w-20 h-20 rounded-lg object-cover shadow-md"
-                    />
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900">{doctor?.name}</h3>
-                          <p className="text-[#0B8FAC] font-medium">{doctor?.specialization}</p>
-                        </div>
-                        <span className={`px-4 py-1.5 rounded-full text-sm font-medium ${appointment.status === 'Completed'
+            {filteredAppointments.map((appointment) => (
+              <div key={appointment.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6">
+                <div className="flex items-start space-x-6">
+                  <img
+                    src={appointment.doctor_id.image}
+                    alt={appointment.doctor_id.name}
+                    className="w-20 h-20 rounded-lg object-cover shadow-md"
+                  />
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900">{appointment.doctor_id.name}</h3>
+                        <p className="text-[#0B8FAC] font-medium">{appointment.doctor_id.specialization}</p>
+                      </div>
+                      <span className={`px-4 py-1.5 rounded-full text-sm font-medium ${
+                        appointment.status === 'Completed'
                           ? 'bg-green-100 text-green-800'
                           : appointment.status === 'Scheduled'
                             ? 'bg-blue-100 text-blue-800'
                             : appointment.status === 'Requested'
                               ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-purple-100 text-purple-800'
-                          }`}>
-                          {appointment.status}
-                        </span>
-                      </div>
-
-                      <div className="mt-6 grid grid-cols-2 gap-6">
-                        <div className="flex items-center text-gray-600 bg-gray-50 rounded-lg p-3">
-                          <Calendar className="w-5 h-5 mr-3 text-[#0B8FAC]" />
-                          <div>
-                            <p className="text-sm text-gray-500">Date</p>
-                            <p className="font-medium">{formatDate(appointment.appointment_date)}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center text-gray-600 bg-gray-50 rounded-lg p-3">
-                          <Clock className="w-5 h-5 mr-3 text-[#0B8FAC]" />
-                          <div>
-                            <p className="text-sm text-gray-500">Time</p>
-                            <p className="font-medium">{appointment.appointment_time}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {appointment.status === 'Scheduled' && doctor && (
-                        <div className="mt-6 flex justify-end">
-                          <button
-                            onClick={() => navigate(`/doctor/${doctor.id}`)}
-                            className="px-5 py-2.5 bg-[#0B8FAC] text-white rounded-lg hover:bg-[#097a93] transition-all duration-200 font-medium"
-                          >
-                            <span>Reschedule Appointment</span>
-                          </button>
-                        </div>
-                      )}
-
-                      {appointment.status === 'Completed' && doctor && (
-                        <div className="mt-6 flex items-center border-t pt-6">
-                          <div className="flex-1">
-                            <p className="text-sm text-gray-600">Share your experience with Dr. {doctor.name.split(' ')[0]}</p>
-                          </div>
-                          <button
-                            onClick={() => handleAddReview(doctor)}
-                            className="flex items-center space-x-2 px-5 py-2.5 bg-[#0B8FAC] text-white rounded-lg hover:bg-[#097a93] transition-all duration-200 font-medium"
-                          >
-                            <span>Add Review</span>
-                          </button>
-                        </div>
-                      )}
+                              : appointment.status === 'Cancelled'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-purple-100 text-purple-800'
+                      }`}>
+                        {appointment.status}
+                      </span>
                     </div>
+
+                    <div className="mt-6 grid grid-cols-2 gap-6">
+                      <div className="flex items-center text-gray-600 bg-gray-50 rounded-lg p-3">
+                        <Calendar className="w-5 h-5 mr-3 text-[#0B8FAC]" />
+                        <div>
+                          <p className="text-sm text-gray-500">Date</p>
+                          <p className="font-medium">{formatDate(appointment.date)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center text-gray-600 bg-gray-50 rounded-lg p-3">
+                        <Clock className="w-5 h-5 mr-3 text-[#0B8FAC]" />
+                        <div>
+                          <p className="text-sm text-gray-500">Time</p>
+                          <p className="font-medium">{appointment.time}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {appointment.status === 'Scheduled' && (
+                      <div className="mt-6 flex justify-end space-x-4">
+                        <button
+                          onClick={() => handleCancelClick(appointment.id)}
+                          className="px-5 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all duration-200 font-medium"
+                        >
+                          Cancel Appointment
+                        </button>
+                        <button
+                          onClick={() => handleRescheduleClick(appointment.id)}
+                          className="px-5 py-2.5 bg-[#0B8FAC] text-white rounded-lg hover:bg-[#097a93] transition-all duration-200 font-medium"
+                        >
+                          Reschedule
+                        </button>
+                      </div>
+                    )}
+
+                    {appointment.status === 'Completed' && (
+                      <div className="mt-6 flex items-center border-t pt-6">
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-600">Share your experience with Dr. {appointment.doctor_id.name.split(' ')[0]}</p>
+                        </div>
+                        <button
+                          onClick={() => handleAddReview(appointment.doctor_id)}
+                          className="flex items-center space-x-2 px-5 py-2.5 bg-[#0B8FAC] text-white rounded-lg hover:bg-[#097a93] transition-all duration-200 font-medium"
+                        >
+                          <span>Add Review</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
 
           {isModalOpen && (
@@ -197,10 +349,11 @@ export default function AppointmentsPage() {
                         className="focus:outline-none"
                       >
                         <Star
-                          className={`w-8 h-8 ${star <= rating
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                            }`}
+                          className={`w-8 h-8 ${
+                            star <= rating
+                              ? 'text-yellow-400 fill-current'
+                              : 'text-gray-300'
+                          }`}
                         />
                       </button>
                     ))}
@@ -229,10 +382,11 @@ export default function AppointmentsPage() {
                   <button
                     onClick={handleSubmitReview}
                     disabled={!rating}
-                    className={`px-6 py-2 rounded-lg text-white ${rating
-                      ? 'bg-[#0B8FAC] hover:bg-[#097a93]'
-                      : 'bg-gray-300 cursor-not-allowed'
-                      }`}
+                    className={`px-6 py-2 rounded-lg text-white ${
+                      rating
+                        ? 'bg-[#0B8FAC] hover:bg-[#097a93]'
+                        : 'bg-gray-300 cursor-not-allowed'
+                    }`}
                   >
                     Submit Review
                   </button>
@@ -240,8 +394,21 @@ export default function AppointmentsPage() {
               </div>
             </div>
           )}
+
+          <ConfirmationModal
+            isOpen={showCancelModal}
+            onClose={() => setShowCancelModal(false)}
+            onConfirm={() => {
+              handleCancelAppointment(selectedAppointmentId);
+              setShowCancelModal(false);
+            }}
+            title="Cancel Appointment"
+            message="Are you sure you want to cancel this appointment?"
+            confirmButtonText="Cancel Appointment"
+          />
         </div>
       </div>
     </Layout>
   );
 }
+

@@ -17,13 +17,13 @@ POST http://localhost:5000/api/users/register
 Content-Type: application/json
 
 {
-    "name": "Patient",
-    "email": "patient@gmail.com",
-    "password": "password123",
-    "role": "Patient",
-    "age": 38,
-    "gender": "Male",
-    "phone_number": "03211274567"
+    "name": "Dr. Sarah Anjum",
+    "email": "doctor@gmail.com",
+    "password": "doctor123",
+    "role": "Doctor",
+    "age": 37,
+    "gender": "Female",
+    "phone_number": "03151574567"
 }
 
 ###

@@ -49,10 +49,12 @@ export interface Review {
 export interface Doctor {
   id: string;
   name: string;
+  department: string;
   specialization: string;
   experience: string;
   rating: number;
-  price: number;
-  description: string;
   image: string;
+  description: string;
+  price: number;
+  workingHours: string;
 }

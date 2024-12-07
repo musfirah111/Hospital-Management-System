@@ -8,18 +8,21 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0N
 
 ### Create Doctor
 POST http://localhost:5000/api/doctors
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzUwMjM4OSwiZXhwIjoxNzM2MDk0Mzg5fQ.DMdTk1Ll4ermFB9Hons0QRM1w5kJ-xmvMhuqGJq5NcQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
 Content-Type: application/json
 
 {
-    "user_id": "675324cea335f7e600d77028",
-    "specialization": "Cardiology",
-    "qualification": ["MBBS", "MD"],
-    "description": "nice",
-    "department_id": "6750385bbb481a21276f3586",
+    "user_id": "675433accaf1c6a1dd2cdc34",
+    "specialization": "Child Specialist",
+    "qualification": ["MBBS", "MD Pediatrics"],
+    "description": "Dr. Sarah is a compassionate pediatrician who has dedicated her career to children's healthcare. She has extensive experience in treating various pediatric conditions and is known for her gentle approach.",
+    "department_id": "67543352caf1c6a1dd2cdc2f",
     "shift": "Evening",
     "working_hours": "3PM-11PM",
-    "availability_status": true
+    "availability_status": true,
+    "experience": 10,
+    "consultation_fee": 1000,
+    "date_of_joining": "2022-03-15"
 }
 
 ### Get Daily Schedule

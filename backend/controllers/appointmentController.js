@@ -399,6 +399,23 @@ const getPatientAppointments = asyncHandler(async (req, res) => {
     });
 });
 
+// Get available slots for a doctor on a specific date
+const getAvailableSlotsForDoctor = asyncHandler(async (req, res) => {
+    const { doctorId } = req.params;
+    const { date } = req.query;
+
+    if (!doctorId || !date) {
+        res.status(400);
+        throw new Error('Doctor ID and date are required');
+    }
+
+    const availableSlots = await getAvailableTimeSlots(doctorId, date);
+    
+    res.json({
+        success: true,
+        availableSlots
+    });
+});
 
 module.exports = {
     createAppointment,
@@ -414,4 +431,5 @@ module.exports = {
     getCompletedAppointments,
     getRequestedAppointments,
     getPatientAppointments,
+    getAvailableSlotsForDoctor,
 };

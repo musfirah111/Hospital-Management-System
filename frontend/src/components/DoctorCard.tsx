@@ -5,11 +5,15 @@ import type { Doctor } from '../types';
 
 interface DoctorCardProps {
   doctor: Doctor;
+  onClick: () => void;
 }
 
-export default function DoctorCard({ doctor }: DoctorCardProps) {
+export default function DoctorCard({ doctor, onClick }: DoctorCardProps) {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+    <div 
+      className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={onClick}
+    >
       <div className="flex items-start space-x-4">
         <img
           src={doctor.image}
@@ -35,8 +39,12 @@ export default function DoctorCard({ doctor }: DoctorCardProps) {
       <div className="flex justify-between items-center mt-4">
         <span className="text-lg font-semibold text-[#0B8FAC]">Consultation Fee: ${doctor.price}</span>
         <Link
-          to={`/doctor/${doctor.id}`}
+          to={`/doctors/${doctor.id}`}
           className="px-6 py-2 bg-[#0B8FAC] text-white rounded-lg hover:bg-[#097a93] transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+          }}
         >
           Book Appointment
         </Link>

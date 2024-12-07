@@ -4,15 +4,19 @@ const Doctor = require('../models/Doctor');
 const User = require('../models/User');
 const Appointment = require('../models/Appointment');
 
-// Get all doctors.
+// Get all doctors with populated data
 const getDoctors = asyncHandler(async (req, res) => {
-    const doctors = await Doctor.find({}).populate('user_id department_id');
+    const doctors = await Doctor.find({})
+        .populate('user_id department_id')
+        .select('user_id department_id description specialization qualification shift working_hours availability_status rating experience consultation_fee date_of_joining');
     res.json(doctors);
 });
 
-// Get doctor by ID.
+// Get doctor by ID with all details
 const getDoctorById = asyncHandler(async (req, res) => {
-    const doctor = await Doctor.findById(req.params.id).populate('user_id department_id');
+    const doctor = await Doctor.findById(req.params.id)
+        .populate('user_id department_id')
+        .select('user_id department_id description specialization qualification shift working_hours availability_status rating experience consultation_fee date_of_joining');
 
     if (!doctor) {
         res.status(404);
@@ -22,26 +26,90 @@ const getDoctorById = asyncHandler(async (req, res) => {
     res.json(doctor);
 });
 
-// Create a new doctor.
+// Create a new doctor with all required fields
 const createDoctor = asyncHandler(async (req, res) => {
-    const existingDoctor = await Doctor.findOne({ user_id: req.body.user_id });
+    const {
+        user_id,
+        description,
+        specialization,
+        qualification,
+        department_id,
+        shift,
+        working_hours,
+        availability_status,
+        experience,
+        consultation_fee,
+        date_of_joining
+    } = req.body;
 
+    // Check if doctor already exists
+    const existingDoctor = await Doctor.findOne({ user_id });
     if (existingDoctor) {
         res.status(400);
         throw new Error("Doctor already exists for this user ID.");
     }
 
-    const doctor = await Doctor.create(req.body);
+    // Validate required fields
+    if (!experience || experience < 0) {
+        res.status(400);
+        throw new Error("Please enter valid years of experience.");
+    }
+
+    if (!consultation_fee || consultation_fee < 0) {
+        res.status(400);
+        throw new Error("Please enter valid consultation fee.");
+    }
+
+    const doctor = await Doctor.create({
+        user_id,
+        description,
+        specialization,
+        qualification,
+        department_id,
+        shift,
+        working_hours,
+        availability_status,
+        experience,
+        consultation_fee,
+        date_of_joining: date_of_joining || Date.now()
+    });
+
     res.status(201).json(doctor);
 });
 
-// Update doctor information.
+// Update doctor information including new fields
 const updateDoctor = asyncHandler(async (req, res) => {
+    const {
+        description,
+        specialization,
+        qualification,
+        department_id,
+        shift,
+        working_hours,
+        availability_status,
+        experience,
+        consultation_fee
+    } = req.body;
+
+    // Validate experience and consultation_fee if they're being updated
+    if (experience !== undefined && experience < 0) {
+        res.status(400);
+        throw new Error("Experience cannot be negative.");
+    }
+
+    if (consultation_fee !== undefined && consultation_fee < 0) {
+        res.status(400);
+        throw new Error("Consultation fee cannot be negative.");
+    }
+
     const updatedDoctor = await Doctor.findByIdAndUpdate(
         req.params.id,
         req.body,
-        { new: true }
-    );
+        { 
+            new: true,
+            runValidators: true // This ensures the schema validations run on update
+        }
+    ).populate('user_id department_id');
 
     if (!updatedDoctor) {
         res.status(404);
@@ -179,18 +247,36 @@ const getWeeklySchedule = asyncHandler(async (req, res) => {
     });
 });
 
-// Get all doctors with pagination
+// Get all doctors with pagination and include new fields
 const getAllDoctors = asyncHandler(async (req, res) => {
-    const page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit) || 7; // Default to 7 doctors per page
-    const skip = (page - 1) * limit; // Calculate the number of documents to skip
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 7;
+    const skip = (page - 1) * limit;
 
-    const doctors = await Doctor.find()
+    // Add sorting options
+    const sort = {};
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':');
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1;
+    }
+
+    // Add filtering options
+    const filter = {};
+    if (req.query.experience) {
+        filter.experience = { $gte: parseInt(req.query.experience) };
+    }
+    if (req.query.maxFee) {
+        filter.consultation_fee = { $lte: parseInt(req.query.maxFee) };
+    }
+
+    const doctors = await Doctor.find(filter)
+        .sort(sort)
         .skip(skip)
         .limit(limit)
-        .populate('user_id department_id'); // Populate if needed
+        .populate('user_id department_id')
+        .select('user_id department_id description specialization qualification shift working_hours availability_status rating experience consultation_fee date_of_joining');
 
-    const totalDoctors = await Doctor.countDocuments(); // Get total number of doctors
+    const totalDoctors = await Doctor.countDocuments(filter);
 
     res.json({
         totalDoctors,

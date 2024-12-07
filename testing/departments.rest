@@ -4,8 +4,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhN
 Content-Type: application/json
 
 {
-    "name": "Cardiology",
-    "description": "Heart related treatments",
+    "name": "Peeds",
+    "description": "Department for treating children",
     "active_status": true
 }
 

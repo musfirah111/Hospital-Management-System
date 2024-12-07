@@ -104,4 +104,34 @@ const getUserProfile = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { registerUser, loginUser, getUserProfile };
+const updateUserProfile = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    // Update user fields
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.age = req.body.age || user.age;
+    user.gender = req.body.gender || user.gender;
+    user.phone_number = req.body.phone_number || user.phone_number;
+    user.address = req.body.address || user.address;
+    // Add other fields as necessary
+
+    const updatedUser = await user.save();
+    res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        age: updatedUser.age,
+        gender: updatedUser.gender,
+        phone_number: updatedUser.phone_number,
+        address: updatedUser.address,
+        // Return other fields as necessary
+    });
+});
+
+module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile };

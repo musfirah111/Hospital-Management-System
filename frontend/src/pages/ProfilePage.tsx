@@ -1,25 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Avatar } from '../components/Avatar';
 import { Layout } from '../components/Layout';
+import axios from 'axios';
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    age: 30,
-    gender: 'Male',
-    phone_number: '03001234567',
-    role: 'Patient',
-    profile_picture: '/path/to/profile-image.jpg',
-    address: '123 Main Street, City, Country',
+    name: '',
+    email: '',
+    age: 0,
+    gender: '',
+    phone_number: '',
+    role: '',
+    profile_picture: '',
+    address: '',
     emergency_contact: {
-      name: 'Jane Doe',
-      phone: '03009876543',
-      relationship: 'Spouse'
+      name: '',
+      phone: '',
+      relationship: ''
     },
-    date_created: new Date('2024-01-01')
+    date_created: ''
   });
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await axios.get('http://localhost:5000/api/users/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setEditedUser(response.data);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
     if (field.includes('.')) {
@@ -39,29 +56,20 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSave = () => {
-    // Here you would typically make an API call to update the user
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await axios.put('http://localhost:5000/api/users/profile', editedUser, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+    }
   };
 
   const handleCancel = () => {
     // Reset the edited user to the original values
-    setEditedUser({
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      age: 30,
-      gender: 'Male',
-      phone_number: '03001234567',
-      role: 'Patient',
-      profile_picture: '/path/to/profile-image.jpg',
-      address: '123 Main Street, City, Country',
-      emergency_contact: {
-        name: 'Jane Doe',
-        phone: '03009876543',
-        relationship: 'Spouse'
-      },
-      date_created: new Date('2024-01-01')
-    });
     setIsEditing(false);
   };
 
@@ -70,19 +78,15 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-[#D2EBE7] pb-6">
         <div className="max-w-6xl mx-auto p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">Profile</h1>
-
-          <div className="bg-white rounded-xl shadow-lg p-8">  {/* Increased padding */}
-            {/* Profile Header */}
-            <div className="flex items-center space-x-6 mb-8 border-b pb-6">  {/* Added border and spacing */}
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="flex items-center space-x-6 mb-8 border-b pb-6">
               <Avatar name={editedUser.name} image={editedUser.profile_picture} size="lg" />
               <div>
                 <h2 className="text-2xl font-semibold text-gray-900">{editedUser.name}</h2>
                 <p className="text-gray-500">{editedUser.email}</p>
               </div>
             </div>
-
-            <div className="space-y-8">  {/* Increased section spacing */}
-              {/* Personal Information */}
+            <div className="space-y-8">
               <div>
                 <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center">
                   <span>Personal Information</span>
@@ -95,7 +99,7 @@ export default function ProfilePage() {
                     </button>
                   )}
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">  {/* Increased gap */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-gray-600 text-sm mb-2">Full Name</label>
                     <input
@@ -172,54 +176,6 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
-
-              {/* Emergency Contact */}
-              <div className="border-t pt-8">
-                <h3 className="text-lg font-semibold mb-4 text-gray-900">Emergency Contact</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-gray-600 text-sm mb-2">Contact Name</label>
-                    <input
-                      type="text"
-                      value={editedUser.emergency_contact.name}
-                      onChange={(e) => handleInputChange(e, 'emergency_contact.name')}
-                      className={`w-full p-3 border rounded-lg ${isEditing
-                        ? 'bg-white border-[#0B8FAC] focus:ring-2 focus:ring-[#0B8FAC] focus:border-transparent'
-                        : 'bg-gray-50'
-                        }`}
-                      readOnly={!isEditing}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-600 text-sm mb-2">Contact Phone</label>
-                    <input
-                      type="text"
-                      value={editedUser.emergency_contact.phone}
-                      onChange={(e) => handleInputChange(e, 'emergency_contact.phone')}
-                      className={`w-full p-3 border rounded-lg ${isEditing
-                        ? 'bg-white border-[#0B8FAC] focus:ring-2 focus:ring-[#0B8FAC] focus:border-transparent'
-                        : 'bg-gray-50'
-                        }`}
-                      readOnly={!isEditing}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-600 text-sm mb-2">Relationship</label>
-                    <input
-                      type="text"
-                      value={editedUser.emergency_contact.relationship}
-                      onChange={(e) => handleInputChange(e, 'emergency_contact.relationship')}
-                      className={`w-full p-3 border rounded-lg ${isEditing
-                        ? 'bg-white border-[#0B8FAC] focus:ring-2 focus:ring-[#0B8FAC] focus:border-transparent'
-                        : 'bg-gray-50'
-                        }`}
-                      readOnly={!isEditing}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Save/Cancel Buttons */}
               {isEditing && (
                 <div className="pt-6 border-t flex justify-end space-x-4">
                   <button

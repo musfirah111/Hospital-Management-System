@@ -3,7 +3,8 @@ const express = require('express');
 const {
     registerUser,
     loginUser,
-    getUserProfile
+    getUserProfile,
+    updateUserProfile
 } = require('../controllers/userController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly } = require('../middlewares/roleMiddleware');
@@ -18,5 +19,8 @@ router.post('/login', loginUser);
 
 // Route for getting user profile.
 router.get('/profile', protect, getUserProfile);
+
+// Route for updating user profile
+router.put('/profile', protect, updateUserProfile);
 
 module.exports = router;

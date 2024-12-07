@@ -139,7 +139,9 @@ export default function LabReportsPage() {
       );
 
       console.log('Report shared successfully');
-      setSharePopup(false);
+      setSharePopup(false); // Close the popup after successful sharing
+      setShareEmail(''); // Clear the email input after sharing
+      setSelectedReportId(null); // Reset the selected report ID after sharing
     } catch (error) {
       console.error('Failed to share report:', error);
     }

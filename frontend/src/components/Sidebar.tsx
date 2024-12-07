@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Calendar, 
   LogOut,
@@ -21,6 +21,7 @@ const menuItems = [
 
 export function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   
   return (
     <div className="w-64 bg-white h-screen fixed left-0 top-0 border-r border-gray-200">
@@ -56,7 +57,10 @@ export function Sidebar() {
       </nav>
       
       <div className="absolute bottom-8 w-full px-6">
-        <button className="flex items-center space-x-2 text-gray-600 hover:text-[#0B8FAC]">
+        <button 
+          className="flex items-center space-x-2 text-gray-600 hover:text-[#0B8FAC]"
+          onClick={() => navigate('/login')}
+        >
           <LogOut className="w-5 h-5" />
           <span>Logout</span>
         </button>

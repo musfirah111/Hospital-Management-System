@@ -49,12 +49,12 @@ export interface Review {
 export interface Doctor {
   id: string;
   name: string;
+  department: string;
   specialization: string;
   experience: string;
   rating: number;
-  consultation_fee: number;
-  working_hours: string;
-  description: string;
   image: string;
-  shift: 'Morning' | 'Evening' | 'Night';
+  description: string;
+  price: number;
+  workingHours: string;
 }

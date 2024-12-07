@@ -66,9 +66,36 @@ const getAllReviews = asyncHandler(async (req, res) => {
     }
 });
 
+// Get reviews for a specific doctor
+const getReviewsByDoctor = asyncHandler(async (req, res) => {
+    try {
+        const reviews = await Review.find({ doctor_id: req.params.id })
+            .populate({
+                path: 'patient_id',
+                select: 'name',
+                model: 'Patient'
+            })
+            .sort({ createdAt: -1 }); // Sort by newest first
+
+        // Transform the data to match the frontend expectations
+        const formattedReviews = reviews.map(review => ({
+            id: review._id,
+            rating: review.rating,
+            comment: review.review,
+            date: review.createdAt,
+            patientName: review.patient_id.name
+        }));
+
+        res.status(200).json(formattedReviews);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Export the controller functions
 module.exports = {
     addReview,
     deleteReview,
     getAllReviews,
+    getReviewsByDoctor
 };

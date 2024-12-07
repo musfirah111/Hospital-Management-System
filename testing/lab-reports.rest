@@ -11,6 +11,19 @@ Content-Type: application/json
     "result": "Normal"
 }
 
+### Create Lab Test Report
+POST http://localhost:5000/api/lab-reports
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzYTY4MDhmYmM3Y2NjYzIxMjFhNyIsImlhdCI6MTczMzU1NDAyMiwiZXhwIjoxNzM2MTQ2MDIyfQ.SH2WaV-_49FXglF13AulS52fU6Vb2I8bvRBTZAHqoiA
+Content-Type: application/json
+
+{
+    "patient_id": "675410a39ecbbda6b8d767a5",
+    "doctor_id": "6750afac6dd96e12b38b5ea1",
+    "test_name": "Nuerology Test",
+    "test_date": "2024-03-20",
+    "result": "Normal"
+}
+
 ### Daily Registrations
 GET http://localhost:5000/api/lab-reports/daily-registrations
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4

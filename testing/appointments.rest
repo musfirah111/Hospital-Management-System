@@ -102,6 +102,6 @@ Content-Type: application/json
     "invoiceId": "67507592ccba814bde07155b"
 }
 
-### Get Patient Appointments (Default pagination)
-GET http://localhost:5000/api/appointments/patient/6750af7e6dd96e12b38b5e93
+### Get Patient Appointments (Default pagination)`  
+GET http://localhost:5000/api/appointments/patient/675410a39ecbbda6b8d767a5
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzYjIxMDhmYmM3Y2NjYzIxMjFjYiIsImlhdCI6MTczMzU1MDA2NiwiZXhwIjoxNzM2MTQyMDY2fQ.Kz12082EL8It8KjxuuPqsxNU_snD9TKBhHmOs845DzA

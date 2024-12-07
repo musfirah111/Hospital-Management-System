@@ -19,7 +19,7 @@ GET http://localhost:5000/api/appointments/67507592ccba814bde07155b
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
 
 ### Update Appointment Status
-PUT http://localhost:5000/api/appointments/67507592ccba814bde07155b/status
+PUT http://localhost:5000/api/appointments/67540985a0fa0fde8c185904/status
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNzQ5NmExNTc5NjUyNjk2ODI1NyIsImlhdCI6MTczMzMxMDI4MSwiZXhwIjoxNzM1OTAyMjgxfQ.HdCrILiR1rieALWfs5C6fod3S11CFZ1D8D_H4ac6n3k
 Content-Type: application/json
 
@@ -40,12 +40,12 @@ Content-Type: application/json
 
 ### Request Appointment or Reschedule
 POST http://localhost:5000/api/appointments/request-reschedule
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzYjIxMDhmYmM3Y2NjYzIxMjFjYiIsImlhdCI6MTczMzUxNzU5OCwiZXhwIjoxNzM2MTA5NTk4fQ.AHkTgNpAMUuztGHFpyAix9ipm7JPyH15E87_aDcfwzQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8
 Content-Type: application/json
 
 {
-    "patient_id": "6750af7e6dd96e12b38b5e93",
-    "doctor_id": "6750afac6dd96e12b38b5ea1",
+    "patient_id": "6753668162ae38bdf7368784",
+    "doctor_id": "6750790c91dcace6a5837f2b",
     "appointment_date": "2024-03-22",
     "appointment_time": "10:00"
 } 
@@ -102,6 +102,6 @@ Content-Type: application/json
     "invoiceId": "67507592ccba814bde07155b"
 }
 
-### Get Patient Appointments (Default pagination)
-GET http://localhost:5000/api/appointments/patient/6750af7e6dd96e12b38b5e93
+### Get Patient Appointments (Default pagination)`  
+GET http://localhost:5000/api/appointments/patient/675410a39ecbbda6b8d767a5
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzYjIxMDhmYmM3Y2NjYzIxMjFjYiIsImlhdCI6MTczMzU1MDA2NiwiZXhwIjoxNzM2MTQyMDY2fQ.Kz12082EL8It8KjxuuPqsxNU_snD9TKBhHmOs845DzA

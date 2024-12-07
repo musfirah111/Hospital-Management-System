@@ -43,9 +43,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const response = await axios.post<User>('http://localhost:5000/api/users/login', { email, password });
             const userData = response.data;
-            
+
             // Debug log before storage
-            console.log('About to store:', { 
+            console.log('About to store:', {
                 id: userData.id,
                 token: userData.token,
                 role: userData.role
@@ -92,5 +92,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         <AuthContext.Provider value={{ user, login, logout, setUser }}>
             {children}
         </AuthContext.Provider>
-);
+    );
 };

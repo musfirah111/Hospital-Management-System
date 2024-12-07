@@ -1,12 +1,12 @@
 ### Create Prescription
 POST http://localhost:5000/api/prescriptions
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlMTJlMzE1YmVhMzZkMmQ0YSIsImlhdCI6MTczMzQxNzk2OCwiZXhwIjoxNzM2MDA5OTY4fQ.R7iRf71IuqpKNDkOTzq4BvJbTx8HotyL4tNUjDhN6XE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNzQ5NmExNTc5NjUyNjk2ODI1NyIsImlhdCI6MTczMzMxMDI4MSwiZXhwIjoxNzM1OTAyMjgxfQ.HdCrILiR1rieALWfs5C6fod3S11CFZ1D8D_H4ac6n3k
 Content-Type: application/json
 
 {
-    "patient_id": "67503a99079109bd4cef37be",
-    "doctor_id": "6750ae1ebb5819c52ef40704",
-    "appointment_id": "6751de8cad579fe75b07de5c",
+    "patient_id": "6753668162ae38bdf7368784",
+    "doctor_id": "675039e1bb481a21276f3590",
+    "appointment_id": "675366f062ae38bdf7368791",
     "medications": [
         {
             "name": "Medicine Name-------------",

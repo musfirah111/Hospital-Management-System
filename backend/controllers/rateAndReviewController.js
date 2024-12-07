@@ -5,7 +5,7 @@ const Patient = require('../models/Patient');
 
 // Add a review (Patient)
 const addReview = asyncHandler(async (req, res) => {
-    const { doctor_id, patient_id } = req.body;
+    const { doctor_id, patient_id, rating, review } = req.body;
 
     try {
         // Verify if the doctor exists
@@ -20,9 +20,16 @@ const addReview = asyncHandler(async (req, res) => {
             return res.status(404).json({ message: 'Patient not found' });
         }
 
-        const review = new Review(req.body);
-        await review.save();
-        res.status(201).json(review);
+        // Create and save the review
+        const newReview = new Review({
+            doctor_id,
+            patient_id,
+            rating,
+            review: review || '' // Handle optional review text
+        });
+
+        await newReview.save();
+        res.status(201).json(newReview);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

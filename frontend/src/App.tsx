@@ -23,6 +23,7 @@ import { AdminAppointmentsPage } from './pages/admin/AppointmentsPage';
 import { DepartmentsPage } from './pages/admin/DepartmentsPage';
 import { ReviewsPage } from './pages/admin/ReviewsPage';
 import { DashboardPage } from './pages/admin/DashboardPage';
+import { AdminLayout } from './components/admin/layout/AdminLayout';
 
 // Doctor imports
 import DoctorSidebar from './components/doctor/Sidebar';
@@ -35,6 +36,7 @@ import MedicalRecords from './pages/doctor/MedicalRecords';
 import LabReports from './pages/doctor/LabReports';
 import Chat from './pages/doctor/Chat';
 import { DoctorHeader } from './components/doctor/layout/Header';
+import { DoctorLayout } from './components/doctor/layout/DoctorLayout';
 
 // Protected route component
 interface ProtectedRouteProps {
@@ -82,24 +84,26 @@ function App() {
 
           {/* Protected Doctor Routes */}
           <Route element={<ProtectedRoute allowedRoles={['Doctor']} />}>
-            <Route path="/" element={<DoctorDashboard />} />
-            <Route path="/appointments" element={<Appointments />} />
-            <Route path="/schedule" element={<Schedule />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/prescriptions" element={<Prescriptions />} />
-            <Route path="/records" element={<MedicalRecords />} />
-            <Route path="/lab-reports" element={<LabReports />} />
-            <Route path="/chat" element={<Chat />} />
+            <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+            <Route path="/doctor/appointments" element={<Appointments />} />
+            <Route path="/doctor/schedule" element={<Schedule />} />
+            <Route path="/doctor/profile" element={<Profile />} />
+            <Route path="/doctor/prescriptions" element={<Prescriptions />} />
+            <Route path="/doctor/records" element={<MedicalRecords />} />
+            <Route path="/doctor/lab-reports" element={<LabReports />} />
+            <Route path="/doctor/chat" element={<Chat />} />
           </Route>
 
           {/* Protected Admin Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/patients" element={<PatientsPage />} />
-            <Route path="/appointments" element={<AdminAppointmentsPage />} />
-            <Route path="/doctors" element={<DoctorsPage />} />
-            <Route path="/departments" element={<DepartmentsPage />} />
-            <Route path="/reviews" element={<ReviewsPage />} />
+          <Route element={<ProtectedRoute allowedRoles={['Admin']} />} >
+            <Route element={<AdminLayout />}>
+              <Route path="/admin/dashboard" element={<DashboardPage />} />
+              <Route path="/admin/patients" element={<PatientsPage />} />
+              <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
+              <Route path="/admin/doctors" element={<DoctorsPage />} />
+              <Route path="/admin/departments" element={<DepartmentsPage />} />
+              <Route path="/admin/reviews" element={<ReviewsPage />} />
+            </Route>
           </Route>
         </Routes>
       </Router>

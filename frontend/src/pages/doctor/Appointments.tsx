@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import SearchBar from '../../components/doctor/SearchBar';
 import AppointmentList from '../../components/doctor/AppointmentList';
+import { Layout } from '../../components/doctor/Layout';
 
 const mockAppointments = [
   {
@@ -48,35 +49,37 @@ export default function Appointments() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Appointments</h1>
-      </div>
+    <Layout>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-800">Appointments</h1>
+        </div>
 
-      <div className="flex space-x-4">
-        <div className="flex-1">
-          <SearchBar
-            onSearch={handleSearch}
-            placeholder="Search by patient name or ID..."
+        <div className="flex space-x-4">
+          <div className="flex-1">
+            <SearchBar
+              onSearch={handleSearch}
+              placeholder="Search by patient name or ID..."
+            />
+          </div>
+          <select className="border rounded-md px-3 py-2">
+            <option value="all">All Status</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="reschedule-requested">Reschedule Requested</option>
+          </select>
+          <input
+            type="date"
+            className="border rounded-md px-3 py-2"
           />
         </div>
-        <select className="border rounded-md px-3 py-2">
-          <option value="all">All Status</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-          <option value="reschedule-requested">Reschedule Requested</option>
-        </select>
-        <input
-          type="date"
-          className="border rounded-md px-3 py-2"
+
+        <AppointmentList
+          appointments={filteredAppointments}
+          onStatusUpdate={handleStatusUpdate}
         />
       </div>
-
-      <AppointmentList
-        appointments={filteredAppointments}
-        onStatusUpdate={handleStatusUpdate}
-      />
-    </div>
+    </Layout>
   );
 }

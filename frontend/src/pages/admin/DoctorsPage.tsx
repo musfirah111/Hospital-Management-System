@@ -23,7 +23,7 @@ export function DoctorsPage() {
   };
 
   const handleDeleteConfirm = () => {
-    setDoctorData(prevData => 
+    setDoctorData(prevData =>
       prevData.filter(doc => doc.id !== selectedDoctor.id)
     );
   };

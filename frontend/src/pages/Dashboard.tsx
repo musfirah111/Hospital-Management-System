@@ -63,7 +63,7 @@ function Dashboard() {
   useEffect(() => {
     const userId = localStorage.getItem('userId');
     console.log('Dashboard mounted, userId:', userId); // Debug log
-   
+
     const fetchDashboardData = async () => {
       try {
         const userId = localStorage.getItem('userId');
@@ -83,15 +83,15 @@ function Dashboard() {
         );
 
         console.log('Appointments response:', appointmentsResponse.data);
-        
+
         // Check if appointments exist and are in an array
-        const appointments = Array.isArray(appointmentsResponse.data.appointments) 
+        const appointments = Array.isArray(appointmentsResponse.data.appointments)
           ? appointmentsResponse.data.appointments.map(apt => ({
-              doctorName: apt.doctor_id.user_id.name,
-              specialty: apt.doctor_id.department_id.name,
-              date: new Date(apt.appointment_date).toLocaleDateString(),
-              time: apt.appointment_time
-            }))
+            doctorName: apt.doctor_id.user_id.name,
+            specialty: apt.doctor_id.department_id.name,
+            date: new Date(apt.appointment_date).toLocaleDateString(),
+            time: apt.appointment_time
+          }))
           : [];
 
         setAppointments(appointments);

@@ -46,10 +46,10 @@ export const Login: React.FC = () => {
         navigate('/dashboard');
       }
       else if (data.role === 'Doctor') {
-        navigate('/doctor-dashboard');
+        navigate('/doctor/dashboard');
       }
       else if (data.role === 'Admin') {
-        navigate('/admin-dashboard');
+        navigate('/admin/dashboard');
       }
       else {
         throw new Error('Role not recognized');

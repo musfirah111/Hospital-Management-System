@@ -25,6 +25,18 @@ import { DepartmentsPage } from './pages/admin/DepartmentsPage';
 import { ReviewsPage } from './pages/admin/ReviewsPage';
 import { DashboardPage } from './pages/admin/DashboardPage';
 
+// Doctor imports
+import DoctorSidebar from './components/doctor/Sidebar';
+import DoctorDashboard from './pages/doctor/Dashboard';
+import Appointments from './pages/doctor/Appointments';
+import Schedule from './pages/doctor/Schedule';
+import Profile from './pages/doctor/Profile';
+import Prescriptions from './pages/doctor/Prescriptions';
+import MedicalRecords from './pages/doctor/MedicalRecords';
+import LabReports from './pages/doctor/LabReports';
+import Chat from './pages/doctor/Chat';
+import { DoctorHeader } from './components/doctor/layout/Header';
+
 // Protected route component
 interface ProtectedRouteProps {
   allowedRole: string;
@@ -84,21 +96,41 @@ function App() {
 
           {/* Admin routes*/}
           <div className="min-h-screen bg-[#D2EBE7]">
-        <Sidebar />
-        <div className="ml-64">
-          <Header user={currentUser} />
-          <main className="p-6">
-            <Routes>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/patients" element={<PatientsPage />} />
-              <Route path="/appointments" element={<AdminAppointmentsPage />} />
-              <Route path="/doctors" element={<DoctorsPage />} />
-              <Route path="/departments" element={<DepartmentsPage />} />
-              <Route path="/reviews" element={<ReviewsPage />} />
-            </Routes>
-          </main>
-        </div>
-      </div>
+            <Sidebar />
+            <div className="ml-64">
+              <Header user={currentUser} />
+              <main className="p-6">
+                <Routes>
+                  <Route path="/" element={<DashboardPage />} />
+                  <Route path="/patients" element={<PatientsPage />} />
+                  <Route path="/appointments" element={<AdminAppointmentsPage />} />
+                  <Route path="/doctors" element={<DoctorsPage />} />
+                  <Route path="/departments" element={<DepartmentsPage />} />
+                  <Route path="/reviews" element={<ReviewsPage />} />
+                </Routes>
+              </main>
+            </div>
+          </div>
+
+          {/* Doctor Routes*/}
+          <div className="min-h-screen bg-[#D2EBE7]">
+            <DoctorSidebar />
+            <div className="ml-64">
+              <DoctorHeader user={currentUser} />
+              <main className="p-6">
+                <Routes>
+                  <Route path="/" element={<DoctorDashboard />} />
+                  <Route path="/appointments" element={<Appointments />} />
+                  <Route path="/schedule" element={<Schedule />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/prescriptions" element={<Prescriptions />} />
+                  <Route path="/records" element={<MedicalRecords />} />
+                  <Route path="/lab-reports" element={<LabReports />} />
+                  <Route path="/chat" element={<Chat />} />
+                </Routes>
+              </main>
+            </div>
+          </div>
         </Routes>
       </Router>
     </AuthProvider>

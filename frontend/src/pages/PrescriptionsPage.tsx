@@ -1,41 +1,75 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar } from 'lucide-react';
 import { formatDate } from '../utils/date';
-import { doctors } from '../data/doctors';
 import SearchBar from '../components/SearchBar';
 import { Layout } from '../components/Layout';
+import axios from 'axios';
 
-// Mock prescriptions data
-const prescriptions = [
-  {
-    id: '1',
-    doctor_id: '1',
-    medications: [
-      {
-        name: 'Amoxicillin',
-        dosage: '500mg',
-        frequency: 'Twice daily',
-        duration: '7 days'
-      },
-      {
-        name: 'Ibuprofen',
-        dosage: '400mg',
-        frequency: 'As needed',
-        duration: '5 days'
-      }
-    ],
-    instructions: 'Take with food. Complete the full course of antibiotics.',
-    date: '2024-03-15'
-  }
-];
+// Define a type for the prescription data
+interface Prescription {
+  id: string;
+  doctor_id: {
+    _id: string;
+    user_id: {
+      name: string;
+      profile_picture: string;
+    };
+    specialization: string;
+  };
+  medications: { name: string; dosage: string; frequency: string; duration: string }[];
+  date_issued: string;
+  instructions?: string;
+}
+
+interface PatientResponse {
+  id: string;
+}
 
 export default function PrescriptionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+
+  useEffect(() => {
+    const fetchPrescriptions = async () => {
+      try {
+        const userId = localStorage.getItem('userId');
+        const token = localStorage.getItem('authToken');  
+
+        if (!userId || !token) {
+          console.error('User ID or token is missing');
+          return;
+        }
+
+        const patientResponse = await axios.get<PatientResponse>(
+          `http://localhost:5000/api/patients/user/${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const patientId = patientResponse.data.id;
+
+        if (!patientId) {
+          console.error('Patient ID is undefined');
+          return;
+        }
+
+        const response = await axios.get<Prescription[]>(
+          `http://localhost:5000/api/prescriptions/patient/${patientId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        setPrescriptions(response.data);
+      } catch (error) {
+        console.error('Error fetching prescriptions:', error);
+      }
+    };
+
+    fetchPrescriptions();
+  }, []);
 
   const filteredPrescriptions = prescriptions.filter(prescription => {
-    const doctor = doctors.find(d => d.id === prescription.doctor_id);
+    const doctorName = prescription.doctor_id.user_id.name.toLowerCase();
     const medications = prescription.medications.map(m => m.name.toLowerCase());
-    return doctor?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    return doctorName.includes(searchQuery.toLowerCase()) ||
       medications.some(med => med.includes(searchQuery.toLowerCase()));
   });
 
@@ -54,25 +88,25 @@ export default function PrescriptionsPage() {
 
         <div className="space-y-6">
           {filteredPrescriptions.map((prescription) => {
-            const doctor = doctors.find(d => d.id === prescription.doctor_id);
+            const doctor = prescription.doctor_id;
 
             return (
               <div key={prescription.id} className="bg-white rounded-xl shadow-lg p-6">
                 <div className="flex items-start space-x-4">
                   <img
-                    src={doctor?.image}
-                    alt={doctor?.name}
+                    src={doctor.user_id.profile_picture}
+                    alt={doctor.user_id.name}
                     className="w-16 h-16 rounded-lg object-cover"
                   />
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-semibold text-lg">{doctor?.name}</h3>
-                        <p className="text-[#0B8FAC]">{doctor?.specialization}</p>
+                        <h3 className="font-semibold text-lg">{doctor.user_id.name}</h3>
+                        <p className="text-[#0B8FAC]">{doctor.specialization}</p>
                       </div>
                       <div className="flex items-center text-gray-600">
                         <Calendar className="w-4 h-4 mr-2" />
-                        {formatDate(prescription.date)}
+                        {formatDate(prescription.date_issued)}
                       </div>
                     </div>
 

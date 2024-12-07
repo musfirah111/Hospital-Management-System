@@ -41,6 +41,16 @@ const doctorSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    experience: {
+        type: Number,
+        required: [true, 'Please enter years of experience.'],
+        min: [0, 'Experience cannot be negative.']
+    },
+    consultation_fee: {
+        type: Number,
+        required: [true, 'Please enter consultation fee.'],
+        min: [0, 'Consultation fee cannot be negative.']
+    },
     date_of_joining: {
         type: Date,
         default: Date.now,
@@ -51,3 +61,4 @@ const doctorSchema = new mongoose.Schema({
 const Doctor = mongoose.model('Doctor', doctorSchema);
 
 module.exports = Doctor;
+

@@ -52,7 +52,9 @@ export interface Doctor {
   specialization: string;
   experience: string;
   rating: number;
-  price: number;
+  consultation_fee: number;
+  working_hours: string;
   description: string;
   image: string;
+  shift: 'Morning' | 'Evening' | 'Night';
 }

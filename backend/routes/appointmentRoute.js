@@ -36,8 +36,10 @@ router.get('/completed', getCompletedAppointments);
 // Route for getting requested or rescheduled appointments with pagination
 router.get('/requested', getRequestedAppointments);
 
-// Route to create a new appointment (admin only).
-router.post('/', protect, adminOnly, createAppointment);
+// Route to get available slots for a doctor
+router.get('/available-slots/:doctorId', protect, getAvailableSlotsForDoctor);
+
+
 
 // Route to get all appointments (admin only).
 router.get('/', protect, adminOnly, getAppointments);
@@ -57,7 +59,8 @@ router.post('/request-reschedule', protect, requestAppointmentOrReschedule);
 // Route to request appointment cancellation
 router.post('/cancel', protect, requestCancellation);
 
-
+// Route to create a new appointment (admin only).
+router.post('/', protect, adminOnly, createAppointment);
 
 
 module.exports = router; 

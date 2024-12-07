@@ -8,6 +8,6 @@ const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly } = require('../middlewares/roleMiddleware');
 
 router.get('/ratings/doctor/:doctor_id', protect, adminOnly, getDoctorRating);
-router.get('/ratings/departments/top-doctors', protect, adminOnly, getTopRatedDoctorsByDepartment);
+router.get('/ratings/departments/top-doctors', protect, getTopRatedDoctorsByDepartment);
 
 module.exports = router;

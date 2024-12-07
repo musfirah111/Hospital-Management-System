@@ -4,10 +4,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhY
 Content-Type: application/json
 
 {
-    "patient_id": "6753637cf0fb6ac17272fb7d",
+    "patient_id": "67543533fb2d19b713e97458",
     "doctor_id": "6750ae1ebb5819c52ef40704",
-    "appointment_date": "2024-12-07",
-    "appointment_time": "12:00"
+    "appointment_date": "2024-12-08",
+    "appointment_time": "11:00"
 }
 
 ### Get All Appointments

@@ -1,18 +1,39 @@
 import { formatDate } from '../utils/date';
 import { Layout } from '../components/Layout';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
-// Mock notifications data
-const notifications = [
-  {
-    id: '1',
-    title: 'Appointment Reminder',
-    message: 'Your appointment with Dr. Smith is tomorrow at 10:00 AM',
-    date: '2024-03-20',
-    read: false,
-  },
-];
+interface Notification {
+  _id: string;
+  title: string;
+  message: string;
+  sent_date: string; // Adjust type based on your actual data structure
+  read: boolean; // Add the read property
+}
 
 export default function NotificationsPage() {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const userId = localStorage.getItem('userId');
+        const token = localStorage.getItem('authToken');
+        const response = await axios.get(`http://localhost:5000/api/appointments/notifications/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(response);
+        setNotifications(response.data);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
   return (
     <Layout>
       <div className="min-h-screen bg-[#D2EBE7] pb-6">
@@ -25,7 +46,7 @@ export default function NotificationsPage() {
             ) : (
               notifications.map((notification) => (
                 <div
-                  key={notification.id}
+                  key={notification._id}
                   className={`bg-white rounded-xl shadow-lg p-6 ${!notification.read ? 'border-l-4 border-[#0B8FAC]' : ''}`}
                 >
                   <div className="flex justify-between items-start">
@@ -34,7 +55,7 @@ export default function NotificationsPage() {
                       <p className="text-gray-600 mt-1">{notification.message}</p>
                     </div>
                     <span className="text-sm text-gray-500">
-                      {formatDate(notification.date)}
+                      {formatDate(notification.sent_date)}
                     </span>
                   </div>
                 </div>

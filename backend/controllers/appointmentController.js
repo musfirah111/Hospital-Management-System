@@ -9,6 +9,7 @@ const User = require('../models/User');
 const cron = require('node-cron');
 const mongoose = require('mongoose');
 
+
 // Function to get available time slots.
 const getAvailableTimeSlots = async (doctorId, date) => {
     const doctor = await Doctor.findById(doctorId);
@@ -56,22 +57,22 @@ const sendAppointmentReminders = async () => {
         status: 'Scheduled'
     }).populate('patient_id'); // Populate patient details
 
-    console.log(`Found ${upcomingAppointments.length} upcoming appointments.`); // Debugging log
+    console.log(`Found ${upcomingAppointments.length} upcoming appointments.`);
 
     for (const appointment of upcomingAppointments) {
-        // Check if the appointment is less than or equal to 24 hours away
+        // Check if the appointment is less than 24 hours away
         const appointmentDate = new Date(appointment.appointment_date);
-        if (appointmentDate <= reminderTime) {
-            console.log(`Creating notification for appointment ID: ${appointment._id}`); // Debugging log
+        if (appointmentDate > now && appointmentDate <= reminderTime) {
+            console.log(`Creating notification for appointment ID: ${appointment._id}`);
             try {
-                if (appointment.patient_id) { // Check if patient_id is populated
-                    console.log('Appointment details:', appointment); // Log the appointment details
+                if (appointment.patient_id) {
+                    console.log('Appointment details:', appointment);
                     const notification = await Notification.create({
-                        title: 'Appointment Reminder',
-                        user_id: appointment.patient_id._id, // Use patient_id's _id
-                        message: `You have an appointment scheduled on ${moment(appointment.appointment_date).format('YYYY-MM-DD HH:mm')}.`,
+                        title: 'The Appointment Reminder',
+                        user_id: appointment.patient_id.user_id, // Use user_id instead of patient_id's _id
+                        message: `You have an appointment scheduled on ${moment(appointment.appointment_date).format('YYYY-MM-DD')}.`,
                     });
-                    console.log(`Notification sent to user ${appointment.patient_id._id}: ${notification.message}`);
+                    console.log(`Notification sent to user ${appointment.patient_id.user_id}: ${notification}`);
                 } else {
                     console.error('Patient ID is not populated for appointment ID:', appointment._id);
                 }
@@ -383,16 +384,16 @@ const getRequestedAppointments = asyncHandler(async (req, res) => {
 });
 
 const getPatientAppointments = asyncHandler(async (req, res) => {
-    const appointments = await Appointment.find({ 
-        patient_id: req.params.id 
+    const appointments = await Appointment.find({
+        patient_id: req.params.id
     })
-    .populate({
-        path: 'doctor_id',
-        populate: [
-            { path: 'user_id' },
-            { path: 'department_id' }
-        ]
-    });
+        .populate({
+            path: 'doctor_id',
+            populate: [
+                { path: 'user_id' },
+                { path: 'department_id' }
+            ]
+        });
 
     res.json({
         appointments: appointments
@@ -410,7 +411,7 @@ const getAvailableSlotsForDoctor = asyncHandler(async (req, res) => {
     }
 
     const availableSlots = await getAvailableTimeSlots(doctorId, date);
-    
+
     res.json({
         success: true,
         availableSlots

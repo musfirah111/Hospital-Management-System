@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DaySelector } from '../../components/doctor/schedule/DaySelector';
 import { TimeSlotCard } from '../../components/doctor/schedule/TimeSlotCard';
 import type { TimeSlot } from '../../types/doctor/schedule';
+import { Layout } from '../../components/doctor/Layout';
 
 // Mock data - replace with actual data fetching
 const mockTimeSlots: TimeSlot[] = [
@@ -41,22 +42,24 @@ export default function Schedule() {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Schedule</h1>
-        <p className="text-gray-600">Manage your daily appointments</p>
-      </div>
+    <Layout>
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Schedule</h1>
+          <p className="text-gray-600">Manage your daily appointments</p>
+        </div>
 
-      <DaySelector
-        selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
-      />
+        <DaySelector
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+        />
 
-      <div className="space-y-4">
-        {mockTimeSlots.map((slot) => (
-          <TimeSlotCard key={slot.time} slot={slot} />
-        ))}
+        <div className="space-y-4">
+          {mockTimeSlots.map((slot) => (
+            <TimeSlotCard key={slot.time} slot={slot} />
+          ))}
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }

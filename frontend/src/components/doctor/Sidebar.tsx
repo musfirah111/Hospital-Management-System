@@ -10,13 +10,13 @@ import {
 } from 'lucide-react';
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: Calendar, label: 'Appointments', path: '/appointments' },
-  { icon: Clock, label: 'Schedule', path: '/schedule' },
-  { icon: FileText, label: 'Prescriptions', path: '/prescriptions' },
-  { icon: ClipboardList, label: 'Medical Records', path: '/records' },
-  { icon: TestTube2, label: 'Lab Reports', path: '/lab-reports' },
-  { icon: MessageSquare, label: 'Chat', path: '/chat' },
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/doctor/dashboard' },
+  { icon: Calendar, label: 'Appointments', path: '/doctor/appointments' },
+  { icon: Clock, label: 'Schedule', path: '/doctor/schedule' },
+  { icon: FileText, label: 'Prescriptions', path: '/doctor/prescriptions' },
+  { icon: ClipboardList, label: 'Medical Records', path: '/doctor/records' },
+  { icon: TestTube2, label: 'Lab Reports', path: '/doctor/lab-reports' },
+  { icon: MessageSquare, label: 'Chat', path: '/doctor/chat' },
 ];
 
 export default function DoctorSidebar() {
@@ -39,8 +39,8 @@ export default function DoctorSidebar() {
                 <Link
                   to={item.path}
                   className={`flex items-center space-x-3 px-6 py-2.5 transition-colors w-full ${isActive
-                      ? 'bg-[#D2EBE7] text-[#0B8FAC]'
-                      : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-[#D2EBE7] text-[#0B8FAC]'
+                    : 'text-gray-600 hover:bg-gray-50'
                     }`}
                 >
                   <Icon size={20} strokeWidth={1.5} />

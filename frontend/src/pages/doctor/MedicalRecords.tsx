@@ -3,6 +3,7 @@ import SearchBar from '../../components/doctor/SearchBar';
 import MedicalRecordForm from '../../components/doctor/MedicalRecordForm';
 import { FileText, Download, Share2 } from 'lucide-react';
 import type { MedicalRecord } from '../../types/doctor/index';
+import { Layout } from '../../components/doctor/Layout';
 
 const mockRecords: MedicalRecord[] = [
   {
@@ -51,77 +52,79 @@ export default function MedicalRecords() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Medical Records</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-[#0B8FAC] text-white px-4 py-2 rounded-md hover:bg-[#0b8fac7a]"
-        >
-          New Record
-        </button>
-      </div>
+    <Layout>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-800">Medical Records</h1>
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-[#0B8FAC] text-white px-4 py-2 rounded-md hover:bg-[#0b8fac7a]"
+          >
+            New Record
+          </button>
+        </div>
 
-      <MedicalRecordForm
-        isOpen={showForm}
-        onClose={() => setShowForm(false)}
-        onSubmit={handleCreateRecord}
-      />
+        <MedicalRecordForm
+          isOpen={showForm}
+          onClose={() => setShowForm(false)}
+          onSubmit={handleCreateRecord}
+        />
 
-      <div className="flex space-x-4">
-        <div className="flex-1">
-          <SearchBar
-            onSearch={handleSearch}
-            placeholder="Search by patient name, ID, or diagnosis..."
+        <div className="flex space-x-4">
+          <div className="flex-1">
+            <SearchBar
+              onSearch={handleSearch}
+              placeholder="Search by patient name, ID, or diagnosis..."
+            />
+          </div>
+          <input
+            type="date"
+            className="border rounded-md px-3 py-2"
           />
         </div>
-        <input
-          type="date"
-          className="border rounded-md px-3 py-2"
-        />
-      </div>
 
-      <div className="grid gap-6">
-        {filteredRecords.map((record) => (
-          <div key={record.id} className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="flex items-center space-x-2">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold">{record.patientName}</h3>
-                  <span className="text-sm text-gray-500">({record.patientId})</span>
-                </div>
-                <p className="text-sm text-gray-500 mt-1">Record date: {record.date}</p>
-              </div>
-              <div className="flex space-x-2">
-                <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
-                  <Download size={20} />
-                </button>
-                <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
-                  <Share2 size={20} />
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-4 space-y-4">
-              <div>
-                <h4 className="font-medium mb-2">Diagnosis:</h4>
-                <p className="text-sm text-gray-600">{record.diagnosis}</p>
-              </div>
-              <div>
-                <h4 className="font-medium mb-2">Treatment:</h4>
-                <p className="text-sm text-gray-600">{record.treatment}</p>
-              </div>
-              {record.notes && (
+        <div className="grid gap-6">
+          {filteredRecords.map((record) => (
+            <div key={record.id} className="bg-white rounded-lg shadow-md p-6">
+              <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="font-medium mb-2">Notes:</h4>
-                  <p className="text-sm text-gray-600">{record.notes}</p>
+                  <div className="flex items-center space-x-2">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                    <h3 className="text-lg font-semibold">{record.patientName}</h3>
+                    <span className="text-sm text-gray-500">({record.patientId})</span>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">Record date: {record.date}</p>
                 </div>
-              )}
+                <div className="flex space-x-2">
+                  <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
+                    <Download size={20} />
+                  </button>
+                  <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
+                    <Share2 size={20} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-4 space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Diagnosis:</h4>
+                  <p className="text-sm text-gray-600">{record.diagnosis}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Treatment:</h4>
+                  <p className="text-sm text-gray-600">{record.treatment}</p>
+                </div>
+                {record.notes && (
+                  <div>
+                    <h4 className="font-medium mb-2">Notes:</h4>
+                    <p className="text-sm text-gray-600">{record.notes}</p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }

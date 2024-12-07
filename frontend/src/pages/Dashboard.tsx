@@ -64,7 +64,7 @@ function Dashboard() {
   useEffect(() => {
     const userId = localStorage.getItem('userId');
     console.log('Dashboard mounted, userId:', userId); // Debug log
-   
+
     const fetchDashboardData = async () => {
       try {
         const userId = localStorage.getItem('userId');
@@ -84,7 +84,7 @@ function Dashboard() {
         );
 
         console.log('Appointments response:', appointmentsResponse.data);
-        
+
         // Check if appointments exist and are in an array
         const appointments = Array.isArray(appointmentsResponse.data.appointments) 
           ? appointmentsResponse.data.appointments

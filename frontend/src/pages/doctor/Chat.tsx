@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Send } from 'lucide-react';
 import ChatList from '../../components/doctor/ChatList';
 import ChatMessage from '../../components/doctor/ChatMessage';
+import { Layout } from '../../components/doctor/Layout';
 
 const mockContacts = [
   {
@@ -53,52 +54,54 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-2rem)] bg-[#D2EBE7] p-4">
-      <div className="flex w-full bg-white rounded-lg shadow-lg overflow-hidden">
-        <ChatList
-          contacts={mockContacts}
-          selectedContact={selectedContact}
-          onSelectContact={setSelectedContact}
-        />
+    <Layout>
+      <div className="flex h-[calc(100vh-2rem)] bg-[#D2EBE7] p-4">
+        <div className="flex w-full bg-white rounded-lg shadow-lg overflow-hidden">
+          <ChatList
+            contacts={mockContacts}
+            selectedContact={selectedContact}
+            onSelectContact={setSelectedContact}
+          />
 
-        {selectedContact ? (
-          <div className="flex-1 flex flex-col">
-            <div className="p-4 border-b">
-              <h2 className="text-lg font-semibold">
-                {mockContacts.find(c => c.id === selectedContact)?.name}
-              </h2>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {mockMessages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
-              ))}
-            </div>
-
-            <form onSubmit={handleSendMessage} className="p-4 border-t">
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <Send size={20} />
-                </button>
+          {selectedContact ? (
+            <div className="flex-1 flex flex-col">
+              <div className="p-4 border-b">
+                <h2 className="text-lg font-semibold">
+                  {mockContacts.find(c => c.id === selectedContact)?.name}
+                </h2>
               </div>
-            </form>
-          </div>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-500">
-            Select a conversation to start chatting
-          </div>
-        )}
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {mockMessages.map((message) => (
+                  <ChatMessage key={message.id} message={message} />
+                ))}
+              </div>
+
+              <form onSubmit={handleSendMessage} className="p-4 border-t">
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type your message..."
+                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <Send size={20} />
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-gray-500">
+              Select a conversation to start chatting
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }

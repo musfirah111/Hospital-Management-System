@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose');
 const MedicalRecord = require('../models/MedicalRecord');
+const Patient = require('../models/Patient');
 
 // Create a new medical record (Doctor)
 const createRecord = asyncHandler(async (req, res) => {
@@ -44,10 +45,42 @@ const searchRecordsByName = asyncHandler(async (req, res) => {
     }
 });
 
+const getRecordsByPatientId = asyncHandler(async (req, res) => {
+    try {
+        console.log('Received request for patient ID:', req.params.patientId);
+
+        const records = await MedicalRecord.find({ patient_id: req.params.patientId })
+            .populate({
+                path: 'doctor_id',
+                populate: {
+                    path: 'user_id',
+                    select: 'name  profile_picture'
+                }
+            })
+            .populate({
+                path: 'treatment', // Populate the `treatment` field directly as it references `Prescription`
+                select: 'medications instructions date_issued status'
+            });
+
+        if (!records || records.length === 0) {
+            console.error('No records found for patient ID:', req.params.patientId);
+            return res.status(404).json({ message: 'No medical records found for this patient.' });
+        }
+
+        console.log('Found records:', records);
+        res.status(200).json(records);
+    } catch (error) {
+        console.error('Error in getRecordsByPatientId:', error.message);
+        res.status(500).json({ message: 'An error occurred while retrieving medical records.' });
+    }
+});
+
+
 // Export the controller functions
 module.exports = {
     createRecord,
     getRecordById,
     searchRecordsByPatientId,
     searchRecordsByName,
+    getRecordsByPatientId,
 };

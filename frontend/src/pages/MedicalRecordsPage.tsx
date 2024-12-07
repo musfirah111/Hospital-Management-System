@@ -1,15 +1,37 @@
 import { useContext, useEffect, useState } from 'react';
 import { Calendar } from 'lucide-react';
 import { formatDate } from '../utils/date';
-import { doctors } from '../data/doctors';
 import { Layout } from '../components/Layout';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 
+interface User {
+  _id: string;
+  name: string;
+  profile_picture: string;
+}
+
+interface Doctor {
+  _id: string;
+  user_id: User;
+  specialization: string;
+}
+
+interface Treatment {
+  medications: {
+    name: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+  }[];
+  instructions: string;
+}
+
 interface MedicalRecord {
-  id: string;
-  doctor_id: string;
+  _id: string;
+  doctor_id: Doctor;
   diagnosis: string;
+  treatment: Treatment[];
   date: string;
 }
 
@@ -23,7 +45,6 @@ export default function MedicalRecordsPage() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    console.log('User object in MedicalRecordsPage:', user);
     const fetchMedicalRecords = async () => {
       if (!user || !user.id) {
         console.error('User ID is null, cannot fetch medical records.');
@@ -33,11 +54,11 @@ export default function MedicalRecordsPage() {
 
       try {
         const userId = localStorage.getItem('userId');
-        console.log('---------------------------Dashboard mounted, userId:', userId);
         const token = localStorage.getItem('authToken');
 
         if (!userId || !token) {
           console.error('User ID or token not found in localStorage');
+          setLoading(false);
           return;
         }
 
@@ -46,7 +67,6 @@ export default function MedicalRecordsPage() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        console.log('Patient response:', patientResponse.data);
         const patientId = patientResponse.data.id;
 
         const recordsResponse = await axios.get<MedicalRecord[]>(
@@ -54,29 +74,16 @@ export default function MedicalRecordsPage() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        console.log('Fetched medical records:', recordsResponse.data);
         setMedicalRecords(recordsResponse.data);
-        console.log('Medical records state updated:', medicalRecords);
-      }
-      catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error('Error fetching medical records:', error.response?.data || error.message);
-        }
-        else {
-          console.error('Unexpected error:', error);
-        }
-      }
-      finally {
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      } finally {
         setLoading(false);
       }
     };
 
     fetchMedicalRecords();
-  }, []);
-
-  useEffect(() => {
-    console.log('Medical records state updated:', medicalRecords);
-  }, [medicalRecords]);
+  }, [user]);
 
   return (
     <Layout>
@@ -91,26 +98,28 @@ export default function MedicalRecordsPage() {
               {Array.isArray(medicalRecords) && medicalRecords.length === 0 ? (
                 <p>No medical records found.</p>
               ) : (
-                Array.isArray(medicalRecords) && medicalRecords.map((record) => {
-                  const doctor = doctors.find(d => d.id === record.doctor_id);
-                  if (!doctor) {
-                    console.error(`Doctor not found for ID: ${record.doctor_id}`);
-                    //return null;
-                  }
+                medicalRecords.map((record) => {
+                  const doctor = record.doctor_id;
+
+                  // Fallback handling for missing doctor details
+                  const doctorSpecialization =
+                    doctor?.specialization || 'Specialization not available';
+                  const doctorProfilePicture =
+                    doctor?.user_id?.profile_picture || 'Profile picture not available';
 
                   return (
-                    <div key={record.id} className="bg-white rounded-xl shadow-lg p-6">
+                    <div key={record._id} className="bg-white rounded-xl shadow-lg p-6">
                       <div className="flex items-start space-x-4">
-                        <img
-                          src={doctor?.image}
-                          alt={doctor?.name}
-                          className="w-16 h-16 rounded-lg object-cover"
-                        />
+                        <div className="w-16 h-16 rounded-full overflow-hidden">
+                          <img src={doctorProfilePicture} alt="Doctor Profile" className="w-full h-full object-cover" />
+                        </div>
                         <div className="flex-1">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h3 className="font-semibold text-lg">{doctor?.name}</h3>
-                              <p className="text-[#0B8FAC]">{doctor?.specialization}</p>
+                              <h3 className="font-semibold text-lg">
+                                {doctor?.user_id.name || 'Not available'}
+                              </h3>
+                              <p className="text-[#0B8FAC]">{doctorSpecialization}</p>
                             </div>
                             <div className="flex items-center text-gray-600">
                               <Calendar className="w-4 h-4 mr-2" />
@@ -121,15 +130,27 @@ export default function MedicalRecordsPage() {
                           <div className="mt-6 space-y-4">
                             <div>
                               <h4 className="font-semibold text-gray-700 mb-2">Diagnosis</h4>
-                              <p className="text-gray-600">{record.diagnosis}</p>
+                              <p className="text-gray-600">
+                                {record.diagnosis || 'Diagnosis not available'}
+                              </p>
                             </div>
 
                             <div>
                               <h4 className="font-semibold text-gray-700 mb-2">Treatment</h4>
                               <div className="bg-gray-50 rounded-lg p-4">
-                                <p className="text-gray-600">
-                                  Prescribed medications can be viewed in the Prescriptions section.
-                                </p>
+                                {record.treatment.map((treatment, index) => (
+                                  <div key={index} className="mb-4">
+                                    <p className="font-semibold text-gray-800">Medications:</p>
+                                    {treatment.medications.map((med, medIndex) => (
+                                      <p key={medIndex} className="text-gray-600">
+                                        {med.name} - {med.dosage} - {med.frequency} - {med.duration}
+                                      </p>
+                                    ))}
+                                    <p className="text-gray-600 mt-2">
+                                      Instructions: {treatment.instructions || 'Not available'}
+                                    </p>
+                                  </div>
+                                ))}
                               </div>
                             </div>
                           </div>

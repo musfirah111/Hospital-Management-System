@@ -1,37 +1,28 @@
 const mongoose = require('mongoose');
 
-const RatingAndReviewSchema = new mongoose.Schema({
-    patient_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Patient',
-        required: false
-    },
+const ratingAndReviewSchema = new mongoose.Schema({
     doctor_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Doctor',
-        required: [true, `Please enter the doctor id.`]
+        required: true
     },
-    department_id: {
+    patient_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Department',
-        required: [true, `Please enter the department id.`]
+        ref: 'Patient',
+        required: true
     },
     rating: {
         type: Number,
+        required: true,
         min: 1,
-        max: 5,
-        required: [true, `Please enter the rating.`]
+        max: 5
     },
     review: {
         type: String,
         required: false
-    },
-    date_given: {
-        type: Date,
-        default: Date.now
     }
+}, {
+    timestamps: true
 });
 
-const RatingAndReview = mongoose.model('RatingAndReview', RatingAndReviewSchema);
-
-module.exports = RatingAndReview;
+module.exports = mongoose.model('RatingAndReview', ratingAndReviewSchema);

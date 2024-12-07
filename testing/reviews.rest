@@ -6,7 +6,6 @@ Content-Type: application/json
 {
     "doctor_id": "675039e1bb481a21276f3590",
     "patient_id": "67503b48bb481a21276f35a4",
-      "department_id": "6750385bbb481a21276f3586", 
     "rating": 5,
     "review": "Excellent service!"
 }

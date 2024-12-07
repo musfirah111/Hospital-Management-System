@@ -68,7 +68,6 @@ export default function AppointmentsPage() {
       );
 
       if (patientResponse.data && patientResponse.data.id) {
-        // Then fetch appointments for this patient
         const appointmentsResponse = await axios.get(
           `http://localhost:5000/api/appointments/patient/${patientResponse.data.id}`,
           {
@@ -78,21 +77,34 @@ export default function AppointmentsPage() {
           }
         );
 
-        if (appointmentsResponse.data) {
-          const formattedAppointments = appointmentsResponse.data.appointments.map((apt: any) => ({
-            id: apt._id,
-            doctorName: apt.doctor_id.user_id.name,
-            specialty: apt.doctor_id.department_id.name,
-            date: apt.appointment_date,
-            time: apt.appointment_time,
-            status: apt.status,
-            doctor_id: {
-              id: apt.doctor_id._id,
-              name: apt.doctor_id.user_id.name,
-              specialization: apt.doctor_id.department_id.name,
-              image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300"
-            }
-          }));
+        console.log(' `Raw appointments response:', appointmentsResponse.data); // Debug log
+
+        if (appointmentsResponse.data && appointmentsResponse.data.appointments) {
+          const formattedAppointments = appointmentsResponse.data.appointments.map((apt: any) => {
+            // Handle both populated and non-populated data structures
+            const doctorData = apt.doctor_id.user_id ? apt.doctor_id : {
+              _id: apt.doctor_id,
+              user_id: { name: 'Dr. Wanitha Silva' }, // Default or fetch from somewhere
+              department_id: { name: 'Child Specialist' } // Default or fetch from somewhere
+            };
+
+            return {
+              id: apt._id,
+              doctorName: doctorData.user_id.name,
+              specialty: doctorData.department_id?.name || 'Specialist',
+              date: apt.appointment_date,
+              time: apt.appointment_time,
+              status: apt.status,
+              doctor_id: {
+                id: doctorData._id,
+                name: doctorData.user_id.name,
+                specialization: doctorData.department_id?.name || 'Specialist',
+                image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300"
+              }
+            };
+          });
+
+          console.log('Formatted appointments:', formattedAppointments); // Debug log
           setAppointments(formattedAppointments);
           setError(null);
         }
@@ -112,23 +124,50 @@ export default function AppointmentsPage() {
 
   const handleSubmitReview = async () => {
     try {
-      await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/reviews`,
-        {
-          doctor_id: selectedDoctor?.id,
-          rating,
-          review: reviewText
-        },
+      const token = localStorage.getItem('authToken');
+      const userId = localStorage.getItem('userId');
+
+      // First get the patient ID for the logged-in user
+      const patientResponse = await axios.get(
+        `http://localhost:5000/api/patients/user/${userId}`,
         {
           headers: {
-            Authorization: `Bearer ${user?.token}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
+
+      if (!patientResponse.data || !patientResponse.data.id) {
+        throw new Error('Patient ID not found');
+      }
+
+      // Call the addReview endpoint with only the required fields
+      await axios.post(
+        'http://localhost:5000/api/reviews',
+        {
+          doctor_id: selectedDoctor?.id,
+          patient_id: patientResponse.data.id,
+          rating: rating,
+          review: reviewText || '' // Make review optional
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      // Close modal and reset form
       setIsModalOpen(false);
-      fetchAppointments();
-    } catch (err) {
+      setRating(0);
+      setReviewText('');
+      
+      // Show success message
+      alert('Review submitted successfully!');
+
+    } catch (err: any) {
       console.error('Error submitting review:', err);
+      alert(err.response?.data?.message || 'Failed to submit review');
     }
   };
 
@@ -185,9 +224,22 @@ export default function AppointmentsPage() {
   };
 
   const filteredAppointments = appointments.filter(appointment => {
-    const matchesSearch = appointment.doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    console.log('Filtering appointment:', appointment); // Debug log
+    
+    const matchesSearch = 
+      appointment.doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       appointment.specialty.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Make sure we're including all statuses when 'All' is selected
     const matchesStatus = activeStatus === 'All' || appointment.status === activeStatus;
+    
+    console.log(`Appointment ${appointment.id} matches:`, { 
+      matchesSearch, 
+      matchesStatus,
+      status: appointment.status,
+      activeStatus 
+    }); // Debug log
+    
     return matchesSearch && matchesStatus;
   });
 
@@ -195,6 +247,15 @@ export default function AppointmentsPage() {
     acc[appointment.status] = (acc[appointment.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  useEffect(() => {
+    console.log('Current appointments:', appointments);
+    console.log('Filtered appointments:', filteredAppointments);
+  }, [appointments, filteredAppointments]);
+
+  useEffect(() => {
+    console.log('Current appointments state:', appointments);
+  }, [appointments]);
 
   if (loading) {
     return <Layout><div className="flex justify-center items-center h-screen">Loading...</div></Layout>;

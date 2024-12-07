@@ -9,10 +9,12 @@ export const Login: React.FC = () => {
   const { setUser } = useContext(AuthContext) as { setUser: (user: any) => void };
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
 
     try {
       const response = await fetch('http://localhost:5000/api/users/login', {
@@ -42,16 +44,20 @@ export const Login: React.FC = () => {
       // Redirect based on the user's role
       if (data.role === 'Patient') {
         navigate('/dashboard');
-      } else if (data.role === 'Doctor') {
+      }
+      else if (data.role === 'Doctor') {
         navigate('/doctor-dashboard');
-      } else if (data.role === 'Admin') {
+      }
+      else if (data.role === 'Admin') {
         navigate('/admin-dashboard');
-      } else {
+      }
+      else {
         throw new Error('Role not recognized');
       }
-    } catch (error: any) {
+    }
+    catch (error: any) {
       console.error('Login failed:', error.message);
-      alert('Login failed. Please check your email and password.');
+      setError('Login failed. Please check your email and password.');
     }
   };
 
@@ -95,7 +101,7 @@ export const Login: React.FC = () => {
               Forgot Password?
             </button>
           </div>
-
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
           <Button type="submit" className="w-full">
             Sign In
             <ArrowRight className="ml-2 inline-block" size={20} />
@@ -104,4 +110,5 @@ export const Login: React.FC = () => {
       </div>
     </div>
   );
-};  
+};
+

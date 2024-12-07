@@ -61,7 +61,14 @@ const getPrescriptionById = asyncHandler(async (req, res) => {
 
 // Get active prescriptions of a specific patient
 const getActivePrescriptionsByPatientId = asyncHandler(async (req, res) => {
-    const prescriptions = await Prescription.find({ patient_id: req.params.id, status: 'active' });
+    const prescriptions = await Prescription.find({ patient_id: req.params.id, status: 'active' })
+    .populate({
+        path: 'doctor_id',
+        populate: {
+            path: 'user_id',
+            select: 'name  profile_picture'
+        }
+    });
 
     if (!prescriptions) {
         res.status(404);

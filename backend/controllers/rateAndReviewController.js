@@ -67,6 +67,19 @@ const getAllReviews = asyncHandler(async (req, res) => {
 });
 
 // Get reviews for a specific doctor
+const getReviewsByDoctorReviews = asyncHandler(async (req, res) => {
+    try {
+        const reviews = await Review.find({ doctor_id: req.params.id })
+            .sort({ createdAt: -1 })
+            .select('review rating createdAt'); // Select review, rating and date
+
+        res.status(200).json(reviews);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Get reviews for a specific doctor
 const getReviewsByDoctor = asyncHandler(async (req, res) => {
     try {
         const reviews = await Review.find({ doctor_id: req.params.id })
@@ -97,5 +110,6 @@ module.exports = {
     addReview,
     deleteReview,
     getAllReviews,
-    getReviewsByDoctor
+    getReviewsByDoctor,
+    getReviewsByDoctorReviews
 };

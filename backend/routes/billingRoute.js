@@ -19,4 +19,4 @@ router.get('/download/:invoiceId', protect, downloadInvoice);
 // Add this new route
 router.post('/refund', protect, adminOnly, refundPayment);
 
-module.exports = router; 
+module.exports = router;

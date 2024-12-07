@@ -39,7 +39,7 @@ export default function DoctorCard({ doctor, onClick }: DoctorCardProps) {
       <div className="flex justify-between items-center mt-4">
         <span className="text-lg font-semibold text-[#0B8FAC]">Consultation Fee: ${doctor.price}</span>
         <Link
-          to={`/doctors/${doctor.id}`}
+          to={`/doctor/${doctor.id}`}
           className="px-6 py-2 bg-[#0B8FAC] text-white rounded-lg hover:bg-[#097a93] transition-colors"
           onClick={(e) => {
             e.stopPropagation();

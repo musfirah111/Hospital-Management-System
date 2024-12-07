@@ -59,11 +59,6 @@ function App() {
             <Route path="/notifications" element={<NotificationsPage />} />
           </Route>
 
-          {/* Protected Doctor Routes */}
-          <Route element={<ProtectedRoute allowedRole="Doctor" />}>
-            <Route path="/doctors" element={<DoctorList />} />
-            <Route path="/doctors/:id" element={<DoctorDetails />} />
-          </Route>
         </Routes>
       </Router>
     </AuthProvider>
@@ -71,4 +66,3 @@ function App() {
 }
 
 export default App;
-

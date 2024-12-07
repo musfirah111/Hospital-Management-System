@@ -3,10 +3,10 @@ POST http://localhost:5000/api/users/register
 Content-Type: application/json
 
 {
-    "name": "Jaffar Dar",
-    "email": "Jaffar@gmail.com",
-    "password": "Jaffar@321",
-    "role": "Doctor",
+    "name": "Noor Fatima",
+    "email": "noorfatimayousafzai@gmail.com",
+    "password": "Noor@321",
+    "role": "Patient",
     "age": 38,
     "gender": "Male",
     "phone_number": "03211274567"
@@ -40,8 +40,8 @@ POST http://localhost:5000/api/users/login
 Content-Type: application/json
 
 {
-    "email": "Smith@example.com",
-    "password": "password123"
+    "email": "noorfatimayousafzai@gmail.com",
+    "password": "Noor@321"
 }
 
 ###
@@ -49,7 +49,7 @@ POST http://localhost:5000/api/users/login
 Content-Type: application/json
 
 {
-    "email": "doctor@example.com",
+    "email": "test@example.com",
     "password": "password123"
 }
 

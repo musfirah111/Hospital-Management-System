@@ -1,10 +1,10 @@
 ### Add Patient
 POST http://localhost:5000/api/patients
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNTc2NTZmZGYyMmRjYWQ5NGRjYSIsImlhdCI6MTczMzU2MjUxMiwiZXhwIjoxNzM2MTU0NTEyfQ.xdrUwDBLkdCBix6yQ6wgtNyzqTO1e0hDziF1NbT9POM
 Content-Type: application/json
 
 {
-    "user_id": "675036f46a15796526968251",
+    "user_id": "67540fd49ecbbda6b8d7679a",
     "address": "123 Test Street, City",
     "emergency_contact": {
         "name": "Emergency Contact",

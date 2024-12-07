@@ -29,12 +29,14 @@ export const Login: React.FC = () => {
 
       console.log('------------------------------> user role: ', data.role);
 
-      // Save token and role in localStorage
+      // Save token, role, id, and email in localStorage
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('userRole', data.role);
+      localStorage.setItem('userId', data.id);
+      localStorage.setItem('userEmail', data.email);
 
-      // Set user in context
-      setUser({ role: data.role });
+      // Set user in context with a more structured object
+      setUser({ token: data.token, role: data.role, ...data });
       console.log('=================Logged in user:', data);
 
       // Redirect based on the user's role
@@ -102,5 +104,4 @@ export const Login: React.FC = () => {
       </div>
     </div>
   );
-};
-
+};  

@@ -2,9 +2,10 @@ import WelcomeCard from '../components/WelcomeCard';
 import HospitalInfoCards from '../components/HospitalInfoCard';
 import DoctorCard from '../components/DoctorCardDashboard';
 import AppointmentCard from '../components/AppointmentCard';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Layout } from '../components/Layout';
+import { AuthContext } from '../context/AuthContext';
 
 interface DoctorResponse {
   [key: string]: {
@@ -54,6 +55,7 @@ interface PatientResponse {
 }
 
 function Dashboard() {
+  const { user } = useContext(AuthContext);
   const [topDoctors, setTopDoctors] = useState<Doctor[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,7 +125,7 @@ function Dashboard() {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [user]);
 
   if (loading) {
     return <div className="min-h-screen bg-[#D2EBE7] flex items-center justify-center">

@@ -48,14 +48,14 @@ const searchReportsByName = asyncHandler(async (req, res) => {
                 { 'doctor_id.user_id.name': { $regex: name, $options: 'i' } }
             ]
         })
-        .populate({
-            path: 'doctor_id',
-            populate: { 
-                path: 'user_id',
-                select: 'name'
-            }
-        })
-        .sort({ test_date: -1 });
+            .populate({
+                path: 'doctor_id',
+                populate: {
+                    path: 'user_id',
+                    select: 'name'
+                }
+            })
+            .sort({ test_date: -1 });
 
         res.status(200).json(reports);
     } catch (error) {
@@ -76,13 +76,14 @@ const downloadReport = asyncHandler(async (req, res) => {
             })
             .populate({
                 path: 'doctor_id',
-                populate: { 
+                populate: {
                     path: 'user_id',
                     select: 'name'
                 }
             });
-        if (!report) {
-            return res.status(404).json({ message: 'Report not found' });
+
+        if (!report || !report.patient_id || !report.doctor_id) {
+            return res.status(404).json({ message: 'Report or associated user not found' });
         }
 
         // Create a PDF document
@@ -123,67 +124,45 @@ const downloadReport = asyncHandler(async (req, res) => {
 
     } catch (error) {
         console.error('PDF Generation Error:', error);
-        res.status(500).json({ message: 'Error generating PDF', error: error.message });
+        if (!res.headersSent) { // Check if headers have already been sent
+            res.status(500).json({ message: 'Error generating PDF', error: error.message });
+        }
     }
 });
 
-const shareReport = asyncHandler(async (req, res) => {
+const shareReport = async (req, res) => {
     try {
-      const { id } = req.params;
-      const { email } = req.body;
-  
-      // Fetch the report details
-      const report = await MedicalLabTestReport.findById(id);
-      if (!report) {
-        return res.status(404).json({ message: 'Report not found' });
-      }
-  
-      // Check if the authenticated user owns the report
-      if (report.patient_id.toString() !== req.user._id.toString()) {
-        return res.status(403).json({ message: 'You are not authorized to share this report' });
-      }
-  
-      // Fetch the patient details
-      const patient = await Patient.findById(report.patient_id);
-      if (!patient) {
-        return res.status(404).json({ message: 'Patient not found' });
-      }
-  
-      // Ensure the patient has email credentials
-      if (!patient.email || !patient.emailPassword) {
-        return res.status(400).json({ message: 'Patient email credentials are missing' });
-      }
-  
-      // Configure Nodemailer
-      const transporter = nodemailer.createTransport({
-        service: 'gmail', // Ensure the email provider matches the patient's email
-        auth: {
-          user: patient.email,
-          pass: patient.emailPassword,
-        },
-      });
-  
-      // Send the email
-      const mailOptions = {
-        from: patient.email,
-        to: email,
-        subject: 'Medical Lab Test Report Shared',
-        html: `
-          <h1>Medical Lab Test Report Details</h1>
-          <p><strong>Test Name:</strong> ${report.test_name}</p>
-          <p><strong>Test Date:</strong> ${report.test_date}</p>
-          <p><strong>Result:</strong> ${report.result}</p>
-        `,
-      };
-  
-      await transporter.sendMail(mailOptions);
-      res.status(200).json({ message: 'Report shared successfully' });
+        const { id } = req.params;
+        const { email } = req.body;
+
+        // Fetch the report details
+        const report = await MedicalLabTestReport.findById(id);
+        if (!report) {
+            return res.status(404).json({ message: 'Report not found' });
+        }
+
+        // Send email
+        const mailOptions = {
+            from: req.user.email,
+            to: email,
+            subject: 'Medical Lab Test Report Shared',
+            html: `
+                <h1>Medical Lab Test Report Details</h1>
+                <p>Test Name: ${report.test_name}</p>
+                <p>Test Date: ${report.test_date}</p>
+                <p>Result: ${report.result}</p>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ message: 'Report shared successfully' });
+
     } catch (error) {
-      console.error('Error sharing report:', error);
-      res.status(500).json({ message: `Error sharing report: ${error.message}` });
+        console.error('Share report error:', error);
+        res.status(500).json({ message: `Error sharing report: ${error.message}` });
+        res.status(500).json({ message: `Error sharing report: ${error.message}` });
     }
-  });
-  
+};
 
 const getDailyLabReports = asyncHandler(async (req, res) => {
     const now = new Date();
@@ -224,12 +203,12 @@ const getLabReportsByPatientId = asyncHandler(async (req, res) => {
         const reports = await MedicalLabTestReport.find({ patient_id: req.params.patientId })
             .populate({
                 path: 'doctor_id',
-                populate: { 
+                populate: {
                     path: 'user_id',
-                    select: 'name' 
+                    select: 'name'
                 }
             });
-        
+
         console.log('Found reports:', reports);
         res.status(200).json(reports);
     } catch (error) {

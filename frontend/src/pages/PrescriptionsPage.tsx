@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar } from 'lucide-react';
 import { formatDate } from '../utils/date';
-import SearchBar from '../components/SearchBar';
 import { Layout } from '../components/Layout';
 import axios from 'axios';
 
@@ -26,7 +25,6 @@ interface PatientResponse {
 }
 
 export default function PrescriptionsPage() {
-  const [searchQuery, setSearchQuery] = useState('');
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
 
   useEffect(() => {
@@ -66,28 +64,13 @@ export default function PrescriptionsPage() {
     fetchPrescriptions();
   }, []);
 
-  const filteredPrescriptions = prescriptions.filter(prescription => {
-    const doctorName = prescription.doctor_id.user_id.name.toLowerCase();
-    const medications = prescription.medications.map(m => m.name.toLowerCase());
-    return doctorName.includes(searchQuery.toLowerCase()) ||
-      medications.some(med => med.includes(searchQuery.toLowerCase()));
-  });
-
   return (
     <Layout>
       <div className="max-w-6xl mx-auto p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Current Prescriptions</h1>
 
-        <div className="mb-6">
-          <SearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search by doctor name or medication..."
-          />
-        </div>
-
         <div className="space-y-6">
-          {filteredPrescriptions.map((prescription) => {
+          {prescriptions.map((prescription) => {
             const doctor = prescription.doctor_id;
 
             return (

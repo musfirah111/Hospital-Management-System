@@ -14,6 +14,17 @@ import { Login } from './pages/Login';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 
+
+// Admin imports
+import { Sidebar } from './components/admin/layout/Sidebar';
+import { Header } from './components/admin/layout/Header';
+import { DoctorsPage } from './pages/admin/DoctorsPage';
+import { PatientsPage } from './pages/admin/PatientsPage';
+import { AdminAppointmentsPage } from './pages/admin/AppointmentsPage';
+import { DepartmentsPage } from './pages/admin/DepartmentsPage';
+import { ReviewsPage } from './pages/admin/ReviewsPage';
+import { DashboardPage } from './pages/admin/DashboardPage';
+
 // Protected route component
 interface ProtectedRouteProps {
   allowedRole: string;
@@ -34,6 +45,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRole }) => {
 
   // Render the outlet (child routes) if authorized
   return <Outlet />;
+};
+
+const currentUser = {
+  name: 'Jonitha Cathrine',
+  role: 'Admin',
+  image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
 };
 
 function App() {
@@ -64,6 +81,24 @@ function App() {
             <Route path="/doctors" element={<DoctorList />} />
             <Route path="/doctors/:id" element={<DoctorDetails />} />
           </Route>
+
+          {/* Admin routes*/}
+          <div className="min-h-screen bg-[#D2EBE7]">
+        <Sidebar />
+        <div className="ml-64">
+          <Header user={currentUser} />
+          <main className="p-6">
+            <Routes>
+              <Route path="/" element={<DashboardPage />} />
+              <Route path="/patients" element={<PatientsPage />} />
+              <Route path="/appointments" element={<AdminAppointmentsPage />} />
+              <Route path="/doctors" element={<DoctorsPage />} />
+              <Route path="/departments" element={<DepartmentsPage />} />
+              <Route path="/reviews" element={<ReviewsPage />} />
+            </Routes>
+          </main>
+        </div>
+      </div>
         </Routes>
       </Router>
     </AuthProvider>

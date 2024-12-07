@@ -3,8 +3,7 @@ import { Avatar } from '../components/Avatar';
 import { Layout } from '../components/Layout';
 import axios from 'axios';
 
-// Define the UserProfile interface
-interface UserProfile {
+interface User {
   name: string;
   email: string;
   age: number;
@@ -44,7 +43,7 @@ export default function ProfilePage() {
     const fetchUserProfile = async () => {
       try {
         const token = localStorage.getItem('authToken');
-        const response = await axios.get<UserProfile>('http://localhost:5000/api/users/profile', {
+        const response = await axios.get<User>('http://localhost:5000/api/users/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setEditedUser(response.data);

@@ -31,7 +31,7 @@ POST http://localhost:5000/api/users/login
 Content-Type: application/json
 
 {
-    "email": "doeh@example.com",
+    "email": "doctor@example.com",
     "password": "password123"
 }
 
@@ -61,3 +61,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNTc2N
 ### Get Notifications
 GET http://localhost:5000/api/appointments/notifications/675434cefb2d19b713e97445
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQzNGNlZmIyZDE5YjcxM2U5NzQ0NSIsImlhdCI6MTczMzU4NTE2MywiZXhwIjoxNzM2MTc3MTYzfQ.OuMZNwiUJWfGp7zbGdUskpUnSqrX5oOVwwoEYEsneNM
+
+### Update User Profile
+PUT http://localhost:5000/api/users/profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlMTJlMzE1YmVhMzZkMmQ0YSIsImlhdCI6MTczMzU5NzE1NiwiZXhwIjoxNzM2MTg5MTU2fQ.zPY9Hthwbp28-dFT4fmhE5hp-SG5Nx5qpcPq5Yf1WW4
+
+{
+    "password": "thispassword123" 
+}

@@ -14,7 +14,6 @@ import { Login } from './pages/Login';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 
-
 // Admin imports
 import { Sidebar } from './components/admin/layout/Sidebar';
 import { Header } from './components/admin/layout/Header';
@@ -39,33 +38,26 @@ import { DoctorHeader } from './components/doctor/layout/Header';
 
 // Protected route component
 interface ProtectedRouteProps {
-  allowedRole: string;
+  allowedRoles: string[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRole }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
   const { user } = useContext(AuthContext) as { user: any };
 
   if (!user) {
-    // If no user is logged in, redirect to login
     return <Navigate to="/login" replace />;
   }
 
-  if (user.role !== allowedRole) {
-    // If user is not a patient, redirect to unauthorized
+  if (!allowedRoles.includes(user.role)) {
     return <Navigate to="/unauthorized" replace />;
   }
 
-  // Render the outlet (child routes) if authorized
   return <Outlet />;
 };
 
-const currentUser = {
-  name: 'Jonitha Cathrine',
-  role: 'Admin',
-  image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-};
 
 function App() {
+
   return (
     <AuthProvider>
       <Router>
@@ -75,7 +67,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Protected Patient Routes */}
-          <Route element={<ProtectedRoute allowedRole="Patient" />}>
+          <Route element={<ProtectedRoute allowedRoles={['Patient']} />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/" element={<DoctorList />} />
             <Route path="/doctor/:id" element={<DoctorDetails />} />
@@ -89,48 +81,26 @@ function App() {
           </Route>
 
           {/* Protected Doctor Routes */}
-          <Route element={<ProtectedRoute allowedRole="Doctor" />}>
-            <Route path="/doctors" element={<DoctorList />} />
-            <Route path="/doctors/:id" element={<DoctorDetails />} />
+          <Route element={<ProtectedRoute allowedRoles={['Doctor']} />}>
+            <Route path="/" element={<DoctorDashboard />} />
+            <Route path="/appointments" element={<Appointments />} />
+            <Route path="/schedule" element={<Schedule />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/prescriptions" element={<Prescriptions />} />
+            <Route path="/records" element={<MedicalRecords />} />
+            <Route path="/lab-reports" element={<LabReports />} />
+            <Route path="/chat" element={<Chat />} />
           </Route>
 
-          {/* Admin routes*/}
-          <div className="min-h-screen bg-[#D2EBE7]">
-            <Sidebar />
-            <div className="ml-64">
-              <Header user={currentUser} />
-              <main className="p-6">
-                <Routes>
-                  <Route path="/" element={<DashboardPage />} />
-                  <Route path="/patients" element={<PatientsPage />} />
-                  <Route path="/appointments" element={<AdminAppointmentsPage />} />
-                  <Route path="/doctors" element={<DoctorsPage />} />
-                  <Route path="/departments" element={<DepartmentsPage />} />
-                  <Route path="/reviews" element={<ReviewsPage />} />
-                </Routes>
-              </main>
-            </div>
-          </div>
-
-          {/* Doctor Routes*/}
-          <div className="min-h-screen bg-[#D2EBE7]">
-            <DoctorSidebar />
-            <div className="ml-64">
-              <DoctorHeader user={currentUser} />
-              <main className="p-6">
-                <Routes>
-                  <Route path="/" element={<DoctorDashboard />} />
-                  <Route path="/appointments" element={<Appointments />} />
-                  <Route path="/schedule" element={<Schedule />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/prescriptions" element={<Prescriptions />} />
-                  <Route path="/records" element={<MedicalRecords />} />
-                  <Route path="/lab-reports" element={<LabReports />} />
-                  <Route path="/chat" element={<Chat />} />
-                </Routes>
-              </main>
-            </div>
-          </div>
+          {/* Protected Admin Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/patients" element={<PatientsPage />} />
+            <Route path="/appointments" element={<AdminAppointmentsPage />} />
+            <Route path="/doctors" element={<DoctorsPage />} />
+            <Route path="/departments" element={<DepartmentsPage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
+          </Route>
         </Routes>
       </Router>
     </AuthProvider>

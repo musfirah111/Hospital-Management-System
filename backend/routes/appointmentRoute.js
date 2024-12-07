@@ -14,18 +14,18 @@ const {
     getCompletedAppointments,
     getRequestedAppointments,
     requestCancellation,
-    getPatientAppointments
+    getPatientAppointments,
+    getAvailableSlotsForDoctor  // Add this import
 } = require('../controllers/appointmentController');
 
 const { protect } = require('../middlewares/authMiddleware');
-
-const {
-    adminOnly,
-    doctorOnly
-} = require('../middlewares/roleMiddleware');
+const { adminOnly, doctorOnly } = require('../middlewares/roleMiddleware');
 
 // Get patient appointments
 router.get('/patient/:id', protect, getPatientAppointments);
+
+// Route to get available slots for a doctor
+router.get('/available-slots/:doctorId', protect, getAvailableSlotsForDoctor);
 
 router.get('/daily-registrations', protect, getDailyAppointments);
 router.get('/weekly-registrations', protect, getWeeklyAppointments);
@@ -35,11 +35,6 @@ router.get('/completed', getCompletedAppointments);
 
 // Route for getting requested or rescheduled appointments with pagination
 router.get('/requested', getRequestedAppointments);
-
-// Route to get available slots for a doctor
-router.get('/available-slots/:doctorId', protect, getAvailableSlotsForDoctor);
-
-
 
 // Route to get all appointments (admin only).
 router.get('/', protect, adminOnly, getAppointments);
@@ -62,5 +57,4 @@ router.post('/cancel', protect, requestCancellation);
 // Route to create a new appointment (admin only).
 router.post('/', protect, adminOnly, createAppointment);
 
-
-module.exports = router; 
+module.exports = router;

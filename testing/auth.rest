@@ -40,8 +40,8 @@ POST http://localhost:5000/api/users/login
 Content-Type: application/json
 
 {
-    "email": "noorfatimayousafzai@gmail.com",
-    "password": "Noor@321"
+    "email": "fatimarathore2018@gmail.com",
+    "password": "password123"
 }
 
 ###
@@ -56,3 +56,8 @@ Content-Type: application/json
 ### Get User Profile
 GET http://localhost:5000/api/users/profile
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNTc2NTZmZGYyMmRjYWQ5NGRjYSIsImlhdCI6MTczMzMwOTgxNCwiZXhwIjoxNzM1OTAxODE0fQ.Gk1WAb7ziXFbhD-kBL6Y5LgzWO-mHfMplcX0mhGBg2w
+
+
+### Get Notifications
+GET http://localhost:5000/api/appointments/notifications/675434cefb2d19b713e97445
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQzNGNlZmIyZDE5YjcxM2U5NzQ0NSIsImlhdCI6MTczMzU4NTE2MywiZXhwIjoxNzM2MTc3MTYzfQ.OuMZNwiUJWfGp7zbGdUskpUnSqrX5oOVwwoEYEsneNM

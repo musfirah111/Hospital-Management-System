@@ -14,7 +14,8 @@ const {
     getCompletedAppointments,
     getRequestedAppointments,
     requestCancellation,
-    getPatientAppointments
+    getPatientAppointments,
+    getAvailableSlotsForDoctor
 } = require('../controllers/appointmentController');
 
 const { protect } = require('../middlewares/authMiddleware');
@@ -23,6 +24,14 @@ const {
     adminOnly,
     doctorOnly
 } = require('../middlewares/roleMiddleware');
+
+const { getNotifications } = require('../controllers/notificationController');
+
+// Route to get notifications for a specific user
+router.get('/notifications/:id', protect, getNotifications);
+
+// Route to get available slots for a doctor
+router.get('/available-slots/:doctorId', protect, getAvailableSlotsForDoctor);
 
 // Get patient appointments
 router.get('/patient/:id', protect, getPatientAppointments);
@@ -56,7 +65,6 @@ router.post('/request-reschedule', protect, requestAppointmentOrReschedule);
 
 // Route to request appointment cancellation
 router.post('/cancel', protect, requestCancellation);
-
 
 
 

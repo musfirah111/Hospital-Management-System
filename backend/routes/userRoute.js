@@ -4,7 +4,9 @@ const {
     registerUser,
     loginUser,
     getUserProfile,
-    updateUserProfile
+    updateUserProfile,
+    updateUserByUserId,
+    getUserProfileById
 } = require('../controllers/userController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly } = require('../middlewares/roleMiddleware');
@@ -22,5 +24,10 @@ router.get('/profile', protect, getUserProfile);
 
 // Route for updating user profile
 router.put('/profile', protect, updateUserProfile);
+
+// Add this route to your existing routes
+router.put('/user/:userId', protect, updateUserByUserId);
+
+router.get('/user/:userId', protect, getUserProfileById);
 
 module.exports = router;

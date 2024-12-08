@@ -3,12 +3,11 @@ import { SearchInput } from '../../components/admin/shared/SearchInput';
 import { Table } from '../../components/admin/shared/Table';
 import { Pagination } from '../../components/admin/shared/Pagination';
 import { Avatar } from '../../components/admin/shared/Avatar';
-import { Trash2 } from 'lucide-react';
 import { RegistrationModal } from '../../components/admin/forms/RegistrationModal';
 import { DoctorRegistrationForm } from '../../components/admin/forms/DoctorRegistrationForm';
-import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { Layout } from '../../components/admin/AdminLayout';
 import axios from 'axios';
+import { Trash2 } from 'lucide-react';
 
 interface Doctor {
   _id: string;
@@ -31,8 +30,6 @@ export function DoctorsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [doctorData, setDoctorData] = useState<Doctor[]>([]);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -63,33 +60,24 @@ export function DoctorsPage() {
     fetchDoctors(currentPage, search);
   }, [currentPage, search]);
 
-  const handleDeleteClick = (doctor: Doctor) => {
-    setSelectedDoctor(doctor);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!selectedDoctor) return;
-
-    try {
-      const token = localStorage.getItem('authToken');
-      await axios.delete(`http://localhost:5000/api/doctors/${selectedDoctor._id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      setDoctorData(prevData =>
-        prevData.filter(doc => doc._id !== selectedDoctor._id)
-      );
-      setIsDeleteModalOpen(false);
-    } catch (err) {
-      console.error('Error deleting doctor:', err);
-      setError('Failed to delete doctor');
-    }
-  };
-
   const handleDoctorAdded = () => {
     fetchDoctors(currentPage, search);
     setIsModalOpen(false);
+  };
+
+  const handleDeleteDoctor = async (doctorId: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await axios.delete(`http://localhost:5000/api/doctors/${doctorId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Refresh the doctors list after deletion
+      fetchDoctors(currentPage, search);
+    } catch (err) {
+      console.error('Error deleting doctor:', err);
+      alert('Failed to delete doctor. Please try again.');
+    }
   };
 
   const columns = [
@@ -138,7 +126,9 @@ export function DoctorsPage() {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            handleDeleteClick(row);
+            if (window.confirm('Are you sure you want to delete this doctor?')) {
+              handleDeleteDoctor(row._id);
+            }
           }}
           className="p-2 text-gray-500 hover:text-red-600 rounded-full hover:bg-red-50"
         >
@@ -200,15 +190,6 @@ export function DoctorsPage() {
             onSuccess={handleDoctorAdded}
           />
         </RegistrationModal>
-
-        <ConfirmationModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handleDeleteConfirm}
-          title="Delete Doctor"
-          message="Are you sure you want to delete this doctor? This action cannot be undone."
-          confirmButtonText="Delete Doctor"
-        />
       </div>
     </Layout>
   );

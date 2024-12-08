@@ -122,14 +122,21 @@ const updateDoctor = asyncHandler(async (req, res) => {
 
 // Delete a doctor.
 const deleteDoctor = asyncHandler(async (req, res) => {
-    const doctor = await Doctor.findByIdAndDelete(req.params.id);
+    // First find the doctor to get the user_id
+    const doctor = await Doctor.findById(req.params.id);
 
     if (!doctor) {
         res.status(404);
         throw new Error("Doctor not found.");
     }
 
-    res.json({ message: "Doctor deleted successfully." });
+    // Delete the doctor
+    await Doctor.findByIdAndDelete(req.params.id);
+
+    // Delete the corresponding user
+    await User.findByIdAndDelete(doctor.user_id);
+
+    res.json({ message: "Doctor and associated user deleted successfully." });
 });
 
 // Get doctor's schedule for a specific day.

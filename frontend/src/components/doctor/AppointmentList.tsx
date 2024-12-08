@@ -1,13 +1,22 @@
 import { Calendar, Clock, User } from 'lucide-react';
-import { Appointment } from '../../types/doctor/appointment';
 import { useState } from 'react';
+
+interface Appointment {
+  id: string;
+  patientId: string;
+  patientName: string;
+  date: string;
+  time: string;
+  status: string;
+  reason: string;
+}
 
 interface AppointmentListProps {
   appointments: Appointment[];
-  onStatusUpdate: (id: string, status: string) => void;
+  onStatusUpdate: (id: string, status: 'completed' | 'rescheduled') => void;
 }
 
-export default function AppointmentList({ appointments }: AppointmentListProps) {
+export default function AppointmentList({ appointments, onStatusUpdate }: AppointmentListProps) {
   const [filter, setFilter] = useState('all');
 
   const filteredAppointments = appointments.filter((appointment) => {
@@ -77,6 +86,22 @@ export default function AppointmentList({ appointments }: AppointmentListProps) 
                 {appointment.time}
               </div>
             </div>
+            {appointment.status === 'scheduled' && (
+              <div className="flex space-x-2 mt-3">
+                <button
+                  onClick={() => onStatusUpdate(appointment.id, 'completed')}
+                  className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 text-sm"
+                >
+                  Mark as Complete
+                </button>
+                <button
+                  onClick={() => onStatusUpdate(appointment.id, 'rescheduled')}
+                  className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 text-sm"
+                >
+                  Reschedule
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>

@@ -11,7 +11,9 @@ const {
     getDoctorCountByDepartment,
     getDoctorSchedule,
     getDoctorDetailsByUserId,
-    calculateRevenue
+    calculateRevenue,
+    updateDoctorExperience,
+    updateConsultationFee
 } = require('../controllers/doctorController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly, doctorOnly } = require('../middlewares/roleMiddleware');
@@ -50,5 +52,11 @@ router.get('/schedule/weekly', protect, doctorOnly, getWeeklySchedule);
 
 //get doctor details by user id
 router.get('/user/:id', protect, getDoctorDetailsByUserId);
+
+// Add this route with your other doctor routes
+router.put('/:id/consultation-fee', updateConsultationFee);
+
+// Update doctor's experience
+router.patch('/:id/experience', updateDoctorExperience);
 
 module.exports = router;

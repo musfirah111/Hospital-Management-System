@@ -27,12 +27,6 @@ interface Appointment {
   status: string;
 }
 
-interface Medication {
-  name: string;
-  dosage: string;
-  frequency: string;
-  duration: string;
-}
 
 export default function PrescriptionForm({ isOpen, onClose, fetchPrescriptions }: PrescriptionFormProps) {
   const [step, setStep] = useState(1);

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Upload, ArrowRight } from 'lucide-react';
+import { X } from 'lucide-react';
 import axios from 'axios';
 
 interface EmergencyContact {

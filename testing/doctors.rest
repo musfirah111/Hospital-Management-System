@@ -40,3 +40,21 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNzQ5N
 GET http://localhost:5000/api/doctors/6750ae1ebb5819c52ef40704/schedule/2024-12-08
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlMTJlMzE1YmVhMzZkMmQ0YSIsImlhdCI6MTczMzY0MjA2OCwiZXhwIjoxNzM2MjM0MDY4fQ.d1amooeQ4cvbom_bfBKHFEylntIblnbjCPAiirptMiA
 Content-Type: application/json
+
+### Update Doctor's Experience
+PATCH http://localhost:5000/api/doctors/6750790c91dcace6a5837f2b/experience
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ3YjQxNWE3N2I5ZGE5MTQ2ODRmMSIsImlhdCI6MTczMzU4OTgyNSwiZXhwIjoxNzM2MTgxODI1fQ.sQa7a20RKBBnH05wIm0jRNLUZANT-ghtlFFz-d3-A-k
+Content-Type: application/json
+
+{
+    "experience": 15
+}
+
+### Update Doctor's Consultation Fee
+PUT http://localhost:5000/api/doctors/6750790c91dcace6a5837f2b/consultation-fee
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ3YjQxNWE3N2I5ZGE5MTQ2ODRmMSIsImlhdCI6MTczMzU4OTgyNSwiZXhwIjoxNzM2MTgxODI1fQ.sQa7a20RKBBnH05wIm0jRNLUZANT-ghtlFFz-d3-A-k
+Content-Type: application/json
+
+{
+    "consultation_fee": 1600
+}

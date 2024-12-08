@@ -381,7 +381,7 @@ export default function PaymentPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Consultation Fee</span>
                   <span className="text-xl font-bold text-[#0B8FAC]">
-                    ${doctor.consultation_fee}
+                    PKR {doctor.consultation_fee}
                   </span>
                 </div>
               </div>

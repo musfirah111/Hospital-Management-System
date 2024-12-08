@@ -296,6 +296,21 @@ const getDoctorCountByDepartment = asyncHandler(async (req, res) => {
     res.json(doctorCountByDepartment);
 });
 
+// Add this new controller method
+const getDoctorByUserId = asyncHandler(async (req, res) => {
+    console.log('Looking for doctor with user_id:', req.params.userId);
+    
+    const doctor = await Doctor.findOne({ user_id: req.params.userId });
+    
+    console.log('Found doctor:', doctor); // Debug log
+    
+    if (!doctor) {
+        res.status(404);
+        throw new Error("Doctor not found for this user ID");
+    }
+
+    res.json(doctor);
+});
 
 module.exports = {
     getDoctors,
@@ -306,5 +321,6 @@ module.exports = {
     getDailySchedule,
     getWeeklySchedule,
     getAllDoctors,
-    getDoctorCountByDepartment
+    getDoctorCountByDepartment,
+    getDoctorByUserId
 };

@@ -8,7 +8,8 @@ const {
     getDailySchedule,
     getWeeklySchedule,
     getAllDoctors,
-    getDoctorCountByDepartment
+    getDoctorCountByDepartment,
+    getDoctorByUserId
 } = require('../controllers/doctorController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly, doctorOnly } = require('../middlewares/roleMiddleware');
@@ -25,6 +26,9 @@ router.get('/', protect, getAllDoctors);
 
 // Route to get a doctor by ID - accessible to all authenticated users.
 router.get('/:id', protect, getDoctorById);
+
+// Route to get a doctor by user ID - accessible to all authenticated users.
+router.get('/user/:userId', protect, getDoctorByUserId);
 
 // Route to create a new doctor - admin only.
 router.post('/', protect, adminOnly, createDoctor);

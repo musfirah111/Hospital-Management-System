@@ -78,6 +78,29 @@ const getActivePrescriptionsByPatientId = asyncHandler(async (req, res) => {
     res.json(prescriptions);
 });
 
+// Get active prescriptions of a specific doctor
+const getActivePrescriptionsByDoctorId = asyncHandler(async (req, res) => {
+    console.log('Searching for doctor ID:', req.params.id);
+    
+    const prescriptions = await Prescription.find({ 
+        doctor_id: req.params.id, 
+        status: 'active' 
+    })
+    .populate({
+        path: 'patient_id',
+        populate: {
+            path: 'user_id',
+            select: 'name profile_picture'
+        }
+    })
+    .populate('appointment_id')
+    .sort({ date_issued: -1 });
+
+    console.log('Found prescriptions:', prescriptions);
+
+    res.json(prescriptions || []);
+});
+
 // Schedule a job to run every day at midnight
 cron.schedule('0 0 * * *', async () => {
     try {
@@ -120,5 +143,6 @@ module.exports = {
     updatePrescription,
     getPrescriptionById,
     getAllPrescriptions,
-    getActivePrescriptionsByPatientId
+    getActivePrescriptionsByPatientId,
+    getActivePrescriptionsByDoctorId
 };

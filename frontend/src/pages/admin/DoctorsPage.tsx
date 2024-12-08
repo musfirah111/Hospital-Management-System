@@ -146,7 +146,7 @@ export function DoctorsPage() {
     <Layout>
       <div className="space-y-4 max-w-full">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold text-[#0B8FAC]">Doctor Info</h2>
+          <h2 className="text-2xl font-semibold text-black">Doctor Info</h2>
           <button
             onClick={() => setIsModalOpen(true)}
             className="bg-[#0B8FAC] text-white px-4 py-2 rounded-md hover:opacity-90"

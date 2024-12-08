@@ -210,7 +210,7 @@ export function DepartmentsPage() {
     <Layout>
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold text-[#0B8FAC]">Department Info</h2>
+          <h2 className="text-2xl font-semibold text-black">Department Info</h2>
           <button 
             onClick={() => setIsFormModalOpen(true)}
             className="bg-[#0B8FAC] text-white px-4 py-2 rounded-md hover:opacity-90"

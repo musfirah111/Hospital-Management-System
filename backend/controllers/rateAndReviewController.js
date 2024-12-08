@@ -52,13 +52,23 @@ const getAllReviews = asyncHandler(async (req, res) => {
         const reviews = await Review.find()
             .populate({
                 path: 'patient_id',
-                select: 'name',
                 model: 'Patient'
             })
             .populate({
                 path: 'doctor_id',
-                select: 'name department',
-                model: 'Doctor'
+                model: 'Doctor',
+                populate: [
+                    {
+                        path: 'user_id',
+                        select: 'name',
+                        model: 'User'
+                    },
+                    {
+                        path: 'department_id',
+                        select: 'name',
+                        model: 'Department'
+                    }
+                ]
             });
         res.status(200).json(reviews);
     } catch (error) {

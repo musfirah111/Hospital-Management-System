@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const transporter = require('../config/emailConfig');
 const MedicalLabTestReport = require('../models/MedicalLabTestReport');
 const Patient = require('../models/Patient');
+const Doctor = require('../models/Doctor');
 
 // Create a new medical lab test report (Doctor)
 const createReport = asyncHandler(async (req, res) => {
@@ -92,7 +93,7 @@ const downloadReport = asyncHandler(async (req, res) => {
 
         // Force download headers
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename="' + filename + '"');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Transfer-Encoding', 'binary');
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.setHeader('Pragma', 'no-cache');
@@ -124,7 +125,7 @@ const downloadReport = asyncHandler(async (req, res) => {
 
     } catch (error) {
         console.error('PDF Generation Error:', error);
-        if (!res.headersSent) { // Check if headers have already been sent
+        if (!res.headersSent) {
             res.status(500).json({ message: 'Error generating PDF', error: error.message });
         }
     }
@@ -217,6 +218,36 @@ const getLabReportsByPatientId = asyncHandler(async (req, res) => {
     }
 });
 
+const getLabReportsByDoctorId = asyncHandler(async (req, res) => {
+    try {
+        console.log('Received request for user ID:', req.params.id);
+
+        // First find the doctor document using the userId
+        const doctor = await Doctor.findOne({ 'user_id': req.params.id });
+        if (!doctor) {
+            return res.status(404).json({ message: 'Doctor not found' });
+        }
+
+        // Then find all reports where doctor_id matches the doctor's _id
+        const reports = await MedicalLabTestReport.find({ doctor_id: doctor._id })
+            .populate({
+                path: 'patient_id',
+                populate: {
+                    path: 'user_id',
+                    select: 'name'
+                }
+            })
+            .sort({ test_date: -1 });
+
+        console.log('..............................Doctor ID:', doctor._id);
+
+        console.log('Found reports:', reports);
+        res.status(200).json(reports);
+    } catch (error) {
+        console.error('Error in getLabReportsByDoctorId:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
 
 module.exports = {
     createReport,
@@ -228,5 +259,6 @@ module.exports = {
     getDailyLabReports,
     getWeeklyLabReports,
     getMonthlyLabReports,
-    getLabReportsByPatientId
+    getLabReportsByPatientId,
+    getLabReportsByDoctorId
 };

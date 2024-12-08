@@ -1,58 +1,159 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import SearchBar from '../../components/doctor/SearchBar';
 import LabReportForm from '../../components/doctor/LabReportForm';
-import { FileText, Download, Share2, Upload } from 'lucide-react';
+import { FileText, Download, Share2 } from 'lucide-react';
 import type { LabReport } from '../../types/doctor/index';
 import { Layout } from '../../components/doctor/Layout';
 
-const mockReports: LabReport[] = [
-  {
-    id: '1',
-    patientId: 'P001',
-    patientName: 'John Doe',
-    date: '2024-03-15',
-    testType: 'Blood Test',
-    results: 'Normal blood count, slightly elevated cholesterol',
-    status: 'completed',
-    reportUrl: 'https://example.com/report1.pdf'
-  },
-  {
-    id: '2',
-    patientId: 'P002',
-    patientName: 'Jane Smith',
-    date: '2024-03-14',
-    testType: 'X-Ray',
-    results: 'No abnormalities detected',
-    status: 'completed',
-    reportUrl: 'https://example.com/report2.pdf'
-  }
-];
-
 export default function LabReports() {
   const [showForm, setShowForm] = useState(false);
-  const [reports, setReports] = useState(mockReports);
-  const [filteredReports, setFilteredReports] = useState(mockReports);
+  const [reports, setReports] = useState<LabReport[]>([]);
+  const [filteredReports, setFilteredReports] = useState<LabReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [shareEmail, setShareEmail] = useState('');
+  const [selectedReportId, setSelectedReportId] = useState('');
+
+  useEffect(() => {
+    fetchLabReports();
+  }, []);
+
+  const fetchLabReports = async () => {
+    try {
+      const userId = localStorage.getItem('userId');
+      //alert(userId);
+      const token = localStorage.getItem('authToken');
+      const response = await axios.get(`http://localhost:5000/api/lab-reports/doctor/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const formattedReports = response.data.map((report: any) => ({
+        id: report._id || '',
+        patientId: report.patient_id?._id || '',
+        patientName: report.patient_id?.user_id?.name || 'Unknown Patient',
+        date: report.test_date ? new Date(report.test_date).toISOString().split('T')[0] : '',
+        testType: report.test_name || 'Unknown Test',
+        results: report.result || '',
+        status: (report.status || 'pending').toLowerCase(),
+        reportUrl: report.report_url || ''
+      }));
+
+      setReports(formattedReports);
+      setFilteredReports(formattedReports);
+    } catch (error) {
+      console.error('Error fetching lab reports:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (query: string) => {
-    const filtered = reports.filter(
-      (report) =>
-        report.patientName.toLowerCase().includes(query.toLowerCase()) ||
-        report.patientId.toLowerCase().includes(query.toLowerCase()) ||
-        report.testType.toLowerCase().includes(query.toLowerCase())
-    );
+    if (!query.trim()) {
+      setFilteredReports(reports);
+      return;
+    }
+
+    const searchTerm = query.toLowerCase().trim();
+    const filtered = reports.filter((report) => {
+      return (
+        report.patientName.toLowerCase().includes(searchTerm) ||
+        report.patientId.toLowerCase().includes(searchTerm) ||
+        report.testType.toLowerCase().includes(searchTerm) ||
+        report.results.toLowerCase().includes(searchTerm) ||
+        report.date.includes(searchTerm)
+      );
+    });
     setFilteredReports(filtered);
   };
 
-  const handleCreateReport = (data: any) => {
-    const newReport = {
-      ...data,
-      id: Math.random().toString(36).substr(2, 9),
-      date: new Date().toISOString().split('T')[0],
-      status: 'pending'
-    };
-    setReports([newReport, ...reports]);
-    setFilteredReports([newReport, ...reports]);
+  const handleCreateReport = async (data: any) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await axios.post(
+        'http://localhost:5000/api/lab-reports',
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      const newReport = {
+        id: response.data._id,
+        patientId: response.data.patient_id,
+        patientName: response.data.patient_id?.user_id?.name || 'Unknown Patient',
+        date: new Date(response.data.test_date).toISOString().split('T')[0],
+        testType: response.data.test_name,
+        results: response.data.result,
+        status: response.data.status.toLowerCase(),
+        reportUrl: response.data.report_url
+      };
+
+      setReports([newReport, ...reports]);
+      setFilteredReports([newReport, ...reports]);
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error creating lab report:', error);
+    }
   };
+
+  const handleDownload = async (reportId: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await axios.get(
+        `http://localhost:5000/api/lab-reports/download/${reportId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          responseType: 'blob'
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `report-${reportId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error downloading report:', error);
+    }
+  };
+
+  const handleShare = async (reportId: string) => {
+    setSelectedReportId(reportId);
+    setIsShareDialogOpen(true);
+  };
+
+  const submitShare = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await axios.post(
+        `http://localhost:5000/api/lab-reports/${selectedReportId}/share`,
+        { email: shareEmail },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      alert('Report shared successfully!');
+      setIsShareDialogOpen(false);
+      setShareEmail('');
+    } catch (error) {
+      console.error('Error sharing report:', error);
+    }
+  };
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-64">Loading...</div>;
+  }
 
   return (
     <Layout>
@@ -70,25 +171,17 @@ export default function LabReports() {
         <LabReportForm
           isOpen={showForm}
           onClose={() => setShowForm(false)}
-          onSubmit={handleCreateReport}
+          onSuccess={handleCreateReport}
+          refetchLabTests={fetchLabReports}
         />
 
         <div className="flex space-x-4">
           <div className="flex-1">
             <SearchBar
-              onSearch={handleSearch}
+              onChange={handleSearch}
               placeholder="Search by patient name, ID, or test type..."
             />
           </div>
-          <select className="border rounded-md px-3 py-2">
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-          </select>
-          <input
-            type="date"
-            className="border rounded-md px-3 py-2"
-          />
         </div>
 
         <div className="grid gap-6">
@@ -99,32 +192,17 @@ export default function LabReports() {
                   <div className="flex items-center space-x-2">
                     <FileText className="w-5 h-5 text-blue-600" />
                     <h3 className="text-lg font-semibold">{report.patientName}</h3>
-                    <span className="text-sm text-gray-500">({report.patientId})</span>
-                    <span className={`px-2 py-1 rounded-full text-xs ${report.status === 'completed'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                      {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
-                    </span>
                   </div>
                   <p className="text-sm text-gray-500 mt-1">Test date: {report.date}</p>
                 </div>
-                {report.status === 'completed' && (
-                  <div className="flex space-x-2">
-                    <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
-                      <Download size={20} />
-                    </button>
-                    <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
-                      <Share2 size={20} />
-                    </button>
-                  </div>
-                )}
-                {report.status === 'pending' && (
-                  <button className="flex items-center space-x-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-md">
-                    <Upload size={20} />
-                    <span>Upload Results</span>
+                <div className="flex space-x-2">
+                  <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100" onClick={() => handleDownload(report.id)}>
+                    <Download size={20} />
                   </button>
-                )}
+                  <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100" onClick={() => handleShare(report.id)}>
+                    <Share2 size={20} />
+                  </button>
+                </div>
               </div>
 
               <div className="mt-4 space-y-4">
@@ -141,6 +219,41 @@ export default function LabReports() {
           ))}
         </div>
       </div>
+
+      {isShareDialogOpen && (
+        <div className="fixed inset-0 z-10 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="fixed inset-0 bg-black opacity-30" onClick={() => setIsShareDialogOpen(false)}></div>
+
+            <div className="relative bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <h2 className="text-lg font-medium mb-4">Share Lab Report</h2>
+
+              <input
+                type="email"
+                value={shareEmail}
+                onChange={(e) => setShareEmail(e.target.value)}
+                placeholder="Enter recipient's email"
+                className="w-full p-2 border rounded-md mb-4"
+              />
+
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => setIsShareDialogOpen(false)}
+                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitShare}
+                  className="px-4 py-2 bg-[#0B8FAC] text-white rounded-md hover:bg-[#0b8fac9a]"
+                >
+                  Share
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }

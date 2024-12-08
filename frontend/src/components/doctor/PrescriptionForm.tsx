@@ -27,11 +27,19 @@ interface Appointment {
   status: string;
 }
 
+interface Medication {
+  name: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+}
+
 export default function PrescriptionForm({ isOpen, onClose, fetchPrescriptions }: PrescriptionFormProps) {
   const [step, setStep] = useState(1);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [formData, setFormData] = useState({
     appointmentId: '',
+    medications: [{ name: '', dosage: '', frequency: '', duration: '' }],
     instructions: '',
     testsRecommended: ''
   });
@@ -43,7 +51,7 @@ export default function PrescriptionForm({ isOpen, onClose, fetchPrescriptions }
       const token = localStorage.getItem('authToken');
       const userId = localStorage.getItem('userId');
 
-      const doctorIdResponse = await axios.get(`http://localhost:5000/api/doctors/user/${userId}`, {
+      const doctorIdResponse = await axios.get<{_id: string}>(`http://localhost:5000/api/doctors/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

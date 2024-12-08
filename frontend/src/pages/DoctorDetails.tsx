@@ -269,7 +269,7 @@ export default function DoctorDetails() {
             <div className="mt-8 flex justify-between items-center">
               <div>
                 <span className="text-gray-600">Consultation Fee</span>
-                <p className="text-2xl font-bold text-[#0B8FAC]">${doctor.consultation_fee}</p>
+                <p className="text-2xl font-bold text-[#0B8FAC]">PKR{doctor.consultation_fee}</p>
               </div>
               <button
                 onClick={handleBooking}

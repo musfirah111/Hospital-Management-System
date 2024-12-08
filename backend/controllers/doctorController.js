@@ -296,6 +296,12 @@ const getDoctorCountByDepartment = asyncHandler(async (req, res) => {
     res.json(doctorCountByDepartment);
 });
 
+//get doctor details by user id
+const getDoctorDetailsByUserId = asyncHandler(async (req, res) => {
+    const doctor = await Doctor.findOne({ user_id: req.params.id });
+    res.json(doctor);
+});
+
 
 module.exports = {
     getDoctors,
@@ -306,5 +312,6 @@ module.exports = {
     getDailySchedule,
     getWeeklySchedule,
     getAllDoctors,
-    getDoctorCountByDepartment
+    getDoctorCountByDepartment,
+    getDoctorDetailsByUserId
 };

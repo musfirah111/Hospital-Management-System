@@ -77,7 +77,7 @@ export default function AppointmentsPage() {
           }
         );
 
-        console.log(' `Raw appointments response:', appointmentsResponse.data); // Debug log
+        console.log('Raw appointments response:', appointmentsResponse.data); // Debug log
 
         if (appointmentsResponse.data && appointmentsResponse.data.appointments) {
           const formattedAppointments = appointmentsResponse.data.appointments.map((apt: any) => {
@@ -470,6 +470,5 @@ export default function AppointmentsPage() {
         </div>
       </div>
     </Layout>
-  );
+);
 }
-

@@ -408,6 +408,23 @@ const getPatientAppointments = asyncHandler(async (req, res) => {
     });
 });
 
+
+const getDoctorAppointments = asyncHandler(async (req, res) => {
+    const appointments = await Appointment.find({
+        doctor_id: req.params.id
+    })
+        .populate({
+            path: 'patient_id',
+            populate: {
+                path: 'user_id',
+            }
+        });
+
+    res.json({
+        appointments: appointments
+    });
+});
+
 // Get available slots for a doctor on a specific date
 const getAvailableSlotsForDoctor = asyncHandler(async (req, res) => {
     const { doctorId } = req.params;
@@ -426,6 +443,7 @@ const getAvailableSlotsForDoctor = asyncHandler(async (req, res) => {
     });
 });
 
+
 module.exports = {
     createAppointment,
     getAppointments,
@@ -441,4 +459,5 @@ module.exports = {
     getRequestedAppointments,
     getPatientAppointments,
     getAvailableSlotsForDoctor,
+    getDoctorAppointments
 };

@@ -31,8 +31,8 @@ POST http://localhost:5000/api/users/login
 Content-Type: application/json
 
 {
-    "email": "doctor@example.com",
-    "password": "password123"
+    "email": "doctor@gmail.com",
+    "password": "doctor123"
 }
 
 ### Login User

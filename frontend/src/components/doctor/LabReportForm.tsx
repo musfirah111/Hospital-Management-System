@@ -89,6 +89,14 @@ export default function LabReportForm({ isOpen, onClose, onSuccess, refetchLabTe
     });
   };
 
+  const resetForm = () => {
+    setFormData({
+      appointment: '',
+      testName: '',
+      results: ''
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -125,6 +133,7 @@ export default function LabReportForm({ isOpen, onClose, onSuccess, refetchLabTe
 
       console.log('Lab report submitted:', response.data);
       onSuccess(response.data);
+      resetForm();
       onClose();
       refetchLabTests();
     } catch (error) {
@@ -133,7 +142,13 @@ export default function LabReportForm({ isOpen, onClose, onSuccess, refetchLabTe
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal 
+      isOpen={isOpen} 
+      onClose={() => {
+        resetForm();
+        onClose();
+      }}
+    >
       <form onSubmit={handleSubmit} className="p-6">
         <h2 className="text-xl font-semibold mb-6">New Lab Report</h2>
 

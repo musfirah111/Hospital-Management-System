@@ -97,12 +97,35 @@ export default function MedicalRecordForm({ isOpen, onClose, onSubmit }: Medical
     setFormData({ ...formData, diagnosis: e.target.value });
   };
 
+  const resetForm = () => {
+    setFormData({
+      appointment: '',
+      diagnosis: '',
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      // Add debug logs
+      console.log('Token:', token);
+      console.log('Headers:', {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      });
+
       const selectedAppointment = appointments.find(apt => apt._id === formData.appointment);
   
+      // Make sure token is valid by checking its format
+      if (!token.match(/^[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*$/)) {
+        throw new Error('Invalid token format');
+      }
+
       const prescriptionsResponse = await axios.get(`http://localhost:5000/api/prescriptions/appointment/${selectedAppointment?._id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -119,27 +142,37 @@ export default function MedicalRecordForm({ isOpen, onClose, onSubmit }: Medical
   
       console.log('Submitting medical record:', medicalRecordData);
   
-      const response = await axios.post('http://localhost:5000/api/medical-records', medicalRecordData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await axios.post(
+        'http://localhost:5000/api/medical-records', 
+        medicalRecordData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
   
       // Debugging success response
       console.log('Medical record submitted:', response.data);
   
       // Refresh appointments after successful submission
       await fetchAppointments();
-      onSubmit(response.data); // Pass the response to the parent component if needed
+      resetForm();
+      onSubmit(response.data);
       onClose();
     } catch (error) {
       console.error('Failed to submit medical record:', error);
     }
   };
-  
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={handleClose}>
       <form onSubmit={handleSubmit} className="p-6">
         <h2 className="text-xl font-semibold mb-6">New Medical Record</h2>
         
@@ -186,7 +219,7 @@ export default function MedicalRecordForm({ isOpen, onClose, onSubmit }: Medical
         <div className="mt-6 flex justify-end space-x-3">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
           >
             Cancel

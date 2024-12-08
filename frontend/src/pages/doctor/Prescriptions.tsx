@@ -177,8 +177,8 @@ export default function Prescriptions() {
         <div className="flex space-x-4">
           <div className="flex-1">
             <SearchBar
-              onChange={handleSearch} 
-              placeholder="Search by patient name or ID..."
+              onChange={(query) => handleSearch(query)} 
+              placeholder="Search by patient name..."
             />
           </div>
         </div>

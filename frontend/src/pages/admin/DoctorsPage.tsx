@@ -38,7 +38,8 @@ export function DoctorsPage() {
     doctorId: string | null;
   }>({ isOpen: false, doctorId: null });
 
-  const fetchDoctors = async (page: number) => {
+  const fetchDoctors = async (page: number, searchQuery: string = '') => {
+    console.log('Fetching doctors with search:', searchQuery);
     try {
       const token = localStorage.getItem('authToken');
       const response = await axios.get(`http://localhost:5000/api/doctors`, {
@@ -48,9 +49,10 @@ export function DoctorsPage() {
           limit: 10
         }
       });
-      
+      console.log('API response:', response.data);
+
       setAllDoctors(response.data.doctors);
-      filterDoctors(search, response.data.doctors);
+      setFilteredDoctors(response.data.doctors);
       setTotalPages(Math.ceil(response.data.totalPages));
       setCurrentPage(page);
       setLoading(false);
@@ -61,26 +63,18 @@ export function DoctorsPage() {
     }
   };
 
-  const filterDoctors = (searchTerm: string, doctors: Doctor[] = allDoctors) => {
-    if (!searchTerm) {
-      setFilteredDoctors(doctors);
-      return;
-    }
-
-    const filtered = doctors.filter(doctor => 
-      doctor.user_id?.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredDoctors(filtered);
-  };
-
-  const handleSearch = (value: string) => {
-    setSearch(value);
-    filterDoctors(value);
+  const handleSearch = (searchTerm: string) => {
+    setSearch(searchTerm);
+    fetchDoctors(1, searchTerm);
   };
 
   useEffect(() => {
-    fetchDoctors(currentPage);
-  }, [currentPage]);
+    const timeoutId = setTimeout(() => {
+      fetchDoctors(currentPage, search);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [currentPage, search]);
 
   const handleDoctorAdded = () => {
     fetchDoctors(currentPage);
@@ -97,7 +91,7 @@ export function DoctorsPage() {
       fetchDoctors(currentPage);
     } catch (err) {
       console.error('Error deleting doctor:', err);
-      //alert('Failed to delete doctor. Please try again.');
+      alert('Failed to delete doctor. Please try again.');
     }
   };
 
@@ -178,7 +172,7 @@ export function DoctorsPage() {
           <SearchInput
               value={search}
               onChange={handleSearch}
-              placeholder="Search by doctor name..."
+              placeholder="Search doctors..."
             />
           </div>
 

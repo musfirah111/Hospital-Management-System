@@ -1,12 +1,14 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 interface DepartmentData {
   name: string;
-  percentage:number;
+  percentage: number;
   patients: number;
   color: string;
 }
@@ -17,15 +19,29 @@ interface DepartmentChartProps {
 }
 
 export function DepartmentChart({ data, className = '' }: DepartmentChartProps) {
-  const total = data.reduce((sum, item) => sum + item.patients, 0);
+  const [employeeData, setEmployeeData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const employeeData = [
-    { department: 'Emergency', value: 20, percentage: '20%' },
-    { department: 'ICU', value: 60, percentage: '60%' },
-    { department: 'Cardiology', value: 45, percentage: '45%' },
-    { department: 'Neurology', value: 80, percentage: '80%' },
-    { department: 'Dermatology', value: 55, percentage: '55%' }
-  ];
+  useEffect(() => {
+    const fetchDepartmentStats = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await axios.get('http://localhost:5000/api/departments/patient-stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("----------------------------------------------responsepie", response);
+        setEmployeeData(response.data);
+      } catch (error) {
+        console.error('Error fetching department stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDepartmentStats();
+  }, []);
+
+  const total = data.reduce((sum, item) => sum + item.patients, 0);
 
   return (
     <div className="space-y-4">
@@ -35,10 +51,6 @@ export function DepartmentChart({ data, className = '' }: DepartmentChartProps) 
             <h2 className="text-lg font-semibold">Patient Overview</h2>
             <p className="text-sm text-gray-500">by Departments</p>
           </div>
-          <select className="text-sm border-gray-300 rounded-md">
-            <option>Weekly</option>
-            <option>Monthly</option>
-          </select>
         </div>
 
         <div className="flex items-start justify-between">
@@ -69,14 +81,14 @@ export function DepartmentChart({ data, className = '' }: DepartmentChartProps) 
             {data.map((item, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div 
-                    className="w-2 h-2 rounded-full" 
+                  <div
+                    className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: item.color }}
                   />
                   <span className="text-sm">{item.name}</span>
                 </div>
                 <span className="text-sm font-medium">
-                  {Math.round((item.patients / total) * 100)}%
+                  {total > 0 ? Math.round((item.patients / total) * 100) : 0}%
                 </span>
               </div>
             ))}
@@ -86,38 +98,47 @@ export function DepartmentChart({ data, className = '' }: DepartmentChartProps) 
 
       <div className="bg-white rounded-lg shadow p-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Doctors</h2>
+          <h2 className="text-lg font-semibold">Department Patient Distribution</h2>
         </div>
 
-        <div className="h-[180px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={employeeData} barSize={30}>
-              <XAxis 
-                dataKey="department" 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: '#666', fontSize: 12 }}
-              />
-              <YAxis 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: '#666', fontSize: 12 }}
-                domain={[0, 2000]}
-              />
-              <Bar 
-                dataKey="value" 
-                radius={[4, 4, 0, 0]}
-              >
-                {employeeData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={index % 2 === 0 ? '#129820' : '#7BC1B7'} 
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        {loading ? (
+          <div className="h-[180px] flex items-center justify-center">
+            <span>Loading...</span>
+          </div>
+        ) : (
+          <div className="h-[180px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={employeeData} barSize={30}>
+                <XAxis
+                  dataKey="department"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#666', fontSize: 12 }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#666', fontSize: 12 }}
+                />
+                <Tooltip
+                  formatter={(value) => [`${value} patients`, 'Count']}
+                  labelStyle={{ color: '#666' }}
+                />
+                <Bar
+                  dataKey="value"
+                  radius={[4, 4, 0, 0]}
+                >
+                  {employeeData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={index % 2 === 0 ? '#129820' : '#7BC1B7'}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow p-4">
@@ -125,7 +146,7 @@ export function DepartmentChart({ data, className = '' }: DepartmentChartProps) 
           <h2 className="text-lg font-semibold">Calendar</h2>
         </div>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DateCalendar 
+          <DateCalendar
             defaultValue={dayjs()}
             sx={{
               width: '320px',

@@ -5,13 +5,17 @@ interface DepartmentConfirmationModalProps {
   onClose: () => void;
   onConfirm: () => void;
   department: Department | null;
+  title?: string;
+  message?: string;
 }
 
 export function DepartmentConfirmationModal({ 
   isOpen, 
   onClose, 
   onConfirm, 
-  department 
+  department, 
+  title, 
+  message 
 }: DepartmentConfirmationModalProps) {
   if (!isOpen) return null;
 

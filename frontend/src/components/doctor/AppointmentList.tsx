@@ -32,7 +32,7 @@ interface AppointmentListProps {
   loading: boolean;
 }
 
-export default function AppointmentList({ appointments, onStatusUpdate, loading }: AppointmentListProps) {
+export default function AppointmentList({ appointments, onStatusUpdate }: AppointmentListProps) {
   const [filter, setFilter] = useState('all');
   
   const filteredAppointments = appointments.filter(appointment => 

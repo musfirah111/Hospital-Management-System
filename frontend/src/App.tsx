@@ -21,7 +21,6 @@ import { AdminAppointmentsPage } from './pages/admin/AppointmentsPage';
 import { DepartmentsPage } from './pages/admin/DepartmentsPage';
 import { ReviewsPage } from './pages/admin/ReviewsPage';
 import { DashboardPage } from './pages/admin/DashboardPage';
-import { AdminLayout } from './components/admin/layout/AdminLayout';
 
 // Doctor imports
 import DoctorDashboard from './pages/doctor/Dashboard';

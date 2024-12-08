@@ -298,7 +298,27 @@ const getAllDoctors = asyncHandler(async (req, res) => {
 // Get the count of doctors in each department
 const getDoctorCountByDepartment = asyncHandler(async (req, res) => {
     const doctorCountByDepartment = await Doctor.aggregate([
-        { $group: { _id: "$department_id", count: { $sum: 1 } } }
+        {
+            $group: {
+                _id: "$department_id",
+                count: { $sum: 1 }
+            }
+        },
+        {
+            $lookup: {
+                from: "departments",
+                localField: "_id",
+                foreignField: "_id",
+                as: "department"
+            }
+        },
+        {
+            $project: {
+                department_id: "$_id",
+                count: 1,
+                department_name: { $arrayElemAt: ["$department.name", 0] }
+            }
+        }
     ]);
 
     res.json(doctorCountByDepartment);
@@ -349,7 +369,7 @@ const getDoctorSchedule = asyncHandler(async (req, res) => {
         };
     }));
 
-    console.log("************************************************mappedAppointments", mappedAppointments);
+    console.log("***********************mappedAppointments", mappedAppointments);
 
     res.json({
         success: true,

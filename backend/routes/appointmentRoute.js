@@ -52,7 +52,7 @@ router.get('/', protect, getAppointments);
 router.get('/:id', protect, getAppointmentById);
 
 // Route to update appointment status (doctor only).
-router.put('/:id/status', protect, doctorOnly, updateAppointmentStatus);
+router.put('/:id/status', protect, updateAppointmentStatus);
 
 // Route to update/reschedule appointment (admin only)
 router.put('/:id', protect, adminOnly, updateAppointment);

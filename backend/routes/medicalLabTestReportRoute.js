@@ -10,7 +10,8 @@ const {
     getDailyLabReports,
     getWeeklyLabReports,
     getMonthlyLabReports,
-    getLabReportsByPatientId
+    getLabReportsByPatientId,
+    getLabReportsByDoctorId
 } = require('../controllers/medicalLabTestReportController');
 const { protect } = require('../middlewares/authMiddleware');
 const { doctorOnly } = require('../middlewares/roleMiddleware');
@@ -28,5 +29,6 @@ router.post('/share/:id', protect, shareReport);
 // Generic routes last
 router.post('/', protect, doctorOnly, createReport);
 router.get('/:id', protect, getReportById);
+router.get('/doctor/:id', protect, getLabReportsByDoctorId);
 
 module.exports = router; 

@@ -17,7 +17,7 @@ const medicalLabTestReportSchema = new mongoose.Schema({
     },
     test_date: {
         type: Date,
-        required: [true, 'Please enter a test date.']
+        default: Date.now
     },
     result: {
         type: String,

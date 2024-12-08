@@ -15,8 +15,6 @@ import { ForgotPassword } from './pages/ForgotPassword';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 
 // Admin imports
-import { Sidebar } from './components/admin/layout/Sidebar';
-import { Header } from './components/admin/layout/Header';
 import { DoctorsPage } from './pages/admin/DoctorsPage';
 import { PatientsPage } from './pages/admin/PatientsPage';
 import { AdminAppointmentsPage } from './pages/admin/AppointmentsPage';
@@ -26,7 +24,6 @@ import { DashboardPage } from './pages/admin/DashboardPage';
 import { AdminLayout } from './components/admin/layout/AdminLayout';
 
 // Doctor imports
-import DoctorSidebar from './components/doctor/Sidebar';
 import DoctorDashboard from './pages/doctor/Dashboard';
 import Appointments from './pages/doctor/Appointments';
 import Schedule from './pages/doctor/Schedule';
@@ -35,8 +32,6 @@ import Prescriptions from './pages/doctor/Prescriptions';
 import MedicalRecords from './pages/doctor/MedicalRecords';
 import LabReports from './pages/doctor/LabReports';
 import Chat from './pages/doctor/Chat';
-import { DoctorHeader } from './components/doctor/layout/Header';
-import { DoctorLayout } from './components/doctor/layout/DoctorLayout';
 
 // Protected route component
 interface ProtectedRouteProps {

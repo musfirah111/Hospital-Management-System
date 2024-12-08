@@ -90,7 +90,7 @@ const getActivePrescriptionsByDoctorId = asyncHandler(async (req, res) => {
         path: 'patient_id',
         populate: {
             path: 'user_id',
-            select: 'name profile_picture'
+             select: 'name email profile_picture'
         }
     })
     .populate('appointment_id')

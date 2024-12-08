@@ -31,29 +31,29 @@ interface Doctor {
   date_of_joining: string;
 }
 
-interface PaymentResponse {
-  success: boolean;
-  message: string;
-  data: {
-    invoice: {
-      _id: string;
-      stripe_invoice_id: string;
-      payment_status: string;
-    };
-    paymentIntent: {
-      id: string;
-      status: string;
-      amount: number;
-    };
-    testMode: boolean;
-  };
-}
+// interface PaymentResponse {
+//   success: boolean;
+//   message: string;
+//   data: {
+//     invoice: {
+//       _id: string;
+//       stripe_invoice_id: string;
+//       payment_status: string;
+//     };
+//     paymentIntent: {
+//       id: string;
+//       status: string;
+//       amount: number;
+//     };
+//     testMode: boolean;
+//   };
+// }
 
-const TEST_CARDS = {
-  visa: '4242424242424242',
-  mastercard: '5555555555554444',
-  declined: '4000000000000002'
-};
+// const TEST_CARDS = {
+//   visa: '4242424242424242',
+//   mastercard: '5555555555554444',
+//   declined: '4000000000000002'
+// };
 
 export default function PaymentPage() {
   const { id } = useParams();
@@ -344,7 +344,7 @@ export default function PaymentPage() {
     }
   };
 
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  // const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (
     <Layout>

@@ -117,7 +117,11 @@ export default function DoctorList() {
           <p className="text-gray-600 mb-6">Book appointments with the best doctors</p>
 
           <div className="mb-8">
-            <SearchBar value={searchQuery} onChange={setSearchQuery} />
+            <SearchBar 
+              value={searchQuery} 
+              onChange={setSearchQuery}
+              placeholder="Search by doctor name or specialization..."
+            />
           </div>
 
           <div className="grid grid-cols-1 gap-6">

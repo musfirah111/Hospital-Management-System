@@ -10,6 +10,7 @@ interface TableProps {
   columns: Column[];
   data: any[];
   onRowClick?: (row: any) => void;
+  className?: string;
 }
 
 export function Table({ columns, data, onRowClick }: TableProps) {

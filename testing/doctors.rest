@@ -10,14 +10,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ3YjQxN
 
 ### Create Doctor
 POST http://localhost:5000/api/doctors
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNTc2NTZmZGYyMmRjYWQ5NGRjYSIsImlhdCI6MTczMzU4OTkwMSwiZXhwIjoxNzM2MTgxOTAxfQ.ljWggo8ySNPiuXNa5JmPphLXTdH4sc5SpjUGHThqahs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzY3MjEyOSwiZXhwIjoxNzM2MjY0MTI5fQ.F6XbfLXigYvoFXq2SKawpGvIHz7ae6L1wnAP4btY-PQ
 Content-Type: application/json
 
 {
-    "user_id": "67547b415a77b9da914684f1",
-    "specialization": "Child Specialist",
-    "qualification": ["MBBS", "MD Pediatrics"],
-    "description": "Dr. Sarah is a compassionate pediatrician who has dedicated her career to children's healthcare. She has extensive experience in treating various pediatric conditions and is known for her gentle approach.",
+    "user_id": "6755bc5d29acda9bc734e84d",
+    "specialization": "Viral Disease Specialist",
+    "qualification": ["MBBS", "MD Viral Disease"],
+    "description": "Dr. Shahzad is a compassionate viral disease specialist who has dedicated his career to children's healthcare. He has extensive experience in treating various viral diseases and is known for his gentle approach.",
     "department_id": "67543352caf1c6a1dd2cdc2f",
     "shift": "Evening",
     "working_hours": "3PM-11PM",

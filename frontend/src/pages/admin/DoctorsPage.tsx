@@ -1,55 +1,140 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SearchInput } from '../../components/admin/shared/SearchInput';
 import { Table } from '../../components/admin/shared/Table';
 import { Pagination } from '../../components/admin/shared/Pagination';
 import { Avatar } from '../../components/admin/shared/Avatar';
 import { Trash2 } from 'lucide-react';
-import { doctors } from '../../data/mockData';
 import { RegistrationModal } from '../../components/admin/forms/RegistrationModal';
 import { DoctorRegistrationForm } from '../../components/admin/forms/DoctorRegistrationForm';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { Layout } from '../../components/admin/AdminLayout';
+import axios from 'axios';
+
+interface Doctor {
+  _id: string;
+  user_id: {
+    name: string;
+    email: string;
+    profile_picture: string;
+  };
+  specialization: string;
+  qualification: string;
+  department_id: {
+    name: string;
+  };
+  phone_number: string;
+}
 
 export function DoctorsPage() {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [doctorData, setDoctorData] = useState(doctors);
+  const [doctorData, setDoctorData] = useState<Doctor[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const handleDeleteClick = (doctor: any) => {
+  const fetchDoctors = async (page: number, searchQuery: string = '') => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await axios.get(`http://localhost:5000/api/doctors`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          page,
+          limit: 10,
+          search: searchQuery
+        }
+      });
+
+      setDoctorData(response.data.doctors);
+      setTotalPages(Math.ceil(response.data.totalPages));
+      setCurrentPage(page);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching doctors:', err);
+      setError('Failed to fetch doctors');
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDoctors(currentPage, search);
+  }, [currentPage, search]);
+
+  const handleDeleteClick = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
     setIsDeleteModalOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
-    setDoctorData(prevData =>
-      prevData.filter(doc => doc.id !== selectedDoctor.id)
-    );
-    setIsDeleteModalOpen(false);
+  const handleDeleteConfirm = async () => {
+    if (!selectedDoctor) return;
+
+    try {
+      const token = localStorage.getItem('authToken');
+      await axios.delete(`http://localhost:5000/api/doctors/${selectedDoctor._id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setDoctorData(prevData =>
+        prevData.filter(doc => doc._id !== selectedDoctor._id)
+      );
+      setIsDeleteModalOpen(false);
+    } catch (err) {
+      console.error('Error deleting doctor:', err);
+      setError('Failed to delete doctor');
+    }
+  };
+
+  const handleDoctorAdded = () => {
+    fetchDoctors(currentPage, search);
+    setIsModalOpen(false);
   };
 
   const columns = [
     {
       key: 'name',
       header: 'Doctor Name',
-      render: (value: string, row: any) => (
+      render: (_: string, row: Doctor) => (
         <div className="flex items-center space-x-3">
-          <Avatar name={value} image={row.image} />
-          <span>{value}</span>
+          <Avatar
+            name={row.user_id?.name || 'Unknown'}
+            image={row.user_id?.profile_picture}
+          />
+          <span>{row.user_id?.name || 'Unknown'}</span>
         </div>
       ),
     },
-    { key: 'specialization', header: 'Specialization' },
-    { key: 'qualification', header: 'Qualification' },
-    { key: 'department', header: 'Department' },
-    { key: 'phoneNumber', header: 'Phone Number' },
-    { key: 'emailId', header: 'Email ID' },
+    {
+      key: 'specialization',
+      header: 'Specialization',
+      render: (_: string, row: Doctor) => row.specialization || 'N/A'
+    },
+    {
+      key: 'qualification',
+      header: 'Qualification',
+      render: (_: string, row: Doctor) => row.qualification || 'N/A'
+    },
+    {
+      key: 'department',
+      header: 'Department',
+      render: (_: string, row: Doctor) => row.department_id?.name || 'N/A'
+    },
+    {
+      key: 'phoneNumber',
+      header: 'Phone Number',
+      render: (_: string, row: Doctor) => row.phone_number || 'N/A'
+    },
+    {
+      key: 'emailId',
+      header: 'Email ID',
+      render: (_: string, row: Doctor) => row.user_id?.email || 'N/A'
+    },
     {
       key: 'actions',
       header: 'Actions',
-      render: (_: unknown, row: any) => (
+      render: (_: unknown, row: Doctor) => (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -62,6 +147,9 @@ export function DoctorsPage() {
       ),
     },
   ];
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <Layout>
@@ -86,24 +174,31 @@ export function DoctorsPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <Table
-              columns={columns}
-              data={doctorData}
-              onRowClick={(row) => console.log('Clicked row:', row)}
-            />
+            <div className="min-w-full inline-block align-middle">
+              <div className="overflow-hidden">
+                <Table
+                  columns={columns}
+                  data={doctorData}
+                  onRowClick={(row) => console.log('Clicked row:', row)}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="p-4 border-t border-gray-200">
             <Pagination
               currentPage={currentPage}
-              totalPages={5}
+              totalPages={totalPages}
               onPageChange={setCurrentPage}
             />
           </div>
         </div>
 
         <RegistrationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <DoctorRegistrationForm onClose={() => setIsModalOpen(false)} />
+          <DoctorRegistrationForm
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={handleDoctorAdded}
+          />
         </RegistrationModal>
 
         <ConfirmationModal

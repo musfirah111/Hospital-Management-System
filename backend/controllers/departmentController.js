@@ -1,3 +1,4 @@
+const asyncHandler = require('express-async-handler');
 const Department = require('../models/Department'); // Assuming you have a Department model
 
 // Add a new department
@@ -33,9 +34,15 @@ const deleteDepartment = async (req, res) => {
     }
 };
 
+const getAllDepartments = asyncHandler(async (req, res) => {
+    const departments = await Department.find({ active_status: true });
+    res.json(departments);
+});
+
 // Export the controller functions
 module.exports = {
     addDepartment,
     updateDepartment,
     deleteDepartment,
+    getAllDepartments
 };

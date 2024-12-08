@@ -171,6 +171,7 @@ export default function Prescriptions() {
           isOpen={showForm}
           onClose={() => setShowForm(false)}
           onSubmit={handleCreatePrescription}
+          fetchPrescriptions={fetchPrescriptions}
         />
 
         <div className="flex space-x-4">

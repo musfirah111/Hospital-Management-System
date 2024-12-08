@@ -1,54 +1,97 @@
-import { useState } from 'react';
-import SearchBar from '../../components/doctor/SearchBar';
+import { useState, useEffect } from 'react';
+import SearchBar from '../../components/SearchBar';
 import MedicalRecordForm from '../../components/doctor/MedicalRecordForm';
-import { FileText, Download, Share2 } from 'lucide-react';
-import type { MedicalRecord } from '../../types/doctor/index';
+import { FileText } from 'lucide-react';
 import { Layout } from '../../components/doctor/Layout';
+import axios from 'axios';
 
-const mockRecords: MedicalRecord[] = [
-  {
-    id: '1',
-    patientId: 'P001',
-    patientName: 'John Doe',
-    date: '2024-03-15',
-    diagnosis: 'Upper respiratory infection',
-    treatment: 'Prescribed antibiotics and rest',
-    notes: 'Follow up in 1 week if symptoms persist'
-  },
-  {
-    id: '2',
-    patientId: 'P002',
-    patientName: 'Jane Smith',
-    date: '2024-03-14',
-    diagnosis: 'Migraine',
-    treatment: 'Prescribed pain medication',
-    notes: 'Recommended lifestyle changes and stress management'
-  }
-];
+interface DoctorResponse {
+  _id: string;
+  // ... other doctor properties
+}
+
+interface MedicalRecord {
+  _id: string;
+  patient_id: {
+    _id: string;
+    user_id: {
+      name: string;
+    };
+  };
+  doctor_id: string;
+  diagnosis: string;
+  treatment: {
+    _id: string;
+  }[];
+  date: string;
+}
 
 export default function MedicalRecords() {
   const [showForm, setShowForm] = useState(false);
-  const [records, setRecords] = useState(mockRecords);
-  const [filteredRecords, setFilteredRecords] = useState(mockRecords);
+  const [records, setRecords] = useState<MedicalRecord[]>([]);
+  const [filteredRecords, setFilteredRecords] = useState<MedicalRecord[]>([]);
+  const [searchValue, setSearchValue] = useState('');
+
+  useEffect(() => {
+    const fetchRecords = async () => {
+      try {
+
+        const token = localStorage.getItem('authToken');
+        const userId = localStorage.getItem('userId');
+        console.log('User ID:', userId); // Debug log
+
+        const doctorIdResponse = await axios.get(`http://localhost:5000/api/doctors/user/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        console.log('Doctor ID response:', doctorIdResponse.data); // Debug log
+        const doctorId = (doctorIdResponse.data as DoctorResponse)._id;
+        console.log('Doctor ID:', doctorId); // Debug log
+
+        const response = await axios.get<MedicalRecord[]>(`http://localhost:5000/api/medical-records/doctor/${doctorId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log('Medical records response:', response.data); // Debug log
+        setRecords(response.data);
+        setFilteredRecords(response.data);
+      } catch (error) {
+        console.error('Failed to fetch medical records:', error);
+      }
+    };
+
+    fetchRecords();
+  }, []);
 
   const handleSearch = (query: string) => {
+    setSearchValue(query);
     const filtered = records.filter(
       (record) =>
-        record.patientName.toLowerCase().includes(query.toLowerCase()) ||
-        record.patientId.toLowerCase().includes(query.toLowerCase()) ||
+        record.patient_id.user_id.name.toLowerCase().includes(query.toLowerCase()) ||
+        record.patient_id._id.toLowerCase().includes(query.toLowerCase()) ||
         record.diagnosis.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredRecords(filtered);
   };
 
-  const handleCreateRecord = (data: any) => {
-    const newRecord = {
-      ...data,
-      id: Math.random().toString(36).substr(2, 9),
-      date: new Date().toISOString().split('T')[0]
-    };
-    setRecords([newRecord, ...records]);
-    setFilteredRecords([newRecord, ...records]);
+  const handleCreateRecord = async (data: any) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post<MedicalRecord>('http://localhost:5000/api/medical-records', data, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const newRecord = response.data;
+      setRecords([newRecord, ...records]);
+      setFilteredRecords([newRecord, ...records]);
+      setShowForm(false);
+    } catch (error) {
+      console.error('Failed to create medical record:', error);
+    }
   };
 
   return (
@@ -73,35 +116,25 @@ export default function MedicalRecords() {
         <div className="flex space-x-4">
           <div className="flex-1">
             <SearchBar
-              onSearch={handleSearch}
+              value={searchValue}
+              onChange={handleSearch}
               placeholder="Search by patient name, ID, or diagnosis..."
             />
           </div>
-          <input
-            type="date"
-            className="border rounded-md px-3 py-2"
-          />
         </div>
 
         <div className="grid gap-6">
           {filteredRecords.map((record) => (
-            <div key={record.id} className="bg-white rounded-lg shadow-md p-6">
+            <div key={record._id} className="bg-white rounded-lg shadow-md p-6">
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center space-x-2">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                    <h3 className="text-lg font-semibold">{record.patientName}</h3>
-                    <span className="text-sm text-gray-500">({record.patientId})</span>
+                    <FileText className="w-8 h-8 text-blue-600" />
+                    <h3 className="text-lg font-semibold">{record.patient_id.user_id.name}</h3>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">Record date: {record.date}</p>
                 </div>
-                <div className="flex space-x-2">
-                  <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
-                    <Download size={20} />
-                  </button>
-                  <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
-                    <Share2 size={20} />
-                  </button>
+                <div className="text-sm text-gray-500">
+                  Record date: {new Date(record.date).toLocaleDateString()}
                 </div>
               </div>
 
@@ -112,14 +145,10 @@ export default function MedicalRecords() {
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">Treatment:</h4>
-                  <p className="text-sm text-gray-600">{record.treatment}</p>
+                  <p className="text-sm text-gray-600">
+                    {record.treatment.length > 0 ? `${record.treatment.length} prescriptions assigned` : 'No prescriptions assigned'}
+                  </p>
                 </div>
-                {record.notes && (
-                  <div>
-                    <h4 className="font-medium mb-2">Notes:</h4>
-                    <p className="text-sm text-gray-600">{record.notes}</p>
-                  </div>
-                )}
               </div>
             </div>
           ))}

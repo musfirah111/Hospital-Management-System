@@ -115,10 +115,21 @@ const getAllPrescriptions = asyncHandler(async (req, res) => {
     res.json(prescriptions);
 });
 
+
+// Get prescriptions by appointment ID
+const getPrescriptionsByAppointmentId = asyncHandler(async (req, res) => {
+    const prescriptions = await Prescription.find({ appointment_id: req.params.id });
+    res.json(prescriptions);
+});
+
+
+
+
 module.exports = {
     createPrescription,
     updatePrescription,
     getPrescriptionById,
     getAllPrescriptions,
-    getActivePrescriptionsByPatientId
+    getActivePrescriptionsByPatientId,
+    getPrescriptionsByAppointmentId
 };

@@ -5,13 +5,17 @@ const {
     getRecordById,
     //searchRecordsByPatientId,
     searchRecordsByName,
-    getRecordsByPatientId
+    getRecordsByPatientId,
+    getRecordsByDoctorId
 } = require('../controllers/medicalRecordController');
 const { protect } = require('../middlewares/authMiddleware');
 const { doctorOnly } = require('../middlewares/roleMiddleware');
 
 // Route to get medical records by patient ID
 router.get('/patient/:patientId', protect, getRecordsByPatientId);
+
+// Route to get medical records by doctor ID
+router.get('/doctor/:doctorId', protect, getRecordsByDoctorId);
 
 // Route to create a new medical record (Doctor)
 router.post('/', protect, doctorOnly, createRecord);

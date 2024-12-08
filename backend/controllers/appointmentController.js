@@ -216,26 +216,20 @@ const updateAppointment = asyncHandler(async (req, res) => {
 
 // Request an appointment
 const requestAppointment = asyncHandler(async (req, res) => {
-    const { doctor_id, appointment_date, appointment_time } = req.body;
-    const patient_id = req.user._id; // Assuming the user ID is stored in req.user._id after authentication
+    const { doctor_id, patient_id, appointment_date, appointment_time } = req.body;
 
-    // Check if patient exists
-    const patientExists = await Patient.findById(patient_id);
-    if (!patientExists) {
+    // Validate patient exists
+    const patient = await Patient.findById(patient_id);
+    if (!patient) {
         res.status(404);
-        throw new Error("Patient not found.");
+        throw new Error('Patient not found');
     }
 
-    // Check if doctor exists and is available
+    // Validate doctor exists
     const doctor = await Doctor.findById(doctor_id);
     if (!doctor) {
         res.status(404);
-        throw new Error("Doctor not found.");
-    }
-
-    if (!doctor.availability_status) {
-        res.status(400);
-        throw new Error("Doctor is not available for appointments.");
+        throw new Error('Doctor not found');
     }
 
     try {
@@ -254,7 +248,7 @@ const requestAppointment = asyncHandler(async (req, res) => {
         });
     } catch (error) {
         res.status(400);
-        throw new Error(`Error requesting appointment: ${error.message}`);
+        throw new Error(`Error creating appointment: ${error.message}`);
     }
 });
 

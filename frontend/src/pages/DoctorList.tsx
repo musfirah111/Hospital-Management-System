@@ -25,26 +25,47 @@ const doctorImages = {
   }
 };
 
+interface PatientResponse {
+  id: string;
+}
+
 export default function DoctorList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [patientId, setPatientId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchDoctors = async () => {
+    const fetchInitialData = async () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('authToken');
+        const userId = localStorage.getItem('userId');
+
+        if (!token || !userId) {
+          setError('Please login to continue');
+          navigate('/login');
+          return;
+        }
+
+        // Fetch patient ID
+        const patientResponse = await axios.get<PatientResponse>(
+          `http://localhost:5000/api/patients/user/${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        
+        console.log('Patient response:', patientResponse.data);
+        setPatientId(patientResponse.data.id);
+        localStorage.setItem('patientId', patientResponse.data.id); // Store for later use
+
+        // Fetch doctors
         const response = await axios.get<{ doctors: Doctor[] }>('http://localhost:5000/api/doctors', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
         
-        // The response now includes pagination data
-        const doctorsData = response.data.doctors; // Access the doctors array
+        const doctorsData = response.data.doctors;
         
         const transformedDoctors = doctorsData.map((doctor: any, index: number) => {
           const name = doctor.user_id.name.toLowerCase();
@@ -81,16 +102,16 @@ export default function DoctorList() {
         });
 
         setDoctors(transformedDoctors);
-        setLoading(false);
       } catch (err: any) {
-        console.error('Error fetching doctors:', err);
-        setError(err.response?.data?.message || 'Failed to fetch doctors');
+        console.error('Error fetching data:', err);
+        setError(err.response?.data?.message || 'Failed to fetch data');
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchDoctors();
-  }, []);
+    fetchInitialData();
+  }, [navigate]);
 
   const filteredDoctors = doctors.filter(doctor =>
     doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -98,6 +119,11 @@ export default function DoctorList() {
   );
 
   const handleDoctorClick = (doctorId: string) => {
+    if (!patientId) {
+      alert('Please login to book an appointment');
+      navigate('/login');
+      return;
+    }
     navigate(`/doctors/${doctorId}`);
   };
 

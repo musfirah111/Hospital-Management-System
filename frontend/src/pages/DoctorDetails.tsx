@@ -97,12 +97,60 @@ export default function DoctorDetails() {
     getAvailableSlots(doctor.working_hours, selectedDate) : 
     [];
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     if (!selectedDate || !selectedSlot) {
       alert('Please select both date and time slot');
       return;
     }
-    navigate(`/booking/${doctor._id}?date=${selectedDate}&slot=${selectedSlot}`);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const patientId = localStorage.getItem('patientId');
+
+      if (!token || !patientId) {
+        alert('Please login to book an appointment');
+        navigate('/login');
+        return;
+      }
+
+      console.log('Making request with:', {
+        doctor_id: doctor?._id,
+        patient_id: patientId,
+        appointment_date: selectedDate,
+        appointment_time: selectedSlot
+      });
+
+      const response = await axios.post(
+        'http://localhost:5000/api/appointments/request',
+        {
+          doctor_id: doctor?._id,
+          patient_id: patientId,
+          appointment_date: selectedDate,
+          appointment_time: selectedSlot
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('Response:', response.data);
+
+      if (response.data.success) {
+        localStorage.setItem('appointmentId', response.data.appointment._id);
+        navigate(`/booking/${doctor?._id}?date=${selectedDate}&slot=${selectedSlot}`);
+      } else {
+        alert('Failed to request appointment. Please try again.');
+      }
+    } catch (error: any) {
+      console.error('Error requesting appointment:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+      }
+      alert(error.response?.data?.message || 'An error occurred while requesting the appointment. Please try again.');
+    }
   };
 
   return (

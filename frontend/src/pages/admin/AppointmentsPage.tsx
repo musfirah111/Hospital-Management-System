@@ -77,10 +77,31 @@ export function AdminAppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [totalPages, setTotalPages] = useState(0);
   const ITEMS_PER_PAGE = 8;
-  const totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE);
 
+  useEffect(() => {
+    // Filter appointments based on search and active tab
+    const filtered = appointments.filter(apt => {
+      const matchesSearch = 
+        apt.doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        apt.patient.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesTab = activeTab === 'All' || apt.status === activeTab;
+      
+      return matchesSearch && matchesTab;
+    });
+    
+    setFilteredAppointments(filtered);
+    
+    // Calculate total pages
+    setTotalPages(Math.ceil(filtered.length / ITEMS_PER_PAGE));
+    
+    // Reset to first page when filters change
+    setCurrentPage(1);
+  }, [searchTerm, activeTab, appointments]);
+
+  // Calculate paginated data
   const paginatedAppointments = filteredAppointments.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -143,7 +164,7 @@ export function AdminAppointmentsPage() {
                   e.stopPropagation();
                   handleApprovalClick(row);
                 }}
-                className="px-3 py-1 rounded-md bg-[#DCFCE7] text-[#129820] hover:opacity-90"
+                className="px-3 py-1 rounded-md bg-[#0B8FAC] text-white hover:opacity-90"
               >
                 Approve
               </button>
@@ -153,7 +174,7 @@ export function AdminAppointmentsPage() {
                 e.stopPropagation();
                 handleCancelClick(row);
               }}
-              className="px-3 py-1 rounded-md bg-[#FEE2E2] text-[#F30000] hover:opacity-90"
+              className="px-3 py-1 rounded-md bg-red-600 text-white hover:opacity-90"
             >
               Cancel
             </button>
@@ -178,9 +199,11 @@ export function AdminAppointmentsPage() {
   const confirmCancellation = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      await axios.post(
-        `http://localhost:5000/api/appointments/cancel`,
-        { appointment_id: selectedAppointment?.id },
+      await axios.put(
+        `http://localhost:5000/api/appointments/${selectedAppointment?.id}/status`,
+        { 
+          status: 'Cancelled'
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -188,10 +211,14 @@ export function AdminAppointmentsPage() {
         }
       );
       
-      // Refresh appointments after cancellation
-      await fetchAppointments();
+      // Close modal and clear selection
       setIsCancelModalVisible(false);
       setSelectedAppointment(null);
+
+      // Refresh data and navigate
+      await fetchAppointments();
+      navigate('/admin/appointments');
+      
     } catch (err) {
       console.error('Error cancelling appointment:', err);
       // Add error handling here
@@ -329,13 +356,15 @@ export function AdminAppointmentsPage() {
             onRowClick={(row) => console.log('Row clicked:', row)}
           />
           
-          <div className="p-4 border-t border-gray-200">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={5}
-              onPageChange={setCurrentPage}
-            />
-          </div>
+          {totalPages > 1 && (
+            <div className="p-4 border-t border-gray-200">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
         </div>
 
         <ConfirmationModal

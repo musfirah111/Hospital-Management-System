@@ -38,13 +38,13 @@ export interface Appointment {
 }
 
 export interface Department {
+  _id: string;
   id: string;
   name: string;
   description: string;
   isActive: boolean;
-  status: 'Active' | 'Inactive' | 'Closed';  
   staffCount: number;
-  headOfDepartment: string;
+  status?: 'active' | 'inactive' | 'close';
 }
 
 export interface Review {

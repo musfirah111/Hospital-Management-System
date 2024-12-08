@@ -19,11 +19,6 @@ const departmentSchema = new mongoose.Schema({
         type: Number, 
         default: 0 
     },
-    head_of_department: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Doctor', 
-        required: false 
-    },
     date_created: {
         type: Date,
         default: Date.now

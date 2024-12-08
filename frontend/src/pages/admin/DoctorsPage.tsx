@@ -32,6 +32,10 @@ export function DoctorsPage() {
   const [doctorData, setDoctorData] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    doctorId: string | null;
+  }>({ isOpen: false, doctorId: null });
 
   const fetchDoctors = async (page: number, searchQuery: string = '') => {
     try {
@@ -71,12 +75,11 @@ export function DoctorsPage() {
       await axios.delete(`http://localhost:5000/api/doctors/${doctorId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
-      // Refresh the doctors list after deletion
+      setDeleteConfirmation({ isOpen: false, doctorId: null });
       fetchDoctors(currentPage, search);
     } catch (err) {
       console.error('Error deleting doctor:', err);
-      alert('Failed to delete doctor. Please try again.');
+      //alert('Failed to delete doctor. Please try again.');
     }
   };
 
@@ -126,9 +129,7 @@ export function DoctorsPage() {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            if (window.confirm('Are you sure you want to delete this doctor?')) {
-              handleDeleteDoctor(row._id);
-            }
+            setDeleteConfirmation({ isOpen: true, doctorId: row._id });
           }}
           className="p-2 text-gray-500 hover:text-red-600 rounded-full hover:bg-red-50"
         >
@@ -191,6 +192,31 @@ export function DoctorsPage() {
           />
         </RegistrationModal>
       </div>
+
+      {deleteConfirmation.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
+            <h3 className="text-lg font-semibold mb-4">Confirm Deletion</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this doctor? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setDeleteConfirmation({ isOpen: false, doctorId: null })}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteConfirmation.doctorId && handleDeleteDoctor(deleteConfirmation.doctorId)}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }

@@ -126,7 +126,7 @@ export function DoctorRegistrationForm({ onClose, onSuccess }: DoctorRegistratio
         const imageUrl = await uploadProfilePicture(file);
         setFormData(prev => ({ ...prev, profilePictureUrl: imageUrl }));
       } catch (error) {
-        alert('Failed to upload profile picture. Please try again.');
+        //alert('Failed to upload profile picture. Please try again.');
       }
     }
   };
@@ -213,7 +213,7 @@ export function DoctorRegistrationForm({ onClose, onSuccess }: DoctorRegistratio
         setFormData(prev => ({ ...prev, step: prev.step + 1, userId: userData.id }));
       } catch (error: any) {
         console.error('Error creating user:', error);
-        alert(error.message || 'Failed to create user. Please try again.');
+        //alert(error.message || 'Failed to create user. Please try again.');
         return;
       }
     }
@@ -256,7 +256,7 @@ export function DoctorRegistrationForm({ onClose, onSuccess }: DoctorRegistratio
         throw new Error('User ID is missing');
       }
       const doctorData = await createDoctor(formData.userId);
-      alert('Doctor registered successfully!');
+      //alert('Doctor registered successfully!');
       onSuccess();
       onClose();
     } catch (error: any) {

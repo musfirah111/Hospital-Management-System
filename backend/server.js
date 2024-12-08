@@ -30,6 +30,7 @@ app.use('/api/reviews', require('./routes/rateAndReviewRoute'));
 app.use('/api/billing', require('./routes/billingRoute'));
 app.use('/api/recommendations', require('./routes/recommendationRoute'));
 app.use('/api/communication', require('./routes/communicationRoute'));
+app.use('/uploads', express.static('uploads'));
 
 // Error Handler Middleware  
 app.use(errorHandler);

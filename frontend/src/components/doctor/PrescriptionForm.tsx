@@ -1,22 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 interface PrescriptionFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: any) => void;
+  fetchPrescriptions: () => void;
 }
 
-export default function PrescriptionForm({ isOpen, onClose, onSubmit }: PrescriptionFormProps) {
+interface Appointment {
+  _id: string;
+  patient_id: {
+    _id: string;
+    user_id: {
+      _id: string;
+      name: string;
+      email: string;
+      profile_picture: string;
+    };
+  };
+  doctor_id: string;
+  appointment_date: string;
+  appointment_time: string;
+  status: string;
+}
+
+export default function PrescriptionForm({ isOpen, onClose, onSubmit, fetchPrescriptions }: PrescriptionFormProps) {
   const [step, setStep] = useState(1);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [formData, setFormData] = useState({
-    patientName: '',
-    doctorName: '',
     appointmentId: '',
     medications: [{ name: '', dosage: '', frequency: '', duration: '' }],
     instructions: '',
     testsRecommended: ''
   });
+
+  const navigate = useNavigate();
+
+  const fetchAppointments = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const userId = localStorage.getItem('userId');
+
+      const doctorIdResponse = await axios.get(`http://localhost:5000/api/doctors/user/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const doctorId = doctorIdResponse.data._id;
+
+      const appointmentsResponse = await axios.get<Appointment[]>(
+        `http://localhost:5000/api/appointments/doctor/${doctorId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      const appointmentsArray = Array.isArray(appointmentsResponse.data)
+        ? appointmentsResponse.data
+        : (appointmentsResponse.data as { appointments: Appointment[] }).appointments || [];
+
+      setAppointments(appointmentsArray);
+    } catch (error) {
+      console.error('Failed to fetch appointments:', error);
+      setAppointments([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
 
   const handleNext = () => {
     setStep(step + 1);
@@ -26,10 +83,54 @@ export default function PrescriptionForm({ isOpen, onClose, onSubmit }: Prescrip
     setStep(step - 1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    onClose();
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.error('No auth token found');
+        navigate('/login');
+        return;
+      }
+
+      const selectedAppointment = appointments.find(apt => apt._id === formData.appointmentId);
+
+      const formattedTests = formData.testsRecommended
+        ? formData.testsRecommended.split(',').map(test => ({
+            test_name: test.trim()
+          }))
+        : [];
+
+      const prescriptionData = {
+        patient_id: selectedAppointment?.patient_id._id,
+        doctor_id: selectedAppointment?.doctor_id,
+        appointment_id: formData.appointmentId,
+        medications: formData.medications,
+        instructions: formData.instructions,
+        tests: formattedTests
+      };
+
+      await axios.post(
+        'http://localhost:5000/api/prescriptions',
+        prescriptionData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      onClose();
+      navigate('/doctor/prescriptions');
+      fetchPrescriptions();
+
+    } catch (error: any) {
+      console.error('Failed to create prescription:', error);
+      if (error.response?.status === 401) {
+        navigate('/login');
+      }
+    }
   };
 
   const addMedication = () => {
@@ -55,30 +156,6 @@ export default function PrescriptionForm({ isOpen, onClose, onSubmit }: Prescrip
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Patient Name
-              </label>
-              <input
-                type="text"
-                value={formData.patientName}
-                onChange={(e) => setFormData({ ...formData, patientName: e.target.value })}
-                className="w-full border rounded-md px-3 py-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Doctor Name
-              </label>
-              <input
-                type="text"
-                value={formData.doctorName}
-                onChange={(e) => setFormData({ ...formData, doctorName: e.target.value })}
-                className="w-full border rounded-md px-3 py-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Appointment
               </label>
               <select
@@ -88,8 +165,16 @@ export default function PrescriptionForm({ isOpen, onClose, onSubmit }: Prescrip
                 required
               >
                 <option value="">Select appointment</option>
-                <option value="1">Appointment 1</option>
-                <option value="2">Appointment 2</option>
+                {Array.isArray(appointments) && appointments.map(appointment => (
+                  <option key={appointment._id} value={appointment._id}>
+                    {`${appointment.patient_id.user_id.name} - ${new Date(appointment.appointment_date).toLocaleDateString('en-US', {
+                      weekday: 'short',
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })} ${appointment.appointment_time}`}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

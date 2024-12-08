@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import SearchBar from '../../components/doctor/SearchBar';
 import PrescriptionForm from '../../components/doctor/PrescriptionForm';
-import { FileText, Download, Share2 } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { Layout } from '../../components/doctor/Layout';
 
 interface Prescription {
@@ -10,6 +10,7 @@ interface Prescription {
   patient_id: {
     user_id: {
       name: string;
+      email: string;
       profile_picture?: string;
     };
     _id: string;
@@ -22,7 +23,7 @@ interface Prescription {
     duration: string;
   }>;
   instructions: string;
-  tests: string[];
+  tests: Array<{ test_name: string; _id: string }>;
   status: string;
   date_issued: string;
 }
@@ -35,12 +36,12 @@ const getPatientName = (prescription: Prescription) => {
   return prescription.patient_id.user_id.name;
 };
 
-// Helper function to get patient ID
-const getPatientId = (prescription: Prescription) => {
+// Helper function to get patient email
+const getPatientEmail = (prescription: Prescription) => {
   if (typeof prescription.patient_id === 'string') {
-    return prescription.patient_id;
+    return 'No email available';
   }
-  return prescription.patient_id._id;
+  return prescription.patient_id.user_id.email || 'No email available';
 };
 
 export default function Prescriptions() {
@@ -49,7 +50,7 @@ export default function Prescriptions() {
   const [filteredPrescriptions, setFilteredPrescriptions] = useState<Prescription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [patientId, setPatientId] = useState<string | null>(null);
+  const [patientId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPrescriptions();
@@ -88,7 +89,7 @@ export default function Prescriptions() {
 
       // Then fetch the prescriptions for this doctor
       const prescriptionsResponse = await axios.get(
-        `http://localhost:5000/api/prescriptions/doctor/${doctorId}`,
+        `http://localhost:5000/api/prescriptions/doctor/${doctorId}?populate[patient_id]=true&populate[patient_id.user_id]=true`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -121,7 +122,7 @@ export default function Prescriptions() {
     const filtered = prescriptions.filter(
       (prescription) =>
         getPatientName(prescription).toLowerCase().includes(query.toLowerCase()) ||
-        getPatientId(prescription).toLowerCase().includes(query.toLowerCase())
+        getPatientEmail(prescription).toLowerCase().includes(query.toLowerCase())
     );
     setFilteredPrescriptions(filtered);
   };
@@ -175,7 +176,7 @@ export default function Prescriptions() {
         <div className="flex space-x-4">
           <div className="flex-1">
             <SearchBar
-              onSearch={handleSearch}
+              onChange={handleSearch} 
               placeholder="Search by patient name or ID..."
             />
           </div>
@@ -188,6 +189,7 @@ export default function Prescriptions() {
         ) : (
           <div className="grid gap-6">
             {filteredPrescriptions.map((prescription) => {
+              console.log('Patient data:', prescription.patient_id);
               console.log('Rendering prescription:', prescription);
               return (
                 <div key={prescription._id} className="bg-white rounded-lg shadow-md p-6">
@@ -199,20 +201,12 @@ export default function Prescriptions() {
                           {getPatientName(prescription)}
                         </h3>
                         <span className="text-sm text-gray-500">
-                          ({getPatientId(prescription)})
+                          ({getPatientEmail(prescription)})
                         </span>
                       </div>
                       <p className="text-sm text-gray-500 mt-1">
                         Prescribed on {new Date(prescription.date_issued).toLocaleDateString()}
                       </p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
-                        <Download size={20} />
-                      </button>
-                      <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
-                        <Share2 size={20} />
-                      </button>
                     </div>
                   </div>
 
@@ -239,7 +233,9 @@ export default function Prescriptions() {
                       <h4 className="font-medium mb-2">Tests:</h4>
                       <ul className="space-y-1">
                         {prescription.tests.map((test, index) => (
-                          <li key={index} className="text-sm text-gray-600">{test}</li>
+                          <li key={index} className="text-sm text-gray-600">
+                            {test.test_name}
+                          </li>
                         ))}
                       </ul>
                     </div>

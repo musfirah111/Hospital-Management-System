@@ -127,8 +127,20 @@ const createAppointment = asyncHandler(async (req, res) => {
 // Get all appointments.
 const getAppointments = asyncHandler(async (req, res) => {
     const appointments = await Appointment.find({})
-        .populate('patient_id')
-        .populate('doctor_id');
+        .populate({
+            path: 'doctor_id',
+            populate: [
+                { path: 'user_id', select: 'name' },
+                { path: 'department_id', select: 'name' }
+            ]
+        })
+        .populate({
+            path: 'patient_id',
+            populate: {
+                path: 'user_id',
+                select: 'name'
+            }
+        });
     res.json(appointments);
 });
 

@@ -7,6 +7,7 @@ const {
     getAllPrescriptions,
     getActivePrescriptionsByPatientId,
     getActivePrescriptionsByDoctorId
+    getPrescriptionsByAppointmentId
 } = require('../controllers/prescriptionController');
 const { protect } = require('../middlewares/authMiddleware');
 const { doctorOnly } = require('../middlewares/roleMiddleware');
@@ -28,5 +29,8 @@ router.get('/doctor/:id', protect, doctorOnly, getActivePrescriptionsByDoctorId)
 
 // Route to get all prescriptions
 router.get('/', protect, getAllPrescriptions);
+
+// Route to get prescriptions by appointment ID
+router.get('/appointment/:appointmentId', protect, getPrescriptionsByAppointmentId);
 
 module.exports = router;

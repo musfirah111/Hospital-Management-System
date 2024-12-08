@@ -27,8 +27,7 @@ const medicalRecordSchema = new Schema({
     },
     date: {
         type: Date,
-        default: Date.now,
-        required: [true, 'Please enter the date.']
+        default: Date.now
     }
 });
 

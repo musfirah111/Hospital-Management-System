@@ -79,18 +79,57 @@ export default function MedicalRecords() {
 
   const handleCreateRecord = async (data: any) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post<MedicalRecord>('http://localhost:5000/api/medical-records', data, {
+      const token = localStorage.getItem('authToken');
+      const userId = localStorage.getItem('userId');
+      
+      // Get doctor ID first
+      const doctorIdResponse = await axios.get(`http://localhost:5000/api/doctors/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      const newRecord = response.data;
-      setRecords([newRecord, ...records]);
-      setFilteredRecords([newRecord, ...records]);
+      const doctorId = (doctorIdResponse.data as DoctorResponse)._id;
+      
+      // Format the data to match the expected structure
+      const recordData = {
+        patient_id: data.patient_id,
+        doctor_id: doctorId,
+        diagnosis: data.diagnosis,
+        treatment: data.treatment || [],
+      };
+      
+      console.log('Sending medical record data:', recordData);
+      
+      const response = await axios.post<MedicalRecord>(
+        'http://localhost:5000/api/medical-records',
+        recordData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      // Fetch the complete record data after creation
+      const newRecordResponse = await axios.get<MedicalRecord>(
+        `http://localhost:5000/api/medical-records/${response.data._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      
+      setRecords([newRecordResponse.data, ...records]);
+      setFilteredRecords([newRecordResponse.data, ...records]);
       setShowForm(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create medical record:', error);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+      }
     }
   };
 
@@ -130,23 +169,27 @@ export default function MedicalRecords() {
                 <div>
                   <div className="flex items-center space-x-2">
                     <FileText className="w-8 h-8 text-blue-600" />
-                    <h3 className="text-lg font-semibold">{record.patient_id.user_id.name}</h3>
+                    <h3 className="text-lg font-semibold">
+                      {record.patient_id?.user_id?.name || 'Unknown Patient'}
+                    </h3>
                   </div>
                 </div>
                 <div className="text-sm text-gray-500">
-                  Record date: {new Date(record.date).toLocaleDateString()}
+                  Record date: {record.date ? new Date(record.date).toLocaleDateString() : 'N/A'}
                 </div>
               </div>
 
               <div className="mt-4 space-y-4">
                 <div>
                   <h4 className="font-medium mb-2">Diagnosis:</h4>
-                  <p className="text-sm text-gray-600">{record.diagnosis}</p>
+                  <p className="text-sm text-gray-600">{record.diagnosis || 'No diagnosis'}</p>
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">Treatment:</h4>
                   <p className="text-sm text-gray-600">
-                    {record.treatment.length > 0 ? `${record.treatment.length} prescriptions assigned` : 'No prescriptions assigned'}
+                    {record.treatment?.length > 0 
+                      ? `${record.treatment.length} prescriptions assigned` 
+                      : 'No prescriptions assigned'}
                   </p>
                 </div>
               </div>

@@ -6,6 +6,7 @@ import { Trash2 } from 'lucide-react';
 import { departments } from '../../data/mockData';
 import { DepartmentConfirmationModal } from '../../components/admin/departments/DepartmentConfirmationModal';
 import { Department } from '../../types/admin';
+import { Layout } from '../../components/admin/AdminLayout';
 
 export function DepartmentsPage() {
   const [search, setSearch] = useState('');
@@ -21,7 +22,7 @@ export function DepartmentsPage() {
 
   const handleDeleteConfirm = () => {
     if (selectedDepartment && !selectedDepartment.isActive) {
-      setDepartmentData(prevData => 
+      setDepartmentData(prevData =>
         prevData.filter(dept => dept.id !== selectedDepartment.id)
       );
       setIsDeleteModalOpen(false);
@@ -79,44 +80,46 @@ export function DepartmentsPage() {
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-[#0B8FAC]">Department Info</h2>
-        <button className="bg-[#0B8FAC] text-white px-4 py-2 rounded-md hover:opacity-90">
-          + New Department
-        </button>
-      </div>
-
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b border-gray-200">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Search departments..."
-          />
+    <Layout>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-semibold text-[#0B8FAC]">Department Info</h2>
+          <button className="bg-[#0B8FAC] text-white px-4 py-2 rounded-md hover:opacity-90">
+            + New Department
+          </button>
         </div>
 
-        <Table
-          columns={columns}
-          data={departmentData}
-          onRowClick={(row) => console.log('Clicked row:', row)}
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-4 border-b border-gray-200">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Search departments..."
+            />
+          </div>
+
+          <Table
+            columns={columns}
+            data={departmentData}
+            onRowClick={(row) => console.log('Clicked row:', row)}
+          />
+
+          <div className="p-4 border-t border-gray-200">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={5}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        </div>
+
+        <DepartmentConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleDeleteConfirm}
+          department={selectedDepartment}
         />
-
-        <div className="p-4 border-t border-gray-200">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={5}
-            onPageChange={setCurrentPage}
-          />
-        </div>
       </div>
-
-      <DepartmentConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        department={selectedDepartment}
-      />
-    </div>
+    </Layout>
   );
 }

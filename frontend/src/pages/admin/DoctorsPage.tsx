@@ -8,6 +8,7 @@ import { doctors } from '../../data/mockData';
 import { RegistrationModal } from '../../components/admin/forms/RegistrationModal';
 import { DoctorRegistrationForm } from '../../components/admin/forms/DoctorRegistrationForm';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
+import { Layout } from '../../components/admin/AdminLayout';
 
 export function DoctorsPage() {
   const [search, setSearch] = useState('');
@@ -26,6 +27,7 @@ export function DoctorsPage() {
     setDoctorData(prevData =>
       prevData.filter(doc => doc.id !== selectedDoctor.id)
     );
+    setIsDeleteModalOpen(false);
   };
 
   const columns = [
@@ -62,53 +64,57 @@ export function DoctorsPage() {
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-[#0B8FAC]">Doctor Info</h2>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-[#0B8FAC] text-white px-4 py-2 rounded-md hover:opacity-90"
-        >
-          + New Doctor
-        </button>
-      </div>
-
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b border-gray-200">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Search doctors..."
-          />
+    <Layout>
+      <div className="space-y-4 max-w-full">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-semibold text-[#0B8FAC]">Doctor Info</h2>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-[#0B8FAC] text-white px-4 py-2 rounded-md hover:opacity-90"
+          >
+            + New Doctor
+          </button>
         </div>
 
-        <Table
-          columns={columns}
-          data={doctorData}
-          onRowClick={(row) => console.log('Clicked row:', row)}
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-4 border-b border-gray-200">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Search doctors..."
+            />
+          </div>
+
+          <div className="overflow-x-auto">
+            <Table
+              columns={columns}
+              data={doctorData}
+              onRowClick={(row) => console.log('Clicked row:', row)}
+            />
+          </div>
+
+          <div className="p-4 border-t border-gray-200">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={5}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        </div>
+
+        <RegistrationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <DoctorRegistrationForm onClose={() => setIsModalOpen(false)} />
+        </RegistrationModal>
+
+        <ConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Doctor"
+          message="Are you sure you want to delete this doctor? This action cannot be undone."
+          confirmButtonText="Delete Doctor"
         />
-
-        <div className="p-4 border-t border-gray-200">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={5}
-            onPageChange={setCurrentPage}
-          />
-        </div>
       </div>
-
-      <RegistrationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <DoctorRegistrationForm onClose={() => setIsModalOpen(false)} />
-      </RegistrationModal>
-
-      <ConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Doctor"
-        message="Are you sure you want to delete this doctor? This action cannot be undone."
-        confirmButtonText="Delete Doctor"
-      />
-    </div>
+    </Layout>
   );
 }

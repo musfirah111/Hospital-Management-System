@@ -6,6 +6,7 @@ import { Star, Trash2 } from 'lucide-react';
 import { reviews } from '../../data/mockData';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { Review } from '../../types/admin';
+import { Layout } from '../../components/admin/AdminLayout';
 
 export function ReviewsPage() {
   const [search, setSearch] = useState('');
@@ -36,9 +37,8 @@ export function ReviewsPage() {
           {Array.from({ length: 5 }).map((_, index) => (
             <Star
               key={index}
-              className={`w-4 h-4 ${
-                index < value ? 'text-yellow-400 fill-current' : 'text-gray-300'
-              }`}
+              className={`w-4 h-4 ${index < value ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                }`}
             />
           ))}
         </div>
@@ -49,7 +49,7 @@ export function ReviewsPage() {
     {
       key: 'actions',
       header: 'Actions',
-      render: ( row: Review) => (
+      render: (row: Review) => (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -64,43 +64,45 @@ export function ReviewsPage() {
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-[#0B8FAC]">Reviews</h2>
-      </div>
-
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b border-gray-200">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Search reviews..."
-          />
+    <Layout>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-semibold text-[#0B8FAC]">Reviews</h2>
         </div>
 
-        <Table
-          columns={columns}
-          data={reviewData}
-          onRowClick={(row) => console.log('Clicked row:', row)}
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-4 border-b border-gray-200">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Search reviews..."
+            />
+          </div>
+
+          <Table
+            columns={columns}
+            data={reviewData}
+            onRowClick={(row) => console.log('Clicked row:', row)}
+          />
+
+          <div className="p-4 border-t border-gray-200">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={5}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        </div>
+
+        <ConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Review"
+          message="Are you sure you want to delete this review? This action cannot be undone."
+          confirmButtonText="Delete Review"
         />
-
-        <div className="p-4 border-t border-gray-200">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={5}
-            onPageChange={setCurrentPage}
-          />
-        </div>
       </div>
-
-      <ConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Review"
-        message="Are you sure you want to delete this review? This action cannot be undone."
-        confirmButtonText="Delete Review"
-      />
-    </div>
+    </Layout>
   );
 }

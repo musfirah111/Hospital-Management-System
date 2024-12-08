@@ -91,14 +91,12 @@ function App() {
 
           {/* Protected Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['Admin']} />} >
-            <Route element={<AdminLayout />}>
-              <Route path="/admin/dashboard" element={<DashboardPage />} />
-              <Route path="/admin/patients" element={<PatientsPage />} />
-              <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
-              <Route path="/admin/doctors" element={<DoctorsPage />} />
-              <Route path="/admin/departments" element={<DepartmentsPage />} />
-              <Route path="/admin/reviews" element={<ReviewsPage />} />
-            </Route>
+            <Route path="/admin/dashboard" element={<DashboardPage />} />
+            <Route path="/admin/patients" element={<PatientsPage />} />
+            <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
+            <Route path="/admin/doctors" element={<DoctorsPage />} />
+            <Route path="/admin/departments" element={<DepartmentsPage />} />
+            <Route path="/admin/reviews" element={<ReviewsPage />} />
           </Route>
         </Routes>
       </Router>

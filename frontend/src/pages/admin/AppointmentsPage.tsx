@@ -6,6 +6,7 @@ import { appointments } from '../../data/mockData';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import React from 'react';
+import { Layout } from '../../components/admin/AdminLayout';
 
 interface ApprovalModalProps {
   isOpen: boolean;
@@ -77,9 +78,8 @@ export function AdminAppointmentsPage() {
       header: 'Payment Status',
       render: (value: 'Paid' | 'UnPaid') => (
         <span
-          className={`px-3 py-1 rounded-lg text-xs ${
-            value === 'Paid' ? 'bg-[#DCFCE7] text-[#129820]' : 'bg-[#FEF3C7] text-[#F89603]'
-          }`}
+          className={`px-3 py-1 rounded-lg text-xs ${value === 'Paid' ? 'bg-[#DCFCE7] text-[#129820]' : 'bg-[#FEF3C7] text-[#F89603]'
+            }`}
         >
           {value}
         </span>
@@ -93,15 +93,14 @@ export function AdminAppointmentsPage() {
       header: 'Status',
       render: (value: 'Confirmed' | 'Pending' | 'Rescheduled' | 'Cancelled') => (
         <span
-          className={`px-3 py-1 rounded-md text-xs ${
-            value === 'Confirmed'
-              ? 'bg-[#DCFCE7] text-[#129820]'
-              : value === 'Pending'
+          className={`px-3 py-1 rounded-md text-xs ${value === 'Confirmed'
+            ? 'bg-[#DCFCE7] text-[#129820]'
+            : value === 'Pending'
               ? 'bg-[#FEF3C7] text-[#F89603]'
               : value === 'Rescheduled'
-              ? 'bg-[#FEF3C7] text-[#F89603]'
-              : 'bg-[#FEE2E2] text-[#F30000]'
-          }`}
+                ? 'bg-[#FEF3C7] text-[#F89603]'
+                : 'bg-[#FEE2E2] text-[#F30000]'
+            }`}
         >
           {value}
         </span>
@@ -168,75 +167,76 @@ export function AdminAppointmentsPage() {
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-semibold text-[#0B8FAC]">Appointments</h2>
+    <Layout>
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold text-[#0B8FAC]">Appointments</h2>
 
-      <div className="flex justify-between items-center">
-        <div className="flex space-x-4 border-b border-gray-200 w-full">
-          {['all', 'confirmed', 'pending', 'cancelled', 'rescheduled'].map((tab) => (
-            <button
-              key={tab}
-              className={`px-4 py-2 font-medium ${
-                activeTab === tab ? 'text-[#0B8FAC] border-b-2 border-[#0B8FAC]' : 'text-gray-500'
-              }`}
-              onClick={() => setActiveTab(tab as typeof activeTab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-        <button className="bg-[#0B8FAC] text-white px-6 py-3 rounded-md hover:opacity-90 flex-shrink-0">
-          + Add Appointment
-        </button>
-      </div>
-
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-4 flex justify-between items-center">
-          <SearchInput
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Search appointments"
-          />
-          <button
-            className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-            onClick={() => setShowCalendar(!showCalendar)}
-          >
-            <CalendarTodayIcon className="w-5 h-5 text-gray-500" />
+        <div className="flex justify-between items-center">
+          <div className="flex space-x-4 border-b border-gray-200 w-full">
+            {['all', 'confirmed', 'pending', 'cancelled', 'rescheduled'].map((tab) => (
+              <button
+                key={tab}
+                className={`px-4 py-2 font-medium ${activeTab === tab ? 'text-[#0B8FAC] border-b-2 border-[#0B8FAC]' : 'text-gray-500'
+                  }`}
+                onClick={() => setActiveTab(tab as typeof activeTab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
+          <button className="bg-[#0B8FAC] text-white px-6 py-3 rounded-md hover:opacity-90 flex-shrink-0">
+            + Add Appointment
           </button>
         </div>
 
-        <Table
-          columns={columns}
-          data={paginatedAppointments}
-          onRowClick={(row) => console.log('Row clicked:', row)}
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-4 flex justify-between items-center">
+            <SearchInput
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search appointments"
+            />
+            <button
+              className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              onClick={() => setShowCalendar(!showCalendar)}
+            >
+              <CalendarTodayIcon className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+
+          <Table
+            columns={columns}
+            data={paginatedAppointments}
+            onRowClick={(row) => console.log('Row clicked:', row)}
+          />
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+
+        <ConfirmationModal
+          isOpen={isCancelModalVisible}
+          onClose={() => {
+            setIsCancelModalVisible(false);
+            setSelectedAppointment(null);
+          }}
+          onConfirm={confirmCancellation}
+          title="Cancel Appointment"
+          message="Are you sure you want to cancel this appointment? This action cannot be undone."
+          confirmButtonText="Cancel Appointment"
         />
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
+        <ApprovalModal
+          isOpen={isApprovalModalVisible}
+          onClose={() => setIsApprovalModalVisible(false)}
+          onConfirm={confirmApproval}
+          title="Approve Appointment"
+          message="Are you sure you want to approve this appointment?"
         />
       </div>
-
-      <ConfirmationModal
-        isOpen={isCancelModalVisible}
-        onClose={() => {
-          setIsCancelModalVisible(false);
-          setSelectedAppointment(null);
-        }}
-        onConfirm={confirmCancellation}
-        title="Cancel Appointment"
-        message="Are you sure you want to cancel this appointment? This action cannot be undone."
-        confirmButtonText="Cancel Appointment"
-      />
-
-      <ApprovalModal
-        isOpen={isApprovalModalVisible}
-        onClose={() => setIsApprovalModalVisible(false)}
-        onConfirm={confirmApproval}
-        title="Approve Appointment"
-        message="Are you sure you want to approve this appointment?"
-      />
-    </div>
+    </Layout>
   );
 }

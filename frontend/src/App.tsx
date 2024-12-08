@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard';
 import { Login } from './pages/Login';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { AuthProvider, AuthContext } from './context/AuthContext';
+import PatientChat from './pages/Chat';
 
 // Admin imports
 import { DoctorsPage } from './pages/admin/DoctorsPage';
@@ -74,6 +75,7 @@ function App() {
             <Route path="/prescriptions" element={<PrescriptionsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/chat" element={<PatientChat />} />
           </Route>
 
           {/* Protected Doctor Routes */}

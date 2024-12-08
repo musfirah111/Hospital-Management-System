@@ -3,7 +3,7 @@ import { Calendar, Clock, Star } from 'lucide-react';
 import { formatDate } from '../utils/date';
 import type { Doctor } from '../types/medical';
 import SearchBar from '../components/SearchBar';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
@@ -30,6 +30,11 @@ interface Appointment {
 
 type AppointmentStatus = 'All' | 'Scheduled' | 'Completed' | 'Requested' | 'Cancelled' | 'Rescheduled';
 
+// Define the expected response structure
+interface RescheduleResponse {
+  doctor_id: string;
+}
+
 export default function AppointmentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
@@ -44,7 +49,7 @@ export default function AppointmentsPage() {
   // const [showRescheduleModal, setShowRescheduleModal] =useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] =useState<string>('');
   
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
@@ -197,31 +202,32 @@ export default function AppointmentsPage() {
     setShowCancelModal(true);
   };
 
-  const handleRescheduleClick = (appointmentId: string) => {
-    setSelectedAppointmentId(appointmentId);
-    // setShowRescheduleModal(true);
+  const handleRescheduleClick = async (appointmentId: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await axios.get<{ doctor_id: { _id: string } }>(
+        `http://localhost:5000/api/appointments/${appointmentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      console.log('Reschedule response:', response.data);
+
+      // Check if doctor_id exists in the response
+      if (response.data.doctor_id && response.data.doctor_id._id) {
+        const doctorId = response.data.doctor_id._id.toString();
+        navigate(`/doctor/${doctorId}`, { replace: true });
+      } else {
+        console.error('Doctor ID not found in response');
+      }
+    } catch (err) {
+      console.error('Error rescheduling appointment:', err);
+    }
   };
 
-  // const handleRescheduleConfirm = async (newDate: Date) => {
-  //   try {
-  //     const token = localStorage.getItem('authToken');
-  //     await axios.put(
-  //       `http://localhost:5000/api/appointments/${selectedAppointmentId}/reschedule`,
-  //       { 
-  //         appointment_date: newDate.toISOString().split('T')[0],
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`
-  //         }
-  //       }
-  //     );
-  //     setShowRescheduleModal(false);
-  //     fetchAppointments();
-  //   } catch (err) {
-  //     console.error('Error rescheduling appointment:', err);
-  //   }
-  // };
 
   const filteredAppointments = appointments.filter(appointment => {
     console.log('Filtering appointment:', appointment); // Debug log

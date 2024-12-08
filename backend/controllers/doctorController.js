@@ -353,6 +353,12 @@ const getDoctorSchedule = asyncHandler(async (req, res) => {
         }
     });
 });
+//get doctor details by user id
+const getDoctorDetailsByUserId = asyncHandler(async (req, res) => {
+    const doctor = await Doctor.findOne({ user_id: req.params.id });
+    res.json(doctor);
+});
+
 
 module.exports = {
     getDoctors,
@@ -364,5 +370,6 @@ module.exports = {
     getWeeklySchedule,
     getAllDoctors,
     getDoctorCountByDepartment,
-    getDoctorSchedule
+    getDoctorSchedule,
+    getDoctorDetailsByUserId
 };

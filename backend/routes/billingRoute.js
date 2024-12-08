@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-    generateInvoice,
+    payment_and_generateInvoice,
     payBill,
     downloadInvoice,
     refundPayment
@@ -9,8 +9,8 @@ const {
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly, patientOnly } = require('../middlewares/roleMiddleware');
 
-// Admin routes
-router.post('/invoice/generate', protect, adminOnly, generateInvoice);
+
+router.post('/invoice/generate', protect, payment_and_generateInvoice);
 
 // Patient routes
 router.post('/pay', protect, patientOnly, payBill);

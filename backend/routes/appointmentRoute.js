@@ -7,7 +7,7 @@ const {
     getAppointmentById,
     updateAppointmentStatus,
     updateAppointment,
-    requestAppointmentOrReschedule,
+    requestAppointment,
     getDailyAppointments,
     getWeeklyAppointments,
     getMonthlyAppointments,
@@ -15,7 +15,8 @@ const {
     getRequestedAppointments,
     requestCancellation,
     getPatientAppointments,
-    getAvailableSlotsForDoctor  // Add this import
+    getAvailableSlotsForDoctor,
+    getDoctorAppointments  
 } = require('../controllers/appointmentController');
 
 const { protect } = require('../middlewares/authMiddleware');
@@ -45,7 +46,7 @@ router.get('/completed', getCompletedAppointments);
 router.get('/requested', getRequestedAppointments);
 
 // Route to get all appointments (admin only).
-router.get('/', protect, adminOnly, getAppointments);
+router.get('/', protect, getAppointments);
 
 // Route to get appointment by ID (protected).
 router.get('/:id', protect, getAppointmentById);
@@ -57,12 +58,15 @@ router.put('/:id/status', protect, doctorOnly, updateAppointmentStatus);
 router.put('/:id', protect, adminOnly, updateAppointment);
 
 // Route to request an appointment
-router.post('/request-reschedule', protect, requestAppointmentOrReschedule);
+router.post('/request', protect, requestAppointment);
 
 // Route to request appointment cancellation
 router.post('/cancel', protect, requestCancellation);
 
 // Route to create a new appointment (admin only).
 router.post('/', protect, adminOnly, createAppointment);
+
+// Route to get doctor appointments
+router.get('/doctor/:id', protect, doctorOnly, getDoctorAppointments);
 
 module.exports = router;

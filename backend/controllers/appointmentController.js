@@ -215,33 +215,41 @@ const updateAppointment = asyncHandler(async (req, res) => {
 });
 
 // Request an appointment
-const requestAppointmentOrReschedule = asyncHandler(async (req, res) => {
-    const { patient_id, doctor_id, appointment_date, appointment_time } = req.body;
+const requestAppointment = asyncHandler(async (req, res) => {
+    const { doctor_id, patient_id, appointment_date, appointment_time } = req.body;
 
-    // Check if patient exists
-    const patientExists = await Patient.findById(patient_id);
-    if (!patientExists) {
+    // Validate patient exists
+    const patient = await Patient.findById(patient_id);
+    if (!patient) {
         res.status(404);
-        throw new Error("Patient not found.");
+        throw new Error('Patient not found');
     }
 
-    // Check if doctor exists
-    const doctorExists = await Doctor.findById(doctor_id);
-    if (!doctorExists) {
+    // Validate doctor exists
+    const doctor = await Doctor.findById(doctor_id);
+    if (!doctor) {
         res.status(404);
-        throw new Error("Doctor not found.");
+        throw new Error('Doctor not found');
     }
 
-    // Create the appointment request
-    const appointmentRequest = await Appointment.create({
-        patient_id,
-        doctor_id,
-        appointment_date,
-        appointment_time,
-        status: 'Requested', // Set status to 'Requested'
-    });
+    try {
+        const appointmentRequest = await Appointment.create({
+            patient_id,
+            doctor_id,
+            appointment_date,
+            appointment_time,
+            status: 'Requested',
+        });
 
-    res.status(201).json(appointmentRequest);
+        res.status(201).json({
+            success: true,
+            message: 'Appointment requested successfully',
+            appointment: appointmentRequest
+        });
+    } catch (error) {
+        res.status(400);
+        throw new Error(`Error creating appointment: ${error.message}`);
+    }
 });
 
 // Request appointment cancellation.
@@ -400,6 +408,23 @@ const getPatientAppointments = asyncHandler(async (req, res) => {
     });
 });
 
+
+const getDoctorAppointments = asyncHandler(async (req, res) => {
+    const appointments = await Appointment.find({
+        doctor_id: req.params.id
+    })
+        .populate({
+            path: 'patient_id',
+            populate: {
+                path: 'user_id',
+            }
+        });
+
+    res.json({
+        appointments: appointments
+    });
+});
+
 // Get available slots for a doctor on a specific date
 const getAvailableSlotsForDoctor = asyncHandler(async (req, res) => {
     const { doctorId } = req.params;
@@ -418,13 +443,14 @@ const getAvailableSlotsForDoctor = asyncHandler(async (req, res) => {
     });
 });
 
+
 module.exports = {
     createAppointment,
     getAppointments,
     getAppointmentById,
     updateAppointmentStatus,
     updateAppointment,
-    requestAppointmentOrReschedule,
+    requestAppointment,
     requestCancellation,
     getDailyAppointments,
     getWeeklyAppointments,
@@ -433,4 +459,5 @@ module.exports = {
     getRequestedAppointments,
     getPatientAppointments,
     getAvailableSlotsForDoctor,
+    getDoctorAppointments
 };

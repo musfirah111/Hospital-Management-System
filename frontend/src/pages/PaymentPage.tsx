@@ -49,6 +49,12 @@ interface PaymentResponse {
   };
 }
 
+const TEST_CARDS = {
+  visa: '4242424242424242',
+  mastercard: '5555555555554444',
+  declined: '4000000000000002'
+};
+
 export default function PaymentPage() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -61,9 +67,96 @@ export default function PaymentPage() {
     cvv: '',
     name: ''
   });
+  const [invoice, setInvoice] = useState<{ _id: string; stripe_invoice_id: string } | null>(null);
   
   const appointmentDate = searchParams.get('date');
   const appointmentTime = searchParams.get('slot');
+
+  // Add validation state
+  const [cardError, setCardError] = useState('');
+
+  // Add new state for payment success
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  // Add useEffect to handle secure context
+  useEffect(() => {
+    // Check if running in development
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    
+    if (window.location.protocol !== 'https:' && !isDevelopment) {
+      console.warn('Warning: Payment form should be served over HTTPS in production');
+    }
+  }, []);
+
+  // Card number validation function
+  const validateCardNumber = (number: string) => {
+    // Remove any non-digit characters
+    const cleanNumber = number.replace(/\D/g, '');
+    
+    // Check if empty
+    if (!cleanNumber) {
+      setCardError('Card number is required');
+      return false;
+    }
+
+    // Check length (most cards are 16 digits)
+    if (cleanNumber.length < 13 || cleanNumber.length > 19) {
+      setCardError('Card number must be between 13 and 19 digits');
+      return false;
+    }
+
+    // Luhn Algorithm validation
+    let sum = 0;
+    let isEven = false;
+    
+    // Loop through values starting from the rightmost digit
+    for (let i = cleanNumber.length - 1; i >= 0; i--) {
+      let digit = parseInt(cleanNumber.charAt(i));
+
+      if (isEven) {
+        digit *= 2;
+        if (digit > 9) {
+          digit -= 9;
+        }
+      }
+
+      sum += digit;
+      isEven = !isEven;
+    }
+
+    const isValid = (sum % 10) === 0;
+    if (!isValid) {
+      setCardError('Invalid card number');
+    } else {
+      setCardError('');
+    }
+    return isValid;
+  };
+
+  // Format card number as user types
+  const formatCardNumber = (value: string) => {
+    const cleanValue = value.replace(/\D/g, '');
+    let formattedValue = '';
+    
+    for (let i = 0; i < cleanValue.length; i++) {
+      if (i > 0 && i % 4 === 0) {
+        formattedValue += ' ';
+      }
+      formattedValue += cleanValue[i];
+    }
+    
+    return formattedValue;
+  };
+
+  // Handle card number change
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatCardNumber(e.target.value);
+    setPaymentDetails({
+      ...paymentDetails,
+      cardNumber: formattedValue
+    });
+    validateCardNumber(formattedValue);
+  };
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -100,10 +193,158 @@ export default function PaymentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically process the payment
-    alert('Payment successful! Appointment confirmed.');
-    navigate('/appointments');
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const userId = localStorage.getItem('userId');
+      const appointmentId = localStorage.getItem('appointmentId');
+
+      if (!token || !userId || !appointmentId) {
+        throw new Error('Missing required information');
+      }
+
+      // First get the patient ID for the logged-in user
+      const patientResponse = await axios.get(
+        `http://localhost:5000/api/patients/user/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      const patientId = patientResponse.data.id;
+
+      // Generate invoice with proper data
+      const invoiceResponse = await axios.post(
+        'http://localhost:5000/api/billing/invoice/generate',
+        {
+          patientId,
+          totalAmount: doctor.consultation_fee,
+          dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          appointmentId,
+          paymentDetails: {
+            cardNumber: paymentDetails.cardNumber.replace(/\s/g, ''),
+            expiryMonth: parseInt(paymentDetails.expiryDate.split('/')[0]),
+            expiryYear: parseInt('20' + paymentDetails.expiryDate.split('/')[1]),
+            cvv: paymentDetails.cvv
+          }
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!invoiceResponse.data.success) {
+        throw new Error(invoiceResponse.data.message);
+      }
+
+      setInvoice(invoiceResponse.data.data.invoice);
+
+      // Process payment with the generated invoice
+      const paymentResponse = await axios.post(
+        'http://localhost:5000/api/billing/pay',
+        {
+          invoiceId: invoiceResponse.data.data.invoice._id
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (paymentResponse.data.success) {
+        setPaymentSuccess(true);
+        setInvoice(invoiceResponse.data.data.invoice);
+      } else {
+        throw new Error(paymentResponse.data.message);
+      }
+
+    } catch (error: any) {
+      console.error('Error processing payment:', error);
+      let errorMessage = 'Payment failed. ';
+      
+      if (error.response?.data?.message) {
+        errorMessage += error.response.data.message;
+      } else if (error.message) {
+        errorMessage += error.message;
+      } else {
+        errorMessage += 'Please try again.';
+      }
+      
+      alert(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  // Add form validation
+  const validateForm = () => {
+    // Card number validation
+    if (!validateCardNumber(paymentDetails.cardNumber)) {
+      return false;
+    }
+
+    // Expiry date validation
+    const [month, year] = paymentDetails.expiryDate.split('/');
+    const currentYear = new Date().getFullYear() % 100;
+    const currentMonth = new Date().getMonth() + 1;
+    
+    if (!month || !year || 
+        parseInt(year) < currentYear || 
+        (parseInt(year) === currentYear && parseInt(month) < currentMonth)) {
+      alert('Please enter a valid expiry date');
+      return false;
+    }
+
+    // CVV validation
+    if (!/^\d{3,4}$/.test(paymentDetails.cvv)) {
+      alert('Please enter a valid CVV');
+      return false;
+    }
+
+    // Cardholder name validation
+    if (!paymentDetails.name.trim()) {
+      alert('Please enter the cardholder name');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleDownloadInvoice = async () => {
+    if (!invoice) return;
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await axios.get(
+        `http://localhost:5000/api/billing/download/${invoice._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      // Open the invoice URL in a new tab
+      window.open(response.data.data.invoiceUrl, '_blank');
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      alert('Failed to download invoice. Please try again.');
+    }
+  };
+
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (
     <Layout>
@@ -149,23 +390,27 @@ export default function PaymentPage() {
 
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Payment Details</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
               <div>
                 <label className="block text-gray-700 mb-2">Card Number</label>
                 <div className="relative">
                   <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
+                    inputMode="numeric"
+                    autoComplete="cc-number"
+                    maxLength={19}
                     placeholder="1234 5678 9012 3456"
-                    className="w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#0B8FAC] focus:outline-none"
+                    className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#0B8FAC] focus:outline-none ${
+                      cardError ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     value={paymentDetails.cardNumber}
-                    onChange={(e) => setPaymentDetails({
-                      ...paymentDetails,
-                      cardNumber: e.target.value
-                    })}
-                    required
+                    onChange={handleCardNumberChange}
                   />
                 </div>
+                {cardError && (
+                  <p className="mt-1 text-sm text-red-500">{cardError}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -173,28 +418,45 @@ export default function PaymentPage() {
                   <label className="block text-gray-700 mb-2">Expiry Date</label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    autoComplete="cc-exp"
                     placeholder="MM/YY"
+                    maxLength={5}
                     className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#0B8FAC] focus:outline-none"
                     value={paymentDetails.expiryDate}
-                    onChange={(e) => setPaymentDetails({
-                      ...paymentDetails,
-                      expiryDate: e.target.value
-                    })}
-                    required
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      if (value.length <= 4) {
+                        const formattedValue = value.length > 2 
+                          ? value.slice(0, 2) + '/' + value.slice(2) 
+                          : value;
+                        setPaymentDetails({
+                          ...paymentDetails,
+                          expiryDate: formattedValue
+                        });
+                      }
+                    }}
                   />
                 </div>
                 <div>
                   <label className="block text-gray-700 mb-2">CVV</label>
                   <input
-                    type="text"
+                    type="password"
+                    inputMode="numeric"
+                    autoComplete="cc-csc"
                     placeholder="123"
+                    maxLength={4}
                     className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#0B8FAC] focus:outline-none"
                     value={paymentDetails.cvv}
-                    onChange={(e) => setPaymentDetails({
-                      ...paymentDetails,
-                      cvv: e.target.value
-                    })}
-                    required
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      if (value.length <= 4) {
+                        setPaymentDetails({
+                          ...paymentDetails,
+                          cvv: value
+                        });
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -214,12 +476,38 @@ export default function PaymentPage() {
                 />
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-3 bg-[#0B8FAC] text-white rounded-lg hover:bg-[#097a93] transition-colors"
-              >
-                Pay ${doctor.consultation_fee}
-              </button>
+              <div className="space-y-4">
+                <button
+                  type="submit"
+                  className={`w-full py-3 ${
+                    paymentSuccess 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-[#0B8FAC] hover:bg-[#097a93]'
+                  } text-white rounded-lg transition-colors`}
+                  disabled={isLoading || paymentSuccess}
+                >
+                  {isLoading ? 'Processing...' : paymentSuccess ? 'Paid' : `Pay $${doctor.consultation_fee}`}
+                </button>
+
+                {invoice && (
+                  <button
+                    onClick={handleDownloadInvoice}
+                    className={`w-full py-3 ${
+                      paymentSuccess 
+                        ? 'bg-[#0B8FAC] hover:bg-[#097a93] text-white' 
+                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                    } rounded-lg transition-colors`}
+                  >
+                    Download Invoice
+                  </button>
+                )}
+              </div>
+
+              {paymentSuccess && (
+                <div className="mt-4 text-center text-green-600 font-semibold">
+                  Payment successful!
+                </div>
+              )}
             </form>
           </div>
         </div>
@@ -227,3 +515,5 @@ export default function PaymentPage() {
     </Layout>
   );
 }
+
+

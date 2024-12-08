@@ -9,7 +9,8 @@ const {
     getWeeklySchedule,
     getAllDoctors,
     getDoctorCountByDepartment,
-    getDoctorSchedule
+    getDoctorSchedule,
+    getDoctorDetailsByUserId
 } = require('../controllers/doctorController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly, doctorOnly } = require('../middlewares/roleMiddleware');
@@ -43,5 +44,7 @@ router.get('/schedule/daily', protect, doctorOnly, getDailySchedule);
 router.get('/schedule/weekly', protect, doctorOnly, getWeeklySchedule);
 
 
+//get doctor details by user id
+router.get('/user/:id', protect, getDoctorDetailsByUserId);
 
 module.exports = router;

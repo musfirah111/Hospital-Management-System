@@ -1,52 +1,101 @@
-import { useState } from 'react';
-import SearchBar from '../../components/doctor/SearchBar';
+import { useState, useEffect } from 'react';
 import AppointmentList from '../../components/doctor/AppointmentList';
 import { Layout } from '../../components/doctor/Layout';
+import axios from 'axios';
+import SearchBar from '../../components/SearchBar';
 
-const mockAppointments = [
-  {
-    id: '1',
-    patientId: 'P001',
-    patientName: 'John Doe',
-    date: '2024-03-15',
-    time: '09:00 AM',
-    status: 'scheduled',
-    reason: 'Regular checkup'
-  },
-  {
-    id: '2',
-    patientId: 'P002',
-    patientName: 'Jane Smith',
-    date: '2024-03-15',
-    time: '10:30 AM',
-    status: 'reschedule-requested',
-    reason: 'Follow-up consultation'
-  },
-  {
-    id: '3',
-    patientId: 'P003',
-    patientName: 'Mike Johnson',
-    date: '2024-03-15',
-    time: '02:00 PM',
-    status: 'scheduled',
-    reason: 'Vaccination'
-  }
-] as const;
+interface DoctorResponse {
+  _id: string;
+}
+
+interface AppointmentsResponse {
+  appointments: any[];  // Replace 'any' with your appointment type if available
+}
+
 export default function Appointments() {
-  const [filteredAppointments, setFilteredAppointments] = useState<typeof mockAppointments[number][]>([...mockAppointments]);
+  const [filteredAppointments, setFilteredAppointments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchValue, setSearchValue] = useState('');
 
-  const handleSearch = (query: string) => {
-    const filtered = mockAppointments.filter(
-      (appointment) =>
-        appointment.patientName.toLowerCase().includes(query.toLowerCase()) ||
-        appointment.patientId.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredAppointments(filtered);
+    const fetchAppointments = async () => {
+      try {
+        setLoading(true);
+        console.log('Fetching appointments...'); // Debug log
+        const token = localStorage.getItem('authToken');
+        const userId = localStorage.getItem('userId');
+        console.log('User ID:', userId); // Debug log
+
+        const doctorIdResponse = await axios.get(`http://localhost:5000/api/doctors/user/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log('Doctor ID response:', doctorIdResponse.data); // Debug log
+        const doctorId = (doctorIdResponse.data as DoctorResponse)._id;
+        console.log('Doctor ID:', doctorId); // Debug log
+
+        const appointmentsResponse = await axios.get(`http://localhost:5000/api/appointments/doctor/${doctorId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log('Appointments response:', appointmentsResponse.data); // Debug log
+        
+        setFilteredAppointments((appointmentsResponse.data as { appointments: any[] }).appointments);
+      } catch (error) {
+        console.error('Error fetching appointments:', error); // Debug log
+        setError('Error fetching appointments');
+      } finally {
+        setLoading(false);
+        console.log('Appointments fetching completed.'); // Debug log
+      }
+    };
+
+    useEffect(() => {
+      fetchAppointments();
+    }, []);
+    
+  const handleStatusUpdate = async (id: string, status: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await axios.put(
+        `http://localhost:5000/api/appointments/${id}/status`,
+        { status: status.charAt(0).toUpperCase() + status.slice(1) },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      fetchAppointments();
+    } catch (error) {
+      setError('Error updating appointment status');
+      console.error('Error:', error);
+    }
   };
 
-  const handleStatusUpdate = (id: string, status: string) => {
-    console.log('Updating appointment status:', id, status);
+  const handleSearch = (value: string) => {
+    if (!value.trim()) {
+      // If search is cleared, fetch all appointments again
+      fetchAppointments();
+    } else {
+      const filtered = filteredAppointments.filter(appointment => 
+        appointment.patient_id?.user_id?.name?.toLowerCase()
+        .includes(value.toLowerCase())
+      );
+      setFilteredAppointments(filtered);
+    }
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <Layout>
@@ -54,27 +103,14 @@ export default function Appointments() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">Appointments</h1>
         </div>
-
-        <div className="flex space-x-4">
-          <div className="flex-1">
-            <SearchBar
-              onSearch={handleSearch}
-              placeholder="Search by patient name or ID..."
-            />
-          </div>
-          <select className="border rounded-md px-3 py-2">
-            <option value="all">All Status</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="reschedule-requested">Reschedule Requested</option>
-          </select>
-          <input
-            type="date"
-            className="border rounded-md px-3 py-2"
-          />
-        </div>
-
+        <SearchBar
+          value={searchValue}
+          onChange={(value) => {
+            setSearchValue(value);
+            handleSearch(value);
+          }}
+          placeholder="Search by patient name..."
+        />
         <AppointmentList
           appointments={filteredAppointments}
           onStatusUpdate={handleStatusUpdate}

@@ -176,4 +176,11 @@ const getUserProfileById = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile, updateUserByUserId, getUserProfileById };
+//Get user by email.
+const getUserByEmail = asyncHandler(async (req, res) => {
+    const email = req.params.email;
+    const user = await User.findOne({ email });
+    res.json(user);
+});
+
+module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile, updateUserByUserId, getUserProfileById, getUserByEmail };

@@ -107,7 +107,15 @@ const deletePatient = asyncHandler(async (req, res) => {
         throw new Error("Patient not found.");
     }
 
-    res.json({ message: "Patient deleted successfully." });
+    // Also delete the user associated with the patient
+    const user = await User.findByIdAndDelete(patient.user_id);
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found.");
+    }
+
+    res.json({ message: "Patient and associated user deleted successfully." });
 });
 
 // Request appointment cancellation.
@@ -201,7 +209,7 @@ const getMonthlyRegistrations = asyncHandler(async (req, res) => {
 });
 
 
-// Get all patients with pagination
+// Get all patients with pagination and populate user_id
 const getAllPatients = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1; // Default to page 1
     const limit = parseInt(req.query.limit) || 7; // Default to 7 patients per page
@@ -209,7 +217,8 @@ const getAllPatients = asyncHandler(async (req, res) => {
 
     const patients = await Patient.find()
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .populate('user_id'); // Populate the user_id field
 
     const totalPatients = await Patient.countDocuments(); // Get total number of patients
 

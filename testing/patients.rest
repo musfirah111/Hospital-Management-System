@@ -68,5 +68,5 @@ Content-Type: application/json
 
 ### Get all patients
 GET http://localhost:5000/api/patients
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjBhYjE2YTM2ZjZjZjg5Y2YwNiIsImlhdCI6MTczMzQxNTc4OCwiZXhwIjoxNzM2MDA3Nzg4fQ.FWzlVfCuxEUz5zXA8bUYc4IsqcVQHVU7gRSke-fg_I4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNTc2NTZmZGYyMmRjYWQ5NGRjYSIsImlhdCI6MTczMzY3MTQ4MywiZXhwIjoxNzM2MjYzNDgzfQ.7hMDAqNNqXVhb8Ut0oWKRCjQWrR_eWLSa8D7LOs60KU
 Content-Type: application/json

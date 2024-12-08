@@ -1,54 +1,133 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SearchInput } from '../../components/admin/shared/SearchInput';
 import { Table } from '../../components/admin/shared/Table';
 import { Pagination } from '../../components/admin/shared/Pagination';
 import { Avatar } from '../../components/admin/shared/Avatar';
 import { Trash2 } from 'lucide-react';
-import { patients } from '../../data/mockData';
 import { RegistrationModal } from '../../components/admin/forms/RegistrationModal';
 import { PatientRegistrationForm } from '../../components/admin/forms/PatientRegistrationForm';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { Layout } from '../../components/admin/AdminLayout';
+import axios from 'axios';
+
+interface Patient {
+  _id: string;
+  user_id: {
+    name: string;
+    email: string;
+    age: number;
+    gender: string;
+    phone_number: string;
+    profile_picture: string;
+  };
+}
+
+interface PatientResponse {
+  id: string;
+}
 
 export function PatientsPage() {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [patientData, setPatientData] = useState(patients);
+  const [patientData, setPatientData] = useState<Patient[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
+  const [totalPages, setTotalPages] = useState(1);
+  const ITEMS_PER_PAGE = 7;
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await axios.get<{ patients: Patient[], total: number }>(
+          `http://localhost:5000/api/patients?page=${currentPage}&limit=${ITEMS_PER_PAGE}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        setPatientData(response.data.patients);
+        const total = Number(response.data.total) || 0;
+        const pages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
+        setTotalPages(pages);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      }
+    };
+
+    fetchPatients();
+  }, [currentPage]);
 
   const handleDeleteClick = (patient: any) => {
     setSelectedPatient(patient);
     setIsDeleteModalOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
-    setPatientData(prevData =>
-      prevData.filter(pat => pat.id !== selectedPatient.id)
-    );
+  const handleDeleteConfirm = async () => {
+    try {
+      const response = await axios.delete(`http://localhost:5000/api/patients/${selectedPatient._id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+      console.log('Deleted patient:', response.data);
+      setPatientData(prevData =>
+        prevData.filter(pat => pat._id !== selectedPatient._id)
+      );
+      setIsDeleteModalOpen(false);
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+    }
   };
+
+  const filteredPatients = patientData.filter((patient) => {
+    const searchLower = search.toLowerCase();
+    const userData = patient.user_id;
+    
+    return (
+      userData.name.toLowerCase().includes(searchLower) ||
+      userData.email.toLowerCase().includes(searchLower) ||
+      userData.phone_number.includes(search) ||
+      userData.gender.toLowerCase().includes(searchLower)
+    );
+  });
 
   const columns = [
     {
-      key: 'name',
+      key: 'user_id.name',
       header: 'Patient Name',
-      render: (value: string, row: any) => (
+      render: (value: string, row: Patient) => (
         <div className="flex items-center space-x-3">
-          <Avatar name={value} image={row.image} />
-          <span>{value}</span>
+          <Avatar name={row.user_id.name} image={row.user_id.profile_picture} />
+          <span>{row.user_id.name}</span>
         </div>
       ),
     },
-    { key: 'age', header: 'Age' },
-    { key: 'gender', header: 'Gender' },
-    { key: 'bloodGroup', header: 'Blood Group' },
-    { key: 'phoneNumber', header: 'Phone Number' },
-    { key: 'emailId', header: 'Email ID' },
+    { 
+      key: 'user_id.age', 
+      header: 'Age',
+      render: (_: string, row: Patient) => row.user_id.age
+    },
+    { 
+      key: 'user_id.gender', 
+      header: 'Gender',
+      render: (_: string, row: Patient) => row.user_id.gender
+    },
+    { 
+      key: 'user_id.phone_number', 
+      header: 'Phone Number',
+      render: (_: string, row: Patient) => row.user_id.phone_number
+    },
+    { 
+      key: 'user_id.email', 
+      header: 'Email ID',
+      render: (_: string, row: Patient) => row.user_id.email
+    },
     {
       key: 'actions',
       header: 'Actions',
-      render: (_: unknown, row: any) => (
+      render: (_: unknown, row: Patient) => (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -86,7 +165,7 @@ export function PatientsPage() {
 
           <Table
             columns={columns}
-            data={patientData}
+            data={filteredPatients}
             onRowClick={(row) => console.log('Clicked row:', row)}
           />
 

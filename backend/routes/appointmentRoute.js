@@ -7,7 +7,7 @@ const {
     getAppointmentById,
     updateAppointmentStatus,
     updateAppointment,
-    requestAppointmentOrReschedule,
+    requestAppointment,
     getDailyAppointments,
     getWeeklyAppointments,
     getMonthlyAppointments,
@@ -57,7 +57,7 @@ router.put('/:id/status', protect, doctorOnly, updateAppointmentStatus);
 router.put('/:id', protect, adminOnly, updateAppointment);
 
 // Route to request an appointment
-router.post('/request-reschedule', protect, requestAppointmentOrReschedule);
+router.post('/request-reschedule', protect, requestAppointment);
 
 // Route to request appointment cancellation
 router.post('/cancel', protect, requestCancellation);

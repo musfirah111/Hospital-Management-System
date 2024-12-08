@@ -215,8 +215,9 @@ const updateAppointment = asyncHandler(async (req, res) => {
 });
 
 // Request an appointment
-const requestAppointmentOrReschedule = asyncHandler(async (req, res) => {
-    const { patient_id, doctor_id, appointment_date, appointment_time } = req.body;
+const requestAppointment = asyncHandler(async (req, res) => {
+    const { doctor_id, appointment_date, appointment_time } = req.body;
+    const patient_id = req.user._id; // Assuming the user ID is stored in req.user._id after authentication
 
     // Check if patient exists
     const patientExists = await Patient.findById(patient_id);
@@ -225,23 +226,36 @@ const requestAppointmentOrReschedule = asyncHandler(async (req, res) => {
         throw new Error("Patient not found.");
     }
 
-    // Check if doctor exists
-    const doctorExists = await Doctor.findById(doctor_id);
-    if (!doctorExists) {
+    // Check if doctor exists and is available
+    const doctor = await Doctor.findById(doctor_id);
+    if (!doctor) {
         res.status(404);
         throw new Error("Doctor not found.");
     }
 
-    // Create the appointment request
-    const appointmentRequest = await Appointment.create({
-        patient_id,
-        doctor_id,
-        appointment_date,
-        appointment_time,
-        status: 'Requested', // Set status to 'Requested'
-    });
+    if (!doctor.availability_status) {
+        res.status(400);
+        throw new Error("Doctor is not available for appointments.");
+    }
 
-    res.status(201).json(appointmentRequest);
+    try {
+        const appointmentRequest = await Appointment.create({
+            patient_id,
+            doctor_id,
+            appointment_date,
+            appointment_time,
+            status: 'Requested',
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'Appointment requested successfully',
+            appointment: appointmentRequest
+        });
+    } catch (error) {
+        res.status(400);
+        throw new Error(`Error requesting appointment: ${error.message}`);
+    }
 });
 
 // Request appointment cancellation.
@@ -424,7 +438,7 @@ module.exports = {
     getAppointmentById,
     updateAppointmentStatus,
     updateAppointment,
-    requestAppointmentOrReschedule,
+    requestAppointment,
     requestCancellation,
     getDailyAppointments,
     getWeeklyAppointments,

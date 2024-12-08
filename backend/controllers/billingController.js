@@ -28,7 +28,7 @@ const TEST_CARDS = {
 };
 
 // Generate Invoice - Admin Only
-const generateInvoice = async (req, res) => {
+const payment_and_generateInvoice = async (req, res) => {
     try {
         const { patientId, totalAmount, dueDate, appointmentId } = req.body;
 
@@ -378,7 +378,7 @@ const refundPayment = async (req, res) => {
 };
 
 module.exports = {
-    generateInvoice,
+    payment_and_generateInvoice,
     approvePayment,
     payBill,
     downloadInvoice,

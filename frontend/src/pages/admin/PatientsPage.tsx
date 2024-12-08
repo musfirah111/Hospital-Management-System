@@ -33,8 +33,9 @@ export function PatientsPage() {
   const [patientData, setPatientData] = useState<Patient[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
-  const [totalPages, setTotalPages] = useState(1);
-  const ITEMS_PER_PAGE = 7;
+  const ITEMS_PER_PAGE = 8;
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
+  const totalPages = Math.ceil(filteredPatients.length / ITEMS_PER_PAGE);
 
   const fetchPatients = async () => {
     try {
@@ -46,18 +47,41 @@ export function PatientsPage() {
         }
       });
 
-      setPatientData(response.data.patients);
-      const total = Number(response.data.total) || 0;
-      const pages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
-      setTotalPages(pages);
-    } catch (error) {
-      console.error('Error fetching patients:', error);
-    }
-  };
+        setPatientData(response.data.patients);
+        const total = Number(response.data.total) || 0;
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      }
+    };
 
   useEffect(() => {
     fetchPatients();
   }, [currentPage]);
+
+  useEffect(() => {
+    // Filter patients based on search
+    const filtered = patientData.filter((patient) => {
+      const searchLower = search.toLowerCase();
+      const userData = patient.user_id;
+      
+      return (
+        userData.name.toLowerCase().includes(searchLower) ||
+        userData.email.toLowerCase().includes(searchLower) ||
+        userData.phone_number.includes(search) ||
+        userData.gender.toLowerCase().includes(searchLower)
+      );
+    });
+    
+    setFilteredPatients(filtered);
+    // Reset to first page when filters change
+    setCurrentPage(1);
+  }, [search, patientData]);
+
+  // Calculate paginated data
+  const paginatedPatients = filteredPatients.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const handleDeleteClick = (patient: any) => {
     setSelectedPatient(patient);
@@ -80,18 +104,6 @@ export function PatientsPage() {
       console.error('Error deleting patient:', error);
     }
   };
-
-  const filteredPatients = patientData.filter((patient) => {
-    const searchLower = search.toLowerCase();
-    const userData = patient.user_id;
-    
-    return (
-      userData.name.toLowerCase().includes(searchLower) ||
-      userData.email.toLowerCase().includes(searchLower) ||
-      userData.phone_number.includes(search) ||
-      userData.gender.toLowerCase().includes(searchLower)
-    );
-  });
 
   const columns = [
     {
@@ -145,7 +157,7 @@ export function PatientsPage() {
     <Layout>
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold text-[#0B8FAC]">Patient Info</h2>
+          <h2 className="text-2xl font-semibold text-black">Patient Info</h2>
           <button
             onClick={() => setIsModalOpen(true)}
             className="bg-[#0B8FAC] text-white px-4 py-2 rounded-md hover:opacity-90"
@@ -165,17 +177,18 @@ export function PatientsPage() {
 
           <Table
             columns={columns}
-            data={filteredPatients}
+            data={paginatedPatients}
             onRowClick={(row) => console.log('Clicked row:', row)}
           />
 
           <div className="p-4 border-t border-gray-200">
             <Pagination
               currentPage={currentPage}
-              totalPages={5}
+              totalPages={totalPages}
               onPageChange={setCurrentPage}
             />
           </div>
+
         </div>
 
         <RegistrationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>

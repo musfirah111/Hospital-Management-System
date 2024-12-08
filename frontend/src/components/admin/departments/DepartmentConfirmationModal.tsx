@@ -14,8 +14,6 @@ export function DepartmentConfirmationModal({
   onClose, 
   onConfirm, 
   department, 
-  title, 
-  message 
 }: DepartmentConfirmationModalProps) {
   if (!isOpen) return null;
 

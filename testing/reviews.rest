@@ -1,9 +1,9 @@
 ### Add Review
 POST http://localhost:5000/api/reviews
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzYjIxMDhmYmM3Y2NjYzIxMjFjYiIsImlhdCI6MTczMzU5MDk2MSwiZXhwIjoxNzM2MTgyOTYxfQ.k3p0MsJc8hhbOsMstikzv3bpSjQNjrGcfRp6sXfDZuQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNmY0NmExNTc5NjUyNjk2ODI1MSIsImlhdCI6MTczMzMxMDE5NiwiZXhwIjoxNzM1OTAyMTk2fQ.mRrTUnf1hcD5bDo1z9gsLzdQLN1db1P3YKf59kh0V-8
 
 {
-    "doctor_id": "6750afac6dd96e12b38b5ea1",
+    "doctor_id": "675039e1bb481a21276f3590",
     "rating": 5,
     "review": "Excellent service!"
 }

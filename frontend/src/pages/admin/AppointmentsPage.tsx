@@ -77,8 +77,8 @@ export function AdminAppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [totalPages, setTotalPages] = useState(0);
   const ITEMS_PER_PAGE = 8;
+  const totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE);
 
   useEffect(() => {
     // Filter appointments based on search and active tab
@@ -93,9 +93,6 @@ export function AdminAppointmentsPage() {
     });
     
     setFilteredAppointments(filtered);
-    
-    // Calculate total pages
-    setTotalPages(Math.ceil(filtered.length / ITEMS_PER_PAGE));
     
     // Reset to first page when filters change
     setCurrentPage(1);
@@ -369,15 +366,14 @@ export function AdminAppointmentsPage() {
             onRowClick={(row) => console.log('Row clicked:', row)}
           />
           
-          {totalPages > 1 && (
-            <div className="p-4 border-t border-gray-200">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
-            </div>
-          )}
+          <div className="p-4 border-t border-gray-200">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+          
         </div>
 
         <ConfirmationModal

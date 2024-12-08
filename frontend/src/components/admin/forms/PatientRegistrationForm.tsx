@@ -26,6 +26,7 @@ interface PatientFormData {
 
 interface PatientRegistrationFormProps {
   onClose: () => void;
+  onPatientAdded: () => void;
 }
 
 interface UserResponse {
@@ -50,7 +51,7 @@ interface FormErrors {
   emergencyContact?: Partial<EmergencyContact>;
 }
 
-export function PatientRegistrationForm({ onClose }: PatientRegistrationFormProps) {
+export function PatientRegistrationForm({ onClose, onPatientAdded }: PatientRegistrationFormProps) {
   const [formData, setFormData] = useState<PatientFormData>({
     step: 1,
     name: '',
@@ -243,7 +244,7 @@ export function PatientRegistrationForm({ onClose }: PatientRegistrationFormProp
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert('Patient registration successful!');
+      onPatientAdded();
       onClose();
     } catch (error: any) {
       console.error('Error details:', error.response?.data);

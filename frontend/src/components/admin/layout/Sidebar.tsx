@@ -56,7 +56,9 @@ export function Sidebar() {
 
       <div className="absolute bottom-8 w-full px-6">
         <button className="flex items-center space-x-2 text-gray-600 hover:text-[#0B8FAC]">
-          <LogOut className="w-5 h-5" />
+          <Link to="/login" className="w-5 h-5">
+            <LogOut />
+          </Link>
           <span>Logout</span>
         </button>
       </div>

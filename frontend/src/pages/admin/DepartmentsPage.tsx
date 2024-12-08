@@ -20,7 +20,7 @@ export function DepartmentsPage() {
   const [filteredDepartments, setFilteredDepartments] = useState<Department[]>([]);
   const [staffCounts, setStaffCounts] = useState<{ [key: string]: number }>({});
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<'active' | 'inactive' | 'close' | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<'active' | 'inactive' | null>(null);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   
   const ITEMS_PER_PAGE = 8;
@@ -127,7 +127,6 @@ export function DepartmentsPage() {
         `http://localhost:5000/api/departments/${selectedDepartment._id}/status`,
         {
           active_status: selectedStatus === 'active',
-          status: selectedStatus === 'close' ? 'close' : undefined,
         },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -265,7 +264,7 @@ export function DepartmentsPage() {
           <div className="space-y-4">
             <p>Select new status for {selectedDepartment?.name}:</p>
             <div className="flex gap-2">
-              {['active', 'inactive', 'close'].map((status) => (
+              {['active', 'inactive'].map((status) => (
                 <button
                   key={status}
                   onClick={() => setSelectedStatus(status as typeof selectedStatus)}

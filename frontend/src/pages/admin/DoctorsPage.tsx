@@ -29,7 +29,8 @@ export function DoctorsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [doctorData, setDoctorData] = useState<Doctor[]>([]);
+  const [allDoctors, setAllDoctors] = useState<Doctor[]>([]);
+  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
@@ -37,19 +38,19 @@ export function DoctorsPage() {
     doctorId: string | null;
   }>({ isOpen: false, doctorId: null });
 
-  const fetchDoctors = async (page: number, searchQuery: string = '') => {
+  const fetchDoctors = async (page: number) => {
     try {
       const token = localStorage.getItem('authToken');
       const response = await axios.get(`http://localhost:5000/api/doctors`, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
           page,
-          limit: 10,
-          search: searchQuery
+          limit: 10
         }
       });
-
-      setDoctorData(response.data.doctors);
+      
+      setAllDoctors(response.data.doctors);
+      filterDoctors(search, response.data.doctors);
       setTotalPages(Math.ceil(response.data.totalPages));
       setCurrentPage(page);
       setLoading(false);
@@ -60,12 +61,29 @@ export function DoctorsPage() {
     }
   };
 
+  const filterDoctors = (searchTerm: string, doctors: Doctor[] = allDoctors) => {
+    if (!searchTerm) {
+      setFilteredDoctors(doctors);
+      return;
+    }
+
+    const filtered = doctors.filter(doctor => 
+      doctor.user_id?.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredDoctors(filtered);
+  };
+
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    filterDoctors(value);
+  };
+
   useEffect(() => {
-    fetchDoctors(currentPage, search);
-  }, [currentPage, search]);
+    fetchDoctors(currentPage);
+  }, [currentPage]);
 
   const handleDoctorAdded = () => {
-    fetchDoctors(currentPage, search);
+    fetchDoctors(currentPage);
     setIsModalOpen(false);
   };
 
@@ -76,7 +94,7 @@ export function DoctorsPage() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDeleteConfirmation({ isOpen: false, doctorId: null });
-      fetchDoctors(currentPage, search);
+      fetchDoctors(currentPage);
     } catch (err) {
       console.error('Error deleting doctor:', err);
       //alert('Failed to delete doctor. Please try again.');
@@ -157,10 +175,10 @@ export function DoctorsPage() {
 
         <div className="bg-white rounded-lg shadow">
           <div className="p-4 border-b border-gray-200">
-            <SearchInput
+          <SearchInput
               value={search}
-              onChange={setSearch}
-              placeholder="Search doctors..."
+              onChange={handleSearch}
+              placeholder="Search by doctor name..."
             />
           </div>
 
@@ -169,7 +187,7 @@ export function DoctorsPage() {
               <div className="overflow-hidden">
                 <Table
                   columns={columns}
-                  data={doctorData}
+                  data={filteredDoctors}
                   onRowClick={(row) => console.log('Clicked row:', row)}
                 />
               </div>

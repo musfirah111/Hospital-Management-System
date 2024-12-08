@@ -36,26 +36,26 @@ export function PatientsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 7;
 
+  const fetchPatients = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await axios.get<{ patients: Patient[], total: number }>(
+        `http://localhost:5000/api/patients?page=${currentPage}&limit=${ITEMS_PER_PAGE}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      setPatientData(response.data.patients);
+      const total = Number(response.data.total) || 0;
+      const pages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
+      setTotalPages(pages);
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        const response = await axios.get<{ patients: Patient[], total: number }>(
-          `http://localhost:5000/api/patients?page=${currentPage}&limit=${ITEMS_PER_PAGE}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        setPatientData(response.data.patients);
-        const total = Number(response.data.total) || 0;
-        const pages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
-        setTotalPages(pages);
-      } catch (error) {
-        console.error('Error fetching patients:', error);
-      }
-    };
-
     fetchPatients();
   }, [currentPage]);
 
@@ -179,7 +179,13 @@ export function PatientsPage() {
         </div>
 
         <RegistrationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <PatientRegistrationForm onClose={() => setIsModalOpen(false)} />
+          <PatientRegistrationForm 
+            onClose={() => setIsModalOpen(false)} 
+            onPatientAdded={() => {
+              const currentPage = 1;  // Reset to first page
+              fetchPatients();
+            }} 
+          />
         </RegistrationModal>
 
         <ConfirmationModal

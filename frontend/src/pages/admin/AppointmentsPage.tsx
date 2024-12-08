@@ -311,6 +311,19 @@ export function AdminAppointmentsPage() {
     }
   };
 
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    
+    const searchValue = value.toLowerCase().trim();
+    const filteredAppointments = appointments.filter((apt) => {
+      return (
+        apt.doctorName.toLowerCase().includes(searchValue) ||
+        apt.patient.toLowerCase().includes(searchValue)
+      );
+    });
+    setFilteredAppointments(filteredAppointments);
+  };
+
   return (
     <Layout>
       <div className="space-y-4">
@@ -345,7 +358,7 @@ export function AdminAppointmentsPage() {
           <div className="p-4">
             <SearchInput
               value={searchTerm}
-              onChange={setSearchTerm}
+              onChange={handleSearch}
               placeholder="Search appointments"
             />
           </div>

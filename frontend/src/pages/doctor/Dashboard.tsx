@@ -146,6 +146,7 @@ export default function DoctorDashboard() {
   const fetchAllActivities = async (doctorId: string, token: string) => {
     try {
      
+      const userId = localStorage.getItem('userId');
       const [recordsRes, prescriptionsRes, labReportsRes] = await Promise.allSettled([
         axios.get<MedicalRecord[]>(`http://localhost:5000/api/medical-records/doctor/${doctorId}`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -153,7 +154,7 @@ export default function DoctorDashboard() {
         axios.get<Prescription[]>(`http://localhost:5000/api/prescriptions/doctor/${doctorId}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get<LabReport[]>(`http://localhost:5000/api/lab-reports/doctor/${doctorId}`, {
+        axios.get<LabReport[]>(`http://localhost:5000/api/lab-reports/doctor/${userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -263,11 +264,13 @@ export default function DoctorDashboard() {
         <DashboardStats />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className=" bg-white rounded-lg p-6">
           <AppointmentList
             appointments={appointments}
             onStatusUpdate={handleAppointmentStatusUpdate}
             loading={loading}
           />
+          </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>

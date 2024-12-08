@@ -109,9 +109,12 @@ export function PatientsPage() {
     {
       key: 'user_id.name',
       header: 'Patient Name',
-      render: (value: string, row: Patient) => (
+      render: (_: string, row: Patient) => (
         <div className="flex items-center space-x-3">
-          <Avatar name={row.user_id.name} image={row.user_id.profile_picture} />
+          <Avatar 
+            name={row.user_id.name} 
+            image={row.user_id.profile_picture} 
+          />
           <span>{row.user_id.name}</span>
         </div>
       ),

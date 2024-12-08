@@ -6,24 +6,7 @@ import axios from 'axios';
 import { Doctor } from '../types/index';
 import DoctorCard from '../components/DoctorCard';
 
-const doctorImages = {
-  male: {
-    default: [
-      'https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg',
-      'https://img.freepik.com/free-photo/portrait-smiling-male-doctor_171337-1532.jpg'
-    ],
-    jaffar: 'https://img.freepik.com/free-photo/young-handsome-physician-medical-robe-with-stethoscope_1303-17818.jpg',
-    ahmed: 'https://img.freepik.com/free-photo/medical-workers-covid-19-vaccination-concept-confident-professional-doctor-male-nurse-blue-scrubs-stethoscope-cross-arms-chest-ready-help-patients_1258-57360.jpg'
-  },
-  female: {
-    default: [
-      'https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg',
-      'https://img.freepik.com/free-photo/pleased-young-female-doctor-wearing-medical-robe-stethoscope-around-neck-standing-with-closed-posture_409827-254.jpg'
-    ],
-    sarah: 'https://img.freepik.com/free-photo/female-doctor-hospital_23-2148827775.jpg',
-    rizma:  'https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg'
-  }
-};
+const defaultDoctorImage = 'https://www.freepik.com/free-photo/creative-arrangement-lgbt-family-concept_7405072.htm';
 
 interface PatientResponse {
   id: string;
@@ -67,26 +50,7 @@ export default function DoctorList() {
         
         const doctorsData = response.data.doctors;
         
-        const transformedDoctors = doctorsData.map((doctor: any, index: number) => {
-          const name = doctor.user_id.name.toLowerCase();
-          let doctorImage;
-
-          // Check for specific doctors first
-          if (name.includes('jaffar')) {
-            doctorImage = doctorImages.male.jaffar;
-          } else if (name.includes('ahmed')) {
-            doctorImage = doctorImages.male.ahmed;
-          } else if (name.includes('sarah')) {
-            doctorImage = doctorImages.female.sarah;
-          } else if (name.includes('rizma')) {
-            doctorImage = doctorImages.female.rizma;
-          } else {
-            // Default gender-based images
-            const gender = name.includes('dr.') ? 'male' : 'female';
-            const defaultImages = doctorImages[gender].default;
-            doctorImage = defaultImages[index % defaultImages.length];
-          }
-
+        const transformedDoctors = doctorsData.map((doctor: any) => {
           return {
             id: doctor._id,
             name: doctor.user_id.name,
@@ -94,7 +58,7 @@ export default function DoctorList() {
             specialization: doctor.specialization || 'General',
             experience: doctor.experience || '0',
             rating: doctor.rating || 4.5,
-            image: doctor.user_id.profile_image || doctorImage,
+            image: doctor.user_id.profile_image || defaultDoctorImage,
             description: doctor.description || '',
             price: doctor.consultation_fee || 0,
             workingHours: doctor.working_hours || '9 AM - 5 PM'

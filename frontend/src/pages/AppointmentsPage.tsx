@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import  { useState, useEffect, useContext } from 'react';
 import { Calendar, Clock, Star } from 'lucide-react';
 import { formatDate } from '../utils/date';
 import type { Doctor } from '../types/medical';

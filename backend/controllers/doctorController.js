@@ -3,6 +3,7 @@ const moment = require('moment');
 const Doctor = require('../models/Doctor');
 const User = require('../models/User');
 const Appointment = require('../models/Appointment');
+const Patient = require('../models/Patient');
 
 // Get all doctors with populated data
 const getDoctors = asyncHandler(async (req, res) => {
@@ -105,7 +106,7 @@ const updateDoctor = asyncHandler(async (req, res) => {
     const updatedDoctor = await Doctor.findByIdAndUpdate(
         req.params.id,
         req.body,
-        { 
+        {
             new: true,
             runValidators: true // This ensures the schema validations run on update
         }
@@ -296,21 +297,68 @@ const getDoctorCountByDepartment = asyncHandler(async (req, res) => {
     res.json(doctorCountByDepartment);
 });
 
-// Add this new controller method
-const getDoctorByUserId = asyncHandler(async (req, res) => {
-    console.log('Looking for doctor with user_id:', req.params.userId);
-    
-    const doctor = await Doctor.findOne({ user_id: req.params.userId });
-    
-    console.log('Found doctor:', doctor); // Debug log
-    
+// Get doctor's schedule for a specific date
+const getDoctorSchedule = asyncHandler(async (req, res) => {
+    const { doctorId, date } = req.params;
+    console.log("doctorId", doctorId, "date", date);
+
+    // Get doctor using userId
+    const doctor = await Doctor.findOne({ user_id: doctorId });
     if (!doctor) {
-        res.status(404);
-        throw new Error("Doctor not found for this user ID");
+        return res.status(404).json({
+            success: false,
+            error: 'Doctor not found'
+        });
     }
 
+    // Convert the date string to a Date object
+    const queryDate = new Date(date);
+    const nextDate = new Date(queryDate);
+    nextDate.setDate(nextDate.getDate() + 1);
+
+    const appointments = await Appointment.find({
+        doctor_id: doctor._id,
+        appointment_date: {
+            $gte: queryDate,
+            $lt: nextDate
+        }
+    });
+
+    console.log("************************************************appointments", appointments);
+
+    // Add null checks when mapping appointments
+    const mappedAppointments = await Promise.all(appointments.map(async apt => {
+        const patient_id = apt.patient_id.toString();
+        const patient = await Patient.findById(patient_id);
+        const patientUser = patient ? await User.findById(patient.user_id) : null;
+
+        return {
+            id: apt._id,
+            time: apt.appointment_time,
+            patientName: patientUser?.name,
+            patientEmail: patientUser?.email,
+            patientPhone: patientUser?.phone_number,
+            status: apt.status
+        };
+    }));
+
+    console.log("************************************************mappedAppointments", mappedAppointments);
+
+    res.json({
+        success: true,
+        data: {
+            appointments: mappedAppointments,
+            workingHours: doctor.working_hours,
+            shift: doctor.shift
+        }
+    });
+});
+//get doctor details by user id
+const getDoctorDetailsByUserId = asyncHandler(async (req, res) => {
+    const doctor = await Doctor.findOne({ user_id: req.params.id });
     res.json(doctor);
 });
+
 
 module.exports = {
     getDoctors,
@@ -322,5 +370,6 @@ module.exports = {
     getWeeklySchedule,
     getAllDoctors,
     getDoctorCountByDepartment,
-    getDoctorByUserId
+    getDoctorSchedule,
+    getDoctorDetailsByUserId
 };

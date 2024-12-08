@@ -15,13 +15,13 @@ interface Doctor {
     name: string;
     email: string;
     profile_picture: string;
+    phone_number: string;
   };
   specialization: string;
-  qualification: string;
+  qualification: string[];
   department_id: {
     name: string;
   };
-  phone_number: string;
 }
 
 export function DoctorsPage() {
@@ -49,7 +49,7 @@ export function DoctorsPage() {
           limit: 10
         }
       });
-      console.log('API response:', response.data);
+      console.log('API response - doctors:', response.data);
 
       setAllDoctors(response.data.doctors);
       setFilteredDoctors(response.data.doctors);
@@ -117,7 +117,7 @@ export function DoctorsPage() {
     {
       key: 'qualification',
       header: 'Qualification',
-      render: (_: string, row: Doctor) => row.qualification || 'N/A'
+      render: (_: string, row: Doctor) => row.qualification.join(', ') || 'N/A'
     },
     {
       key: 'department',
@@ -127,7 +127,7 @@ export function DoctorsPage() {
     {
       key: 'phoneNumber',
       header: 'Phone Number',
-      render: (_: string, row: Doctor) => row.phone_number || 'N/A'
+      render: (_: string, row: Doctor) => row.user_id?.phone_number || 'N/A'
     },
     {
       key: 'emailId',
@@ -169,7 +169,7 @@ export function DoctorsPage() {
 
         <div className="bg-white rounded-lg shadow">
           <div className="p-4 border-b border-gray-200">
-          <SearchInput
+            <SearchInput
               value={search}
               onChange={handleSearch}
               placeholder="Search doctors..."

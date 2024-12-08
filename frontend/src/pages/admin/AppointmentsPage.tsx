@@ -400,6 +400,5 @@ export function AdminAppointmentsPage() {
         />
       </div>
     </Layout>
-  );
+);
 }
-

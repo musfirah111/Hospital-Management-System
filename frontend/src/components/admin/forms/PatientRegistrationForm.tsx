@@ -82,7 +82,7 @@ export function PatientRegistrationForm({ onClose, onPatientAdded }: PatientRegi
         error = value.trim().length > 0 ? '' : 'Name is required.';
         break;
       case 'email':
-        const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        const emailRegex = /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/;
         error = emailRegex.test(value) ? '' : 'Please enter a valid email.';
         break;
       case 'age':
@@ -201,26 +201,6 @@ export function PatientRegistrationForm({ onClose, onPatientAdded }: PatientRegi
     }
 
     try {
-      // First upload the profile picture if it exists
-      let profilePictureUrl = '';
-      if (formData.profilePicture) {
-        const formDataFile = new FormData();
-        formDataFile.append('profilePicture', formData.profilePicture);
-
-        const uploadResponse = await axios.post(
-          'http://localhost:5000/api/upload',
-          formDataFile,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              Authorization: `Bearer ${localStorage.getItem('authToken')}`
-            }
-          }
-        );
-        profilePictureUrl = uploadResponse.data.url;
-      }
-
-      // Then proceed with user registration
       const requestData = {
         name: formData.name,
         email: formData.email,
@@ -228,7 +208,6 @@ export function PatientRegistrationForm({ onClose, onPatientAdded }: PatientRegi
         gender: formData.gender,
         password: formData.password,
         phone_number: formData.phone_number,
-        profile_picture: profilePictureUrl,
         role: 'Patient'
       };
       
@@ -236,8 +215,26 @@ export function PatientRegistrationForm({ onClose, onPatientAdded }: PatientRegi
       const userResponse = await axios.post<UserResponse>(
         'http://localhost:5000/api/users/register',
         requestData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          } 
+        }
       );
+
+      let profilePictureUrl = 'images/default-profile-picture.jpg';
+      if (formData.profilePicture) {
+        const formDataWithFile = new FormData();
+        formDataWithFile.append('profilePicture', formData.profilePicture);
+        const uploadResponse = await axios.post<UploadResponse>('http://localhost:5000/api/upload', formDataWithFile, {
+          headers: { 
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`
+          }
+        });
+        profilePictureUrl = uploadResponse.data.url;
+      }
 
       const patientData = {
         user_id: userResponse.data.id,
@@ -249,7 +246,11 @@ export function PatientRegistrationForm({ onClose, onPatientAdded }: PatientRegi
       await axios.post(
         'http://localhost:5000/api/patients',
         patientData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { 
+            'Authorization': `Bearer ${token}`
+          } 
+        }
       );
 
       onPatientAdded();
@@ -472,37 +473,27 @@ export function PatientRegistrationForm({ onClose, onPatientAdded }: PatientRegi
   );
 
   return (
-    <div className="max-h-[80vh] overflow-y-auto">
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">
-            {formData.step === 1 ? 'Patient Registration' : 'Additional Information'}
-          </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-
-        {formData.step === 1 ? renderStep1() : renderStep2()}
-
-        <div className="mt-6 flex justify-end space-x-3">
-          {formData.step === 2 && (
-            <button
-              onClick={() => setFormData(prev => ({ ...prev, step: 1 }))}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Back
-            </button>
-          )}
-          <button
-            onClick={formData.step === 1 ? handleNext : handleSubmit}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            {formData.step === 1 ? 'Next' : 'Submit'}
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </button>
-        </div>
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold">
+          {formData.step === 1 ? 'Patient Registration' : 'Additional Information'}
+        </h2>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+          <X className="h-6 w-6" />
+        </button>
       </div>
-    </div>
-  );
+
+      {formData.step === 1 ? renderStep1() : renderStep2()}
+
+      <div className="mt-6 flex justify-end">
+        <button
+          onClick={formData.step === 1 ? handleNext : handleSubmit}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          {formData.step === 1 ? 'Next' : 'Submit'}
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
 }

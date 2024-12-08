@@ -32,6 +32,7 @@ export default function PrescriptionForm({ isOpen, onClose, fetchPrescriptions }
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [formData, setFormData] = useState({
     appointmentId: '',
+    medications: [{ name: '', dosage: '', frequency: '', duration: '' }],
     instructions: '',
     testsRecommended: ''
   });

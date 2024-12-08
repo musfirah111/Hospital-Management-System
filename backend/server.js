@@ -5,7 +5,6 @@ const connectDB = require('./config/db');
 const { errorHandler } = require('./middlewares/errorHandler');
 const cron = require('node-cron');
 const Prescription = require('./models/Prescription'); // Adjust the path as necessary
-const uploadRoutes = require('./routes/uploadRoutes');
 
 // Connection to the database
 connectDB();
@@ -34,8 +33,6 @@ app.use('/api/reviews', require('./routes/rateAndReviewRoute'));
 app.use('/api/billing', require('./routes/billingRoute'));
 app.use('/api/recommendations', require('./routes/recommendationRoute'));
 app.use('/api/communication', require('./routes/communicationRoute'));
-app.use('/api/upload', uploadRoutes);
-app.use('/uploads', express.static('uploads'));
 
 // Error Handler Middleware  
 app.use(errorHandler);

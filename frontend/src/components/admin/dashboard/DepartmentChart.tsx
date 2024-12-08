@@ -6,42 +6,60 @@ import dayjs from 'dayjs';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-interface DepartmentData {
-  name: string;
-  percentage: number;
-  patients: number;
-  color: string;
-}
+// Mock data for Patient Overview
+const mockPieData = [
+  {
+    name: 'Cardiology',
+    percentage: 30,
+    patients: 300,
+    color: '#129820'
+  },
+  {
+    name: 'Neurology',
+    percentage: 25,
+    patients: 250,
+    color: '#7BC1B7'
+  },
+  {
+    name: 'Orthopedics',
+    percentage: 20,
+    patients: 200,
+    color: '#F89603'
+  },
+  {
+    name: 'Pediatrics',
+    percentage: 15,
+    patients: 150,
+    color: '#0B8FAC'
+  },
+  {
+    name: 'Others',
+    percentage: 10,
+    patients: 100,
+    color: '#F30000'
+  }
+];
+
+// Mock data for Department Patient Distribution
+const mockBarData = [
+  { department: 'Cardiology', value: 300 },
+  { department: 'Neurology', value: 250 },
+  { department: 'Orthopedics', value: 200 },
+  { department: 'Pediatrics', value: 150 },
+  { department: 'Oncology', value: 180 },
+  { department: 'Dermatology', value: 120 },
+  { department: 'Others', value: 100 }
+];
 
 interface DepartmentChartProps {
-  data: DepartmentData[];
   className?: string;
 }
 
-export function DepartmentChart({ data, className = '' }: DepartmentChartProps) {
-  const [employeeData, setEmployeeData] = useState([]);
-  const [loading, setLoading] = useState(true);
+export function DepartmentChart({ className = '' }: DepartmentChartProps) {
+  const [employeeData, setEmployeeData] = useState(mockBarData);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchDepartmentStats = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        const response = await axios.get('http://localhost:5000/api/departments/patient-stats', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        console.log("----------------------------------------------responsepie", response);
-        setEmployeeData(response.data);
-      } catch (error) {
-        console.error('Error fetching department stats:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDepartmentStats();
-  }, []);
-
-  const total = data.reduce((sum, item) => sum + item.patients, 0);
+  const total = mockPieData.reduce((sum, item) => sum + item.patients, 0);
 
   return (
     <div className="space-y-4">
@@ -55,13 +73,10 @@ export function DepartmentChart({ data, className = '' }: DepartmentChartProps) 
 
         <div className="flex items-start justify-between">
           <div className="relative w-[120px] h-[120px]">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-
-            </div>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={data}
+                  data={mockPieData}
                   cx="50%"
                   cy="50%"
                   innerRadius="60%"
@@ -69,7 +84,7 @@ export function DepartmentChart({ data, className = '' }: DepartmentChartProps) 
                   paddingAngle={2}
                   dataKey="patients"
                 >
-                  {data.map((entry, index) => (
+                  {mockPieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -78,7 +93,7 @@ export function DepartmentChart({ data, className = '' }: DepartmentChartProps) 
           </div>
 
           <div className="flex-1 pl-6 space-y-2">
-            {data.map((item, index) => (
+            {mockPieData.map((item, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div
@@ -101,44 +116,38 @@ export function DepartmentChart({ data, className = '' }: DepartmentChartProps) 
           <h2 className="text-lg font-semibold">Department Patient Distribution</h2>
         </div>
 
-        {loading ? (
-          <div className="h-[180px] flex items-center justify-center">
-            <span>Loading...</span>
-          </div>
-        ) : (
-          <div className="h-[180px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={employeeData} barSize={30}>
-                <XAxis
-                  dataKey="department"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#666', fontSize: 12 }}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#666', fontSize: 12 }}
-                />
-                <Tooltip
-                  formatter={(value) => [`${value} patients`, 'Count']}
-                  labelStyle={{ color: '#666' }}
-                />
-                <Bar
-                  dataKey="value"
-                  radius={[4, 4, 0, 0]}
-                >
-                  {employeeData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={index % 2 === 0 ? '#129820' : '#7BC1B7'}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+        <div className="h-[180px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={employeeData} barSize={25}>
+              <XAxis
+                dataKey="department"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#666', fontSize: 12 }}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#666', fontSize: 12 }}
+              />
+              <Tooltip
+                formatter={(value) => [`${value} patients`, 'Count']}
+                labelStyle={{ color: '#666' }}
+              />
+              <Bar
+                dataKey="value"
+                radius={[4, 4, 0, 0]}
+              >
+                {employeeData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={index % 2 === 0 ? '#129820' : '#7BC1B7'}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow p-4">

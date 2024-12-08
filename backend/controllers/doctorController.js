@@ -410,6 +410,64 @@ const calculateRevenue = asyncHandler(async (req, res) => {
     });
 });
 
+
+// Update consultation fee for a doctor
+const updateConsultationFee = asyncHandler(async (req, res) => {
+    const { consultation_fee } = req.body;
+
+    // Validate consultation fee
+    if (!consultation_fee || consultation_fee < 0) {
+        res.status(400);
+        throw new Error("Please provide a valid consultation fee (must be greater than 0)");
+    }
+
+    const updatedDoctor = await Doctor.findByIdAndUpdate(
+        req.params.id,
+        { consultation_fee },
+        {
+            new: true,
+            runValidators: true
+        }
+    ).populate('user_id department_id');
+
+    if (!updatedDoctor) {
+        res.status(404);
+        throw new Error("Doctor not found");
+    }
+
+    res.json(updatedDoctor);
+});
+
+// Update doctor's experience
+const updateDoctorExperience = asyncHandler(async (req, res) => {
+    const { experience } = req.body;
+    const doctorId = req.params.id;
+
+    // Validate experience
+    if (experience === undefined || experience < 0) {
+        res.status(400);
+        throw new Error("Please provide valid years of experience (must be 0 or greater)");
+    }
+
+    const updatedDoctor = await Doctor.findByIdAndUpdate(
+        doctorId,
+        { experience },
+        {
+            new: true,
+            runValidators: true
+        }
+    ).populate('user_id department_id');
+
+    if (!updatedDoctor) {
+        res.status(404);
+        throw new Error("Doctor not found");
+    }
+
+    res.json(updatedDoctor);
+});
+
+
+
 module.exports = {
     getDoctors,
     getDoctorById,
@@ -422,5 +480,7 @@ module.exports = {
     getDoctorCountByDepartment,
     getDoctorSchedule,
     getDoctorDetailsByUserId,
-    calculateRevenue
+    calculateRevenue,
+    updateConsultationFee,
+    updateDoctorExperience
 };

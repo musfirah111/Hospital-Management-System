@@ -183,4 +183,30 @@ const getUserByEmail = asyncHandler(async (req, res) => {
     res.json(user);
 });
 
-module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile, updateUserByUserId, getUserProfileById, getUserByEmail };
+const updateProfilePicture = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.userId);
+
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    user.profile_picture = req.body.profile_picture;
+    const updatedUser = await user.save();
+
+    res.json({
+        _id: updatedUser._id,
+        profile_picture: updatedUser.profile_picture
+    });
+});
+
+module.exports = {
+    registerUser,
+    loginUser,
+    getUserProfile,
+    updateUserProfile,
+    updateUserByUserId,
+    getUserProfileById,
+    getUserByEmail,
+    updateProfilePicture
+};

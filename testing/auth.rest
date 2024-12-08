@@ -70,3 +70,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlM
 {
     "password": "thispassword123" 
 }
+
+### Update User Profile Picture
+PUT http://localhost:5000/api/users/6750783291dcace6a5837f1f/profile-picture
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
+Content-Type: application/json
+
+{
+    "profile_picture": "https://img.freepik.com/free-photo/young-bearded-male-doctor-wearing-white-coat-with-stethoscope-loking-camera-with-serious-face_141793-28200.jpg?t=st=1733698578~exp=1733702178~hmac=066fa0f8ce75edabb1e503858ba37d086c9c9489e1db4894637751a9cad56c29&w=826"
+}

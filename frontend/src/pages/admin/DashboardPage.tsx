@@ -139,7 +139,7 @@ export function DashboardPage() {
 
         <div className="grid grid-cols-3 gap-6">
           <TopDoctors className="col-span-2" />
-          <DepartmentChart data={departmentData} />
+          <DepartmentChart />
         </div>
       </div>
     </Layout>

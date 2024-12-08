@@ -28,10 +28,11 @@ interface Appointment {
 
 interface AppointmentListProps {
   appointments: Appointment[];
-  onStatusUpdate: (id: string, status: 'completed' | 'rescheduled') => void;
+  onStatusUpdate: (id: string, status: string) => Promise<void>;
+  loading: boolean;
 }
 
-export default function AppointmentList({ appointments, onStatusUpdate }: AppointmentListProps) {
+export default function AppointmentList({ appointments, onStatusUpdate, loading }: AppointmentListProps) {
   const [filter, setFilter] = useState('all');
   
   const filteredAppointments = appointments.filter(appointment => 

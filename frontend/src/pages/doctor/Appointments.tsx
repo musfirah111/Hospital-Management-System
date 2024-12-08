@@ -114,6 +114,7 @@ export default function Appointments() {
         <AppointmentList
           appointments={filteredAppointments}
           onStatusUpdate={handleStatusUpdate}
+          loading={loading}
         />
       </div>
     </Layout>

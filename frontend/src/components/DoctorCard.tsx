@@ -37,7 +37,7 @@ export default function DoctorCard({ doctor, onClick }: DoctorCardProps) {
       <p className="mt-4 text-gray-600 line-clamp-2">{doctor.description}</p>
       
       <div className="flex justify-between items-center mt-4">
-        <span className="text-lg font-semibold text-[#0B8FAC]">Consultation Fee: ${doctor.price}</span>
+        <span className="text-lg font-semibold text-[#0B8FAC]">Consultation Fee: PKR {doctor.price}</span>
         <Link
           to={`/doctor/${doctor.id}`}
           className="px-6 py-2 bg-[#0B8FAC] text-white rounded-lg hover:bg-[#097a93] transition-colors"

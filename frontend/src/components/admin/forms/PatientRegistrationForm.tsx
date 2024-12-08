@@ -473,27 +473,40 @@ export function PatientRegistrationForm({ onClose, onPatientAdded }: PatientRegi
   );
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">
-          {formData.step === 1 ? 'Patient Registration' : 'Additional Information'}
-        </h2>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
-          <X className="h-6 w-6" />
-        </button>
-      </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg w-[90%] max-w-3xl max-h-[90vh] flex flex-col">
+        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 className="text-xl font-semibold">
+            {formData.step === 1 ? 'Patient Registration' : 'Additional Information'}
+          </h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
 
-      {formData.step === 1 ? renderStep1() : renderStep2()}
+        <div className="overflow-y-auto flex-1 p-6">
+          {formData.step === 1 ? renderStep1() : renderStep2()}
+        </div>
 
-      <div className="mt-6 flex justify-end">
-        <button
-          onClick={formData.step === 1 ? handleNext : handleSubmit}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          {formData.step === 1 ? 'Next' : 'Submit'}
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </button>
+        <div className="p-4 border-t border-gray-200">
+          <div className="flex justify-end space-x-3">
+            {formData.step === 2 && (
+              <button
+                onClick={() => setFormData(prev => ({ ...prev, step: 1 }))}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Back
+              </button>
+            )}
+            <button
+              onClick={formData.step === 1 ? handleNext : handleSubmit}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              {formData.step === 1 ? 'Next' : 'Submit'}
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    </div>
+  );
 }

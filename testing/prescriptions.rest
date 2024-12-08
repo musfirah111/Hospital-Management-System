@@ -1,15 +1,15 @@
 ### Create Prescription
 POST http://localhost:5000/api/prescriptions
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzYTY4MDhmYmM3Y2NjYzIxMjFhNyIsImlhdCI6MTczMzU3NTI0NSwiZXhwIjoxNzM2MTY3MjQ1fQ.bQaCXCAkJt54LWirpP5qAyxl4sAAb3nxcnCLgrusWMs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNzQ5NmExNTc5NjUyNjk2ODI1NyIsImlhdCI6MTczMzMxMDI4MSwiZXhwIjoxNzM1OTAyMjgxfQ.HdCrILiR1rieALWfs5C6fod3S11CFZ1D8D_H4ac6n3k
 Content-Type: application/json
 
 {
-    "patient_id": "6750af7e6dd96e12b38b5e93",
-    "doctor_id": "6750afac6dd96e12b38b5ea1",
-    "appointment_id": "675361c9d56e6dd893adb7e5",
+    "patient_id": "6753668162ae38bdf7368784",
+    "doctor_id": "675433f5caf1c6a1dd2cdc3c",
+    "appointment_id": "675555f1721ec2218e4337fa",
     "medications": [
         {
-            "name": "Medicine Name-------------",
+            "name": "Amoxicillin",
             "dosage": "10mg",
             "frequency": "Twice daily",
             "duration": "7"

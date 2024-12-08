@@ -1,67 +1,168 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import SearchBar from '../../components/doctor/SearchBar';
 import PrescriptionForm from '../../components/doctor/PrescriptionForm';
 import { FileText, Download, Share2 } from 'lucide-react';
-import type { Prescription } from '../../types/doctor/index';
 import { Layout } from '../../components/doctor/Layout';
 
-const mockPrescriptions: Prescription[] = [
-  {
-    id: '1',
-    patientId: 'P001',
-    patientName: 'John Doe',
-    date: '2024-03-15',
-    medications: [
-      { name: 'Amoxicillin', dosage: '500mg', frequency: 'Twice daily', duration: '7 days' }
-    ],
-    notes: 'Take with food'
-  },
-  {
-    id: '2',
-    patientId: 'P002',
-    patientName: 'Jane Smith',
-    date: '2024-03-14',
-    medications: [
-      { name: 'Ibuprofen', dosage: '400mg', frequency: 'As needed', duration: '5 days' }
-    ],
-    notes: 'Take for pain relief'
+interface Prescription {
+  _id: string;
+  patient_id: {
+    user_id: {
+      name: string;
+      profile_picture?: string;
+    };
+    _id: string;
+  } | string;
+  doctor_id: string;
+  medications: Array<{
+    name: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+  }>;
+  instructions: string;
+  tests: string[];
+  status: string;
+  date_issued: string;
+}
+
+// Helper function to get patient name
+const getPatientName = (prescription: Prescription) => {
+  if (typeof prescription.patient_id === 'string') {
+    return 'Patient ID: ' + prescription.patient_id;
   }
-];
+  return prescription.patient_id.user_id.name;
+};
+
+// Helper function to get patient ID
+const getPatientId = (prescription: Prescription) => {
+  if (typeof prescription.patient_id === 'string') {
+    return prescription.patient_id;
+  }
+  return prescription.patient_id._id;
+};
 
 export default function Prescriptions() {
   const [showForm, setShowForm] = useState(false);
-  const [prescriptions, setPrescriptions] = useState(mockPrescriptions);
-  const [filteredPrescriptions, setFilteredPrescriptions] = useState(mockPrescriptions);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [filteredPrescriptions, setFilteredPrescriptions] = useState<Prescription[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [patientId, setPatientId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchPrescriptions();
+  }, []);
+
+  const fetchPrescriptions = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('authToken');
+      const userId = localStorage.getItem('userId');
+
+      console.log('Fetching with userId:', userId);
+
+      if (!userId || !token) {
+        throw new Error('Authentication information missing');
+      }
+
+      // First get the doctor's ID using the user ID
+      const doctorResponse = await axios.get(
+        `http://localhost:5000/api/doctors/user/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      console.log('Doctor response:', doctorResponse.data);
+
+      if (!doctorResponse.data || !doctorResponse.data._id) {
+        throw new Error('Doctor information not found');
+      }
+
+      const doctorId = doctorResponse.data._id;
+      console.log('Found doctorId:', doctorId);
+
+      // Then fetch the prescriptions for this doctor
+      const prescriptionsResponse = await axios.get(
+        `http://localhost:5000/api/prescriptions/doctor/${doctorId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      console.log('Prescriptions response:', prescriptionsResponse.data);
+
+      if (!prescriptionsResponse.data) {
+        throw new Error('No prescriptions found');
+      }
+
+      setPrescriptions(prescriptionsResponse.data);
+      setFilteredPrescriptions(prescriptionsResponse.data);
+    } catch (err: any) {
+      console.error('Error fetching prescriptions:', err);
+      console.error('Error response:', err.response?.data);
+      setError(
+        err.response?.data?.message || 
+        err.message || 
+        'Failed to fetch prescriptions. Please try again later.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (query: string) => {
     const filtered = prescriptions.filter(
       (prescription) =>
-        prescription.patientName.toLowerCase().includes(query.toLowerCase()) ||
-        prescription.patientId.toLowerCase().includes(query.toLowerCase())
+        getPatientName(prescription).toLowerCase().includes(query.toLowerCase()) ||
+        getPatientId(prescription).toLowerCase().includes(query.toLowerCase())
     );
     setFilteredPrescriptions(filtered);
   };
 
-  const handleCreatePrescription = (data: any) => {
-    const newPrescription = {
-      ...data,
-      id: Math.random().toString(36).substr(2, 9),
-      date: new Date().toISOString().split('T')[0]
-    };
-    setPrescriptions([newPrescription, ...prescriptions]);
-    setFilteredPrescriptions([newPrescription, ...prescriptions]);
+  const handleCreatePrescription = async (data: any) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await axios.post(
+        'http://localhost:5000/api/prescriptions',
+        {
+          ...data,
+          patient_id: patientId
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setPrescriptions([response.data, ...prescriptions]);
+      setFilteredPrescriptions([response.data, ...prescriptions]);
+    } catch (err) {
+      console.error('Error creating prescription:', err);
+      setError('Failed to create prescription. Please try again.');
+    }
   };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <Layout>
       <div className="space-y-6">
+ 
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">Prescriptions</h1>
           <button
             onClick={() => setShowForm(true)}
             className="bg-[#0B8FAC] text-white px-4 py-2 rounded-md hover:bg-[#0b8fac7d]"
           >
-            New Prescription
+            + New Prescription
           </button>
         </div>
 
@@ -78,54 +179,76 @@ export default function Prescriptions() {
               placeholder="Search by patient name or ID..."
             />
           </div>
-          <input
-            type="date"
-            className="border rounded-md px-3 py-2"
-          />
         </div>
 
-        <div className="grid gap-6">
-          {filteredPrescriptions.map((prescription) => (
-            <div key={prescription.id} className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                    <h3 className="text-lg font-semibold">{prescription.patientName}</h3>
-                    <span className="text-sm text-gray-500">({prescription.patientId})</span>
+        {filteredPrescriptions.length === 0 ? (
+          <div className="text-center text-gray-500 mt-4">
+            No prescriptions found
+          </div>
+        ) : (
+          <div className="grid gap-6">
+            {filteredPrescriptions.map((prescription) => {
+              console.log('Rendering prescription:', prescription);
+              return (
+                <div key={prescription._id} className="bg-white rounded-lg shadow-md p-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <FileText className="w-5 h-5 text-blue-600" />
+                        <h3 className="text-lg font-semibold">
+                          {getPatientName(prescription)}
+                        </h3>
+                        <span className="text-sm text-gray-500">
+                          ({getPatientId(prescription)})
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Prescribed on {new Date(prescription.date_issued).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
+                        <Download size={20} />
+                      </button>
+                      <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
+                        <Share2 size={20} />
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">Prescribed on {prescription.date}</p>
-                </div>
-                <div className="flex space-x-2">
-                  <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
-                    <Download size={20} />
-                  </button>
-                  <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100">
-                    <Share2 size={20} />
-                  </button>
-                </div>
-              </div>
 
-              <div className="mt-4">
-                <h4 className="font-medium mb-2">Medications:</h4>
-                <ul className="space-y-2">
-                  {prescription.medications.map((med, index) => (
-                    <li key={index} className="text-sm text-gray-600">
-                      {med.name} - {med.dosage} ({med.frequency}) for {med.duration}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                  <div className="mt-4">
+                    <h4 className="font-medium mb-2">Medications:</h4>
+                    <ul className="space-y-2">
+                      {prescription.medications.map((med, index) => (
+                        <li key={index} className="text-sm text-gray-600">
+                          {med.name} - {med.dosage} ({med.frequency}) for {med.duration}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-              {prescription.notes && (
-                <div className="mt-4">
-                  <h4 className="font-medium mb-2">Notes:</h4>
-                  <p className="text-sm text-gray-600">{prescription.notes}</p>
+                  {prescription.instructions && (
+                    <div className="mt-4">
+                      <h4 className="font-medium mb-2">Instructions:</h4>
+                      <p className="text-sm text-gray-600">{prescription.instructions}</p>
+                    </div>
+                  )}
+
+                  {prescription.tests && prescription.tests.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="font-medium mb-2">Tests:</h4>
+                      <ul className="space-y-1">
+                        {prescription.tests.map((test, index) => (
+                          <li key={index} className="text-sm text-gray-600">{test}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -6,8 +6,10 @@ import {
   ClipboardList,
   TestTube2,
   MessageSquare,
-  Clock
+  Clock,
+  LogOut
 } from 'lucide-react';
+import MedinovaLogo from '../../assets/Medinova.svg';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/doctor/dashboard' },
@@ -23,34 +25,43 @@ export default function DoctorSidebar() {
   const location = useLocation();
 
   return (
-    <div className="bg-white h-screen w-64 fixed left-0 top-0 border-r">
-      <div className="p-4 flex items-center space-x-2">
-        <img src="/logo.svg" alt="Oasis" className="h-8 w-8" />
-        <span className="text-xl font-semibold text-[#0B8FAC]">Oasis</span>
+    <div className="w-64 bg-white h-screen fixed left-0 top-0 border-r border-gray-200">
+      <div className="p-4">
+        <Link to="/" className="flex items-center gap-3">
+          <img
+            src={MedinovaLogo}
+            alt="Oasis Logo"
+            className="w-10 h-10"
+          />
+          <span className="text-xl font-bold text-[#0B8FAC]">Oasis</span>
+        </Link>
       </div>
 
-      <nav className="px-0">
-        <ul className="space-y-1">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            return (
-              <li key={item.path}>
-                <Link
-                  to={item.path}
-                  className={`flex items-center space-x-3 px-6 py-2.5 transition-colors w-full ${isActive
-                    ? 'bg-[#D2EBE7] text-[#0B8FAC]'
-                    : 'text-gray-600 hover:bg-gray-50'
-                    }`}
-                >
-                  <Icon size={20} strokeWidth={1.5} />
-                  <span className="text-sm">{item.label}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+      <nav className="mt-8">
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path;
+
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`flex items-center space-x-2 px-6 py-3 text-gray-600 hover:bg-[#D2EBE7] hover:text-[#0B8FAC] ${isActive ? 'bg-[#7BC1B7] text-white' : ''
+                }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
       </nav>
+
+      <div className="absolute bottom-8 w-full px-6">
+        <button className="flex items-center space-x-2 text-gray-600 hover:text-[#0B8FAC]">
+          <LogOut className="w-5 h-5" />
+          <span>Logout</span>
+        </button>
+      </div>
     </div>
   );
 }

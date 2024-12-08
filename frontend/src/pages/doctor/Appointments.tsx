@@ -8,9 +8,9 @@ interface DoctorResponse {
   _id: string;
 }
 
-interface AppointmentsResponse {
-  appointments: any[];  // Replace 'any' with your appointment type if available
-}
+// interface AppointmentsResponse {
+//   appointments: any[];  // Replace 'any' with your appointment type if available
+// }
 
 export default function Appointments() {
   const [filteredAppointments, setFilteredAppointments] = useState<any[]>([]);

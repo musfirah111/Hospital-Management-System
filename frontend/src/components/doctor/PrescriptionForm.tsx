@@ -27,7 +27,7 @@ interface Appointment {
   status: string;
 }
 
-export default function PrescriptionForm({ isOpen, onClose, onSubmit, fetchPrescriptions }: PrescriptionFormProps) {
+export default function PrescriptionForm({ isOpen, onClose, fetchPrescriptions }: PrescriptionFormProps) {
   const [step, setStep] = useState(1);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [formData, setFormData] = useState({

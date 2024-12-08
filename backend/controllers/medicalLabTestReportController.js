@@ -187,16 +187,17 @@ const getWeeklyLabReports = asyncHandler(async (req, res) => {
     res.json({ weeklyCount });
 });
 
-const getMonthlyLabReports = asyncHandler(async (req, res) => {
+const getMonthlyLabReports = async (req, res) => {
     const now = new Date();
     const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // Subtract 30 days
 
     const monthlyCount = await MedicalLabTestReport.countDocuments({
         test_date: { $gte: last30Days },
     });
+    console.log("----------------------------------------------monthlyCount", monthlyCount);
 
     res.json({ monthlyCount });
-});
+};
 
 const getLabReportsByPatientId = asyncHandler(async (req, res) => {
     try {

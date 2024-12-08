@@ -335,17 +335,17 @@ const getWeeklyAppointments = asyncHandler(async (req, res) => {
     res.json({ weeklyCount });
 });
 
-const getMonthlyAppointments = asyncHandler(async (req, res) => {
+const getMonthlyAppointments = async (req, res) => {
     const now = new Date();
     const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // Subtract 30 days
 
     const monthlyCount = await Appointment.countDocuments({
-        status: "Completed", // Ensure only completed appointments are counted
-        date_created: { $gte: last30Days },
+        appointment_date: { $gte: last30Days },
     });
+    console.log("----------------------------------------------monthlyCountOfAppointments", monthlyCount);
 
     res.json({ monthlyCount });
-});
+};
 
 // Get completed appointments with pagination.
 const getCompletedAppointments = asyncHandler(async (req, res) => {

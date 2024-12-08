@@ -367,6 +367,28 @@ const getDoctorDetailsByUserId = asyncHandler(async (req, res) => {
     res.json(doctor);
 });
 
+// Calculate total revenue from appointments
+const calculateRevenue = asyncHandler(async (req, res) => {
+    // Get all completed appointments
+    const appointments = await Appointment.find({ status: 'completed' })
+        .populate({
+            path: 'doctor_id',
+            select: 'consultation_fee'
+        });
+
+    // Calculate total revenue
+    const totalRevenue = appointments.reduce((sum, appointment) => {
+        return sum + (appointment.doctor_id?.consultation_fee || 0);
+    }, 0);
+
+    console.log("----------------------------------------------totalRevenue", totalRevenue);
+
+    res.json({
+        success: true,
+        revenue: totalRevenue,
+        appointmentCount: appointments.length
+    });
+});
 
 module.exports = {
     getDoctors,
@@ -379,5 +401,6 @@ module.exports = {
     getAllDoctors,
     getDoctorCountByDepartment,
     getDoctorSchedule,
-    getDoctorDetailsByUserId
+    getDoctorDetailsByUserId,
+    calculateRevenue
 };

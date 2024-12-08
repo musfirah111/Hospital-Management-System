@@ -1,5 +1,8 @@
 const asyncHandler = require('express-async-handler');
 const Department = require('../models/Department'); // Assuming you have a Department model
+const Patient = require('../models/Patient'); // Make sure to import Patient model
+const Doctor = require('../models/Doctor');
+const Appointment = require('../models/Appointment');
 
 // Add a new department
 const addDepartment = async (req, res) => {
@@ -34,15 +37,67 @@ const deleteDepartment = async (req, res) => {
     }
 };
 
-const getAllDepartments = asyncHandler(async (req, res) => {
+const getAllDepartments = async (req, res) => {
     const departments = await Department.find({ active_status: true });
     res.json(departments);
-});
+};
+
+const getDepartmentPatientStats = async (req, res) => {
+    try {
+        // Get all active departments
+        const departments = await Department.find({ active_status: true });
+
+        // Get total unique patients with appointments
+        const uniquePatients = await Patient.distinct('_id', {
+            '_id': { $in: await Appointment.distinct('patient_id') }
+        });
+        const totalPatients = uniquePatients.length;
+
+        // Get patient counts for each department
+        const departmentStats = await Promise.all(
+            departments.map(async (dept) => {
+                // Get all doctors in this department
+                const doctorIds = await Doctor.distinct('_id', { department: dept._id });
+
+                // Get unique patients who have appointments with these doctors
+                const uniqueDeptPatients = await Patient.distinct('_id', {
+                    '_id': {
+                        $in: await Appointment.distinct('patient_id', {
+                            doctor_id: { $in: doctorIds },
+                            active_status: true
+                        })
+                    }
+                });
+                const patientCount = uniqueDeptPatients.length;
+
+                // Calculate percentage
+                const percentage = totalPatients > 0
+                    ? Math.round((patientCount / totalPatients) * 100)
+                    : 0;
+
+                return {
+                    department: dept.name,
+                    value: patientCount,
+                    percentage: `${percentage}%`
+                };
+            })
+        );
+        console.log("----------------------------------------------departmentStatsssss4s", departmentStats);
+        res.json(departmentStats);
+    } catch (error) {
+        console.error('Error in getDepartmentPatientStats:', error);
+        res.status(500).json({
+            message: 'Error fetching department statistics',
+            error: error.message
+        });
+    }
+};
 
 // Export the controller functions
 module.exports = {
     addDepartment,
     updateDepartment,
     deleteDepartment,
-    getAllDepartments
+    getAllDepartments,
+    getDepartmentPatientStats
 };

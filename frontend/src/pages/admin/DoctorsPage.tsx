@@ -38,6 +38,7 @@ export function DoctorsPage() {
   }>({ isOpen: false, doctorId: null });
 
   const fetchDoctors = async (page: number, searchQuery: string = '') => {
+    console.log('Fetching doctors with search:', searchQuery);
     try {
       const token = localStorage.getItem('authToken');
       const response = await axios.get(`http://localhost:5000/api/doctors`, {
@@ -48,6 +49,7 @@ export function DoctorsPage() {
           search: searchQuery
         }
       });
+      console.log('API response:', response.data);
 
       setDoctorData(response.data.doctors);
       setTotalPages(Math.ceil(response.data.totalPages));
@@ -60,8 +62,17 @@ export function DoctorsPage() {
     }
   };
 
+  const handleSearch = (searchTerm: string) => {
+    setSearch(searchTerm);
+    fetchDoctors(1, searchTerm);
+  };
+
   useEffect(() => {
-    fetchDoctors(currentPage, search);
+    const timeoutId = setTimeout(() => {
+      fetchDoctors(currentPage, search);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
   }, [currentPage, search]);
 
   const handleDoctorAdded = () => {
@@ -79,7 +90,7 @@ export function DoctorsPage() {
       fetchDoctors(currentPage, search);
     } catch (err) {
       console.error('Error deleting doctor:', err);
-      //alert('Failed to delete doctor. Please try again.');
+      alert('Failed to delete doctor. Please try again.');
     }
   };
 
@@ -159,7 +170,7 @@ export function DoctorsPage() {
           <div className="p-4 border-b border-gray-200">
             <SearchInput
               value={search}
-              onChange={setSearch}
+              onChange={handleSearch}
               placeholder="Search doctors..."
             />
           </div>

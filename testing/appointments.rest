@@ -15,8 +15,8 @@ GET http://localhost:5000/api/appointments
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzYjIxMDhmYmM3Y2NjYzIxMjFjYiIsImlhdCI6MTczMzU1MDA2NiwiZXhwIjoxNzM2MTQyMDY2fQ.Kz12082EL8It8KjxuuPqsxNU_snD9TKBhHmOs845DzA
 
 ### Get Appointment by ID
-GET http://localhost:5000/api/appointments/67507592ccba814bde07155b
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTAzNjVhNmExNTc5NjUyNjk2ODI0OCIsImlhdCI6MTczMzMxMDA0MiwiZXhwIjoxNzM1OTAyMDQyfQ.vhJEMJDqLFsXdOmm0mVvfl43mxCvDTppfnphTWvt5Q0
+GET http://localhost:5000/api/appointments/67544b1f29bb73c6ffaa529a
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTA0NDJlMTJlMzE1YmVhMzZkMmQ0YSIsImlhdCI6MTczMzY5ODU2NywiZXhwIjoxNzM2MjkwNTY3fQ.o8frBnnw0zGnwHh2juOIm6sR85yZbim0rIZ96T1fBH8
 
 ### Update Appointment Status
 PUT http://localhost:5000/api/appointments/6755fb6b9f32ed5ae1b5e8da/status

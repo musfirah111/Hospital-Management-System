@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { validatePassword } from '../utils/passwordValidation';
+import axios from 'axios';
 
 export const ForgotPassword: React.FC = () => {
   const navigate = useNavigate();
@@ -36,11 +37,44 @@ export const ForgotPassword: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
+    if (!validateForm()) return;
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const userId = localStorage.getItem('userId');
+
+      if (!token || !userId) {
+        throw new Error('Authentication required');
+      }
+
+      await axios.put(
+        `http://localhost:5000/api/users/profile/password`,
+        {
+          currentPassword: currentPassword,
+          password: newPassword
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
       setSubmitted(true);
-      // Handle password reset logic here
+    } catch (error: any) {
+      if (error.response?.data?.message?.toLowerCase().includes('current password')) {
+        setErrors({
+          ...errors,
+          currentPassword: 'Current password is incorrect'
+        });
+      } else {
+        setErrors({
+          submit: error.response?.data?.message || 'Failed to update password'
+        });
+      }
     }
   };
 
@@ -54,7 +88,7 @@ export const ForgotPassword: React.FC = () => {
       onClick={onClick}
       className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 ${className}`}
     >
-      {show ? <EyeOff size={20} /> : <Eye size={20} />}
+      {show ? <Eye size={20} /> : <EyeOff size={20} />}
     </button>
   );
 

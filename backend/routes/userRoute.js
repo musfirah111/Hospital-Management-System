@@ -8,7 +8,8 @@ const {
     updateUserByUserId,
     getUserProfileById,
     getUserByEmail,
-    updateProfilePicture
+    updateProfilePicture,
+    updatePassword
 } = require('../controllers/userController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly } = require('../middlewares/roleMiddleware');
@@ -36,5 +37,8 @@ router.get('/user/:email', protect, getUserByEmail);
 
 // Add this route with your other user routes
 router.put('/:userId/profile-picture', protect, updateProfilePicture);
+
+// Add this route with your existing routes
+router.put('/profile/password', protect, updatePassword);
 
 module.exports = router;

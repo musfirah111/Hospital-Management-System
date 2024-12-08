@@ -200,6 +200,31 @@ const updateProfilePicture = asyncHandler(async (req, res) => {
     });
 });
 
+const updatePassword = asyncHandler(async (req, res) => {
+    const { currentPassword, password } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    // Verify current password
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+        res.status(400);
+        throw new Error('Current password is incorrect');
+    }
+
+    // Update password
+    user.password = password;
+    await user.save();
+
+    res.json({
+        message: 'Password updated successfully'
+    });
+});
+
 module.exports = {
     registerUser,
     loginUser,
@@ -208,5 +233,6 @@ module.exports = {
     updateUserByUserId,
     getUserProfileById,
     getUserByEmail,
-    updateProfilePicture
+    updateProfilePicture,
+    updatePassword
 };

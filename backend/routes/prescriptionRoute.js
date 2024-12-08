@@ -6,7 +6,7 @@ const {
     getPrescriptionById,
     getAllPrescriptions,
     getActivePrescriptionsByPatientId,
-    getActivePrescriptionsByDoctorId
+    getActivePrescriptionsByDoctorId,
     getPrescriptionsByAppointmentId
 } = require('../controllers/prescriptionController');
 const { protect } = require('../middlewares/authMiddleware');

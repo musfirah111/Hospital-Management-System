@@ -154,6 +154,6 @@ module.exports = {
     getPrescriptionById,
     getAllPrescriptions,
     getActivePrescriptionsByPatientId,
-    getActivePrescriptionsByDoctorId
+    getActivePrescriptionsByDoctorId,
     getPrescriptionsByAppointmentId
 };

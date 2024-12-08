@@ -134,4 +134,46 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile };
+const updateUserByUserId = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.userId);
+
+    console.log(".........................///phone number:", req.body.phone_number);
+    // Update patient fields
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.age = req.body.age || user.age;
+    user.gender = req.body.gender || user.gender;
+    user.phone_number = req.body.phone_number || user.phone_number;
+    user.address = req.body.address || user.address;
+    // Add other patient-specific fields as needed
+
+    const updatedUser = await user.save();
+    res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        age: updatedUser.age,
+        gender: updatedUser.gender,
+        phone_number: updatedUser.phone_number,
+        address: updatedUser.address,
+    });
+});
+
+const getUserProfileById = asyncHandler(async (req, res) => {
+    const userId = req.params.userId;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ message: 'Invalid user ID format' });
+    }
+
+    const user = await User.findById(userId).select('-password');
+    console.log(".........................///user:", user);
+
+    if (user) {
+        res.json(user);
+    } else {
+        res.status(404).json({ message: 'User not found' });
+    }
+});
+
+module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile, updateUserByUserId, getUserProfileById };

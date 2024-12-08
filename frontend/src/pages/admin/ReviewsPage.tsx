@@ -164,7 +164,7 @@ export function ReviewsPage() {
     <Layout>
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold text-[#0B8FAC]">Reviews</h2>
+          <h2 className="text-2xl font-semibold text-black">Reviews</h2>
         </div>
 
         {successMessage && (

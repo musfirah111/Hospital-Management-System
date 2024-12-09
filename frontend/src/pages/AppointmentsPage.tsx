@@ -9,9 +9,9 @@ import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import { ConfirmationModal } from '../components/shared/ConfirmationModal';
 
-// interface PatientResponse {
-//   id: string;
-// }
+interface PatientResponse {
+  id: string;
+}
 
 interface Appointment {
   id: string;
@@ -33,6 +33,23 @@ type AppointmentStatus = 'All' | 'Scheduled' | 'Completed' | 'Requested' | 'Canc
 // Define the expected response structure
 interface RescheduleResponse {
   doctor_id: string;
+}
+
+interface AppointmentsResponse {
+  appointments: Array<{
+    _id: string;
+    doctor_id: {
+      user_id: {
+        name: string;
+      };
+      department_id: {
+        name: string;
+      };
+    };
+    appointment_date: string;
+    appointment_time: string;
+    status: string;
+  }>;
 }
 
 export default function AppointmentsPage() {
@@ -62,8 +79,7 @@ export default function AppointmentsPage() {
       const token = localStorage.getItem('authToken');
       const userId = localStorage.getItem('userId');
 
-      // First get the patient ID for the logged-in user
-      const patientResponse = await axios.get(
+      const patientResponse = await axios.get<{ id: string }>(
         `http://localhost:5000/api/patients/user/${userId}`,
         {
           headers: {
@@ -73,7 +89,7 @@ export default function AppointmentsPage() {
       );
 
       if (patientResponse.data && patientResponse.data.id) {
-        const appointmentsResponse = await axios.get(
+        const appointmentsResponse = await axios.get<AppointmentsResponse>(
           `http://localhost:5000/api/appointments/patient/${patientResponse.data.id}`,
           {
             headers: {
@@ -85,13 +101,14 @@ export default function AppointmentsPage() {
         console.log('Raw appointments response:', appointmentsResponse.data); // Debug log
 
         if (appointmentsResponse.data && appointmentsResponse.data.appointments) {
-          const formattedAppointments = appointmentsResponse.data.appointments.map((apt: any) => {
-            // Handle both populated and non-populated data structures
-            const doctorData = apt.doctor_id.user_id ? apt.doctor_id : {
-              _id: apt.doctor_id,
-              user_id: { name: 'Dr. Wanitha Silva' }, // Default or fetch from somewhere
-              department_id: { name: 'Child Specialist' } // Default or fetch from somewhere
-            };
+          const formattedAppointments = appointmentsResponse.data.appointments.map((apt) => {
+            const doctorData = apt.doctor_id && typeof apt.doctor_id === 'object' && '_id' in apt.doctor_id
+              ? apt.doctor_id
+              : {
+                  _id: String(apt.doctor_id),
+                  user_id: { name: 'Dr. Wanitha Silva' },
+                  department_id: { name: 'Child Specialist' }
+                };
 
             return {
               id: apt._id,
@@ -99,9 +116,9 @@ export default function AppointmentsPage() {
               specialty: doctorData.department_id?.name || 'Specialist',
               date: apt.appointment_date,
               time: apt.appointment_time,
-              status: apt.status,
+              status: apt.status as AppointmentStatus,
               doctor_id: {
-                id: doctorData._id,
+                id: String(doctorData._id),
                 name: doctorData.user_id.name,
                 specialization: doctorData.department_id?.name || 'Specialist',
                 image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300"
@@ -133,7 +150,7 @@ export default function AppointmentsPage() {
       const userId = localStorage.getItem('userId');
 
       // First get the patient ID for the logged-in user
-      const patientResponse = await axios.get(
+      const patientResponse = await axios.get<PatientResponse>(
         `http://localhost:5000/api/patients/user/${userId}`,
         {
           headers: {

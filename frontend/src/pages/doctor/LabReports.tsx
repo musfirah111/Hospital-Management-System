@@ -3,13 +3,53 @@ import axios from 'axios';
 import SearchBar from '../../components/doctor/SearchBar';
 import LabReportForm from '../../components/doctor/LabReportForm';
 import { FileText, Download, Share2 } from 'lucide-react';
-import type { LabReport } from '../../types/doctor/index';
 import { Layout } from '../../components/doctor/Layout';
+
+interface LabReport {
+  _id: string;
+  patient_id: {
+    _id: string;
+    user_id?: {
+      name: string;
+    };
+  };
+  test_date: string;
+  test_name: string;
+  result: string;
+  status: string;
+  report_url: string;
+}
+
+interface FormattedLabReport {
+  id: string;
+  patientId: string;
+  patientName: string;
+  date: string;
+  testType: string;
+  results: string;
+  status: string;
+  reportUrl: string;
+}
+
+interface LabReportResponse {
+  _id: string;
+  patient_id: {
+    _id: string;
+    user_id?: {
+      name: string;
+    };
+  };
+  test_date: string;
+  test_name: string;
+  result: string;
+  status: string;
+  report_url: string;
+}
 
 export default function LabReports() {
   const [showForm, setShowForm] = useState(false);
-  const [reports, setReports] = useState<LabReport[]>([]);
-  const [filteredReports, setFilteredReports] = useState<LabReport[]>([]);
+  const [reports, setReports] = useState<FormattedLabReport[]>([]);
+  const [filteredReports, setFilteredReports] = useState<FormattedLabReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [shareEmail, setShareEmail] = useState('');
@@ -24,13 +64,16 @@ export default function LabReports() {
       const userId = localStorage.getItem('userId');
       //alert(userId);
       const token = localStorage.getItem('authToken');
-      const response = await axios.get(`http://localhost:5000/api/lab-reports/doctor/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const response = await axios.get<LabReport[]>(
+        `http://localhost:5000/api/lab-reports/doctor/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
-      });
+      );
 
-      const formattedReports = response.data.map((report: any) => ({
+      const formattedReports = response.data.map((report) => ({
         id: report._id || '',
         patientId: report.patient_id?._id || '',
         patientName: report.patient_id?.user_id?.name || 'Unknown Patient',
@@ -72,7 +115,7 @@ export default function LabReports() {
   const handleCreateReport = async (data: any) => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await axios.post(
+      const response = await axios.post<LabReportResponse>(
         'http://localhost:5000/api/lab-reports',
         data,
         {
@@ -84,12 +127,12 @@ export default function LabReports() {
 
       const newReport = {
         id: response.data._id,
-        patientId: response.data.patient_id,
+        patientId: response.data.patient_id._id,
         patientName: response.data.patient_id?.user_id?.name || 'Unknown Patient',
         date: new Date(response.data.test_date).toISOString().split('T')[0],
         testType: response.data.test_name,
         results: response.data.result,
-        status: response.data.status.toLowerCase(),
+        status: response.data.status.toLowerCase() as 'pending' | 'completed',
         reportUrl: response.data.report_url
       };
 
@@ -104,7 +147,7 @@ export default function LabReports() {
   const handleDownload = async (reportId: string) => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await axios.get(
+      const response = await axios.get<Blob>(
         `http://localhost:5000/api/lab-reports/download/${reportId}`,
         {
           headers: {

@@ -62,14 +62,11 @@ export default function Prescriptions() {
       const token = localStorage.getItem('authToken');
       const userId = localStorage.getItem('userId');
 
-      console.log('Fetching with userId:', userId);
-
       if (!userId || !token) {
         throw new Error('Authentication information missing');
       }
 
-      // First get the doctor's ID using the user ID
-      const doctorResponse = await axios.get(
+      const doctorResponse = await axios.get<{ _id: string }>(
         `http://localhost:5000/api/doctors/user/${userId}`,
         {
           headers: {
@@ -78,17 +75,9 @@ export default function Prescriptions() {
         }
       );
 
-      console.log('Doctor response:', doctorResponse.data);
-
-      if (!doctorResponse.data || !doctorResponse.data._id) {
-        throw new Error('Doctor information not found');
-      }
-
       const doctorId = doctorResponse.data._id;
-      console.log('Found doctorId:', doctorId);
 
-      // Then fetch the prescriptions for this doctor
-      const prescriptionsResponse = await axios.get(
+      const prescriptionsResponse = await axios.get<Prescription[]>(
         `http://localhost:5000/api/prescriptions/doctor/${doctorId}?populate[patient_id]=true&populate[patient_id.user_id]=true`,
         {
           headers: {
@@ -97,17 +86,10 @@ export default function Prescriptions() {
         }
       );
 
-      console.log('Prescriptions response:', prescriptionsResponse.data);
-
-      if (!prescriptionsResponse.data) {
-        throw new Error('No prescriptions found');
-      }
-
       setPrescriptions(prescriptionsResponse.data);
       setFilteredPrescriptions(prescriptionsResponse.data);
     } catch (err: any) {
       console.error('Error fetching prescriptions:', err);
-      console.error('Error response:', err.response?.data);
       setError(
         err.response?.data?.message || 
         err.message || 
@@ -130,18 +112,16 @@ export default function Prescriptions() {
   const handleCreatePrescription = async (data: any) => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await axios.post(
+      const response = await axios.post<Prescription>(
         'http://localhost:5000/api/prescriptions',
-        {
-          ...data,
-          patient_id: patientId
-        },
+        data,
         {
           headers: {
             Authorization: `Bearer ${token}`
           }
         }
       );
+
       setPrescriptions([response.data, ...prescriptions]);
       setFilteredPrescriptions([response.data, ...prescriptions]);
     } catch (err) {

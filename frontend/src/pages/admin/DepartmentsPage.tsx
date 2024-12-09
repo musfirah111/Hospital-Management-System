@@ -9,6 +9,11 @@ import { Layout } from '../../components/admin/AdminLayout';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { DepartmentForm } from '../../components/admin/forms/DepartmentForm';
 
+interface StaffCountResponse {
+  _id: string;
+  count: number;
+}
+
 export function DepartmentsPage() {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,18 +40,23 @@ export function DepartmentsPage() {
     try {
       setLoading(true);
       const token = localStorage.getItem('authToken');
-      const response = await axios.get('http://localhost:5000/api/departments', {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const response = await axios.get<Department[]>(
+        'http://localhost:5000/api/departments',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
-      });
-      const mappedData = response.data.map((dept: any) => ({
+      );
+
+      const mappedData = response.data.map((dept) => ({
         ...dept,
         isActive: dept.active_status,
         status: dept.status || (dept.active_status ? 'active' : 'inactive'),
         staffCount: dept.staff_count,
         headOfDepartment: dept.head_of_department?.name || 'Not Assigned'
       }));
+
       setDepartmentData(mappedData);
       setError(null);
     } catch (err: any) {
@@ -60,15 +70,18 @@ export function DepartmentsPage() {
   const fetchStaffCounts = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await axios.get('http://localhost:5000/api/doctors/count', {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const response = await axios.get<StaffCountResponse[]>(
+        'http://localhost:5000/api/doctors/count',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
-      });
+      );
       
       console.log('Staff counts response:', response.data);
       
-      const countsMap = response.data.reduce((acc: { [key: string]: number }, curr: any) => {
+      const countsMap = response.data.reduce((acc: { [key: string]: number }, curr) => {
         acc[curr._id.toString()] = curr.count;
         return acc;
       }, {});
@@ -101,7 +114,7 @@ export function DepartmentsPage() {
     if (selectedDepartment && !selectedDepartment.isActive) {
       try {
         const token = localStorage.getItem('authToken');
-        await axios.delete(`http://localhost:5000/api/departments/${selectedDepartment.id}`, {
+        await axios.delete(`http://localhost:5000/api/departments/${selectedDepartment._id}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }

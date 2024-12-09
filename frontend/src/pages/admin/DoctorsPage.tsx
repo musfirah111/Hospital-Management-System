@@ -24,6 +24,11 @@ interface Doctor {
   };
 }
 
+interface DoctorsResponse {
+  doctors: Doctor[];
+  totalPages: number;
+}
+
 export function DoctorsPage() {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,13 +47,16 @@ export function DoctorsPage() {
     console.log('Fetching doctors with search:', searchQuery);
     try {
       const token = localStorage.getItem('authToken');
-      const response = await axios.get(`http://localhost:5000/api/doctors`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: {
-          page,
-          limit: 10
+      const response = await axios.get<DoctorsResponse>(
+        'http://localhost:5000/api/doctors',
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            page,
+            limit: 10
+          }
         }
-      });
+      );
       console.log('API response - doctors:', response.data);
 
       setAllDoctors(response.data.doctors);

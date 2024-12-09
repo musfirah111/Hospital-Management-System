@@ -277,7 +277,7 @@ export function AdminAppointmentsPage() {
 
       console.log('Raw appointments:', appointmentsResponse.data); // Debug log
 
-      if (appointmentsResponse.data) {
+      if (Array.isArray(appointmentsResponse.data)) {
         const formattedAppointments = appointmentsResponse.data.map((apt: any) => ({
           id: apt._id,
           doctorName: apt.doctor_id?.user_id?.name || 'Unknown',
@@ -299,6 +299,9 @@ export function AdminAppointmentsPage() {
         setAppointments(formattedAppointments);
         setFilteredAppointments(formattedAppointments);
         setError(null);
+      } else {
+        console.error('Unexpected response format:', appointmentsResponse.data);
+        // Handle the unexpected format case
       }
     } catch (err: any) {
       console.error('Error fetching appointments:', err);

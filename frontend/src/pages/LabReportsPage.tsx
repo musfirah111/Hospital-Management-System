@@ -4,6 +4,7 @@ import { formatDate } from '../utils/date';
 import SearchBar from '../components/SearchBar';
 import { Layout } from '../components/Layout';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   _id: string;
@@ -39,6 +40,8 @@ export default function LabReportsPage() {
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
   const getAuthToken = () => localStorage.getItem('authToken');
+
+  const navigate = useNavigate();
 
   const fetchReports = async (query = '') => {
     try {
@@ -139,9 +142,8 @@ export default function LabReportsPage() {
       );
 
       console.log('Report shared successfully');
-      setSharePopup(false); // Close the popup after successful sharing
-      setShareEmail(''); // Clear the email input after sharing
-      setSelectedReportId(null); // Reset the selected report ID after sharing
+      closeSharePopup();
+      navigate('/lab-reports');
     } catch (error) {
       console.error('Failed to share report:', error);
     }

@@ -52,7 +52,7 @@ export function DepartmentsPage() {
       const mappedData = response.data.map((dept) => ({
         ...dept,
         isActive: dept?.status === 'active' || false,
-        status: dept?.status || (dept?.status === 'active' ? 'active' : 'inactive'),
+        status: dept?.status || (dept?.status === 'active' ? 'inactive' : 'active'),
         staffCount: dept?.staffCount || 0
       }));
 

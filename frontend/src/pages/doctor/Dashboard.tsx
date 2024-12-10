@@ -232,17 +232,27 @@ export default function DoctorDashboard() {
   };
 
   const getActivityMessage = (activity: any) => {
-    switch(activity.type) {
-      case 'appointment':
-        return `${activity.status} appointment with ${activity.patient}`;
-      case 'record':
-        return `Medical record created for ${activity.patient}`;
-      case 'prescription':
-        return `Prescription issued for ${activity.patient}`;
-      case 'lab':
-        return `Lab report ${activity.status.toLowerCase()} for ${activity.patient}`;
-      default:
-        return '';
+    // Early return if activity or type is undefined
+    if (!activity || typeof activity.type === 'undefined') {
+      return 'Unknown activity';
+    }
+
+    try {
+      const activityType = String(activity.type).toLowerCase();
+      
+      switch (activityType) {
+        case 'appointment':
+          return `New appointment with ${activity.patient?.name || 'Unknown Patient'}`;
+        case 'prescription':
+          return `Prescription created for ${activity.patient?.name || 'Unknown Patient'}`;
+        case 'lab_report':
+          return `Lab report received for ${activity.patient?.name || 'Unknown Patient'}`;
+        default:
+          return `${activity.type} activity`;
+      }
+    } catch (error) {
+      console.error('Error processing activity:', error);
+      return 'Unknown activity';
     }
   };
 

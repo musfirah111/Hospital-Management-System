@@ -51,9 +51,9 @@ export function DepartmentsPage() {
 
       const mappedData = response.data.map((dept) => ({
         ...dept,
-        isActive: dept?.status === 'active' || false,
-        status: dept?.status || (dept?.status === 'active' ? 'active' : 'inactive'),
-        staffCount: dept?.staffCount || 0
+        isActive: dept.active_status,
+        status: dept.status || (dept.active_status ? 'active' : 'inactive'),
+        staffCount: dept.staff_count
       }));
 
       setDepartmentData(mappedData);
